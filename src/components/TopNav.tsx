@@ -3,23 +3,18 @@
 /*
   TopNav — adaptive-contrast, three-region navigation
   ---------------------------------------------------
-  Layout matches the Figma spec:
+  Desktop layout:
 
     [ TORTO STUDIO ]        [ WORK · SERVICES · ABOUT ]        [ COPY EMAIL ]
 
-  - Uppercase, wide tracking, SF font (inherited from body).
-  - `mix-blend-mode: difference` keeps every element legible over any canvas
-    content — white text stays white on dark, flips to that color's complement
-    on colored / light backgrounds.
-  - Active link (matched via `usePathname`) shows a single-pixel underline.
-    No color or weight change — the underline IS the active affordance.
-  - COPY EMAIL writes a placeholder studio address to the clipboard and flashes
-    "COPIED" for 1.5s. Swap the email string when the real one is ready.
+  Mobile (<md): logo on the left, MENU button on the right. Tapping MENU
+  opens a full-screen overlay with the links stacked, plus COPY EMAIL and
+  the language toggle so nothing on the desktop nav is unreachable.
 */
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLang, usePageBg } from "@/lib/state";
 
 // TODO: replace with the real studio email once available.
@@ -27,9 +22,10 @@ const STUDIO_EMAIL = "hello@torto.studio";
 
 export default function TopNav() {
   const pathname = usePathname();
-  const { t } = useLang();
-  const { pageFg } = usePageBg();
+  const { t, lang, setLang } = useLang();
+  const { pageFg, pageBg } = usePageBg();
   const [copied, setCopied] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const links: { href: string; labelKey: "nav.work" | "nav.services" | "nav.about" }[] = [
     { href: "/", labelKey: "nav.work" },
@@ -47,52 +43,46 @@ export default function TopNav() {
     }
   };
 
-  // Shared type class for every nav item — kept short so per-item
-  // `justify-self-*` alignment can be composed in. `cursor-pointer` makes
-  // the OS cursor a hand; `data-cursor-ring` (added on each item) makes
-  // the CustomCursor ring appear.
+  // Close the mobile menu on route change so the reader lands cleanly on
+  // the next page instead of behind the overlay.
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [pathname]);
+
+  // Lock body scroll while the mobile menu is open.
+  useEffect(() => {
+    if (!menuOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [menuOpen]);
+
+  // Shared type class for every nav item. Type scales down on mobile so the
+  // logo + MENU button both fit at 390px without wrapping. `cursor-pointer`
+  // makes the OS cursor a hand; `data-cursor-ring` (added on each item)
+  // makes the CustomCursor ring appear.
   const type =
-    "pointer-events-auto cursor-pointer text-[26px] font-bold uppercase leading-8 tracking-normal";
+    "pointer-events-auto cursor-pointer text-[18px] md:text-[26px] font-bold uppercase leading-[22px] md:leading-8 tracking-normal";
 
   return (
     <nav
-      className="pointer-events-none fixed inset-x-0 top-0 z-40"
+      className={`pointer-events-none fixed inset-x-0 top-0 ${menuOpen ? "z-50" : "z-40"}`}
       // Default treatment is `mix-blend-mode: difference` — auto-inverts
-      // labels against whatever content sits behind the fixed nav
-      // (canvas tiles, gallery images, page bg). When a route sets an
-      // explicit pageFg (see PageBackgroundProvider), we drop the blend
-      // and paint labels in that color, so saturated case study bgs like
-      // coral can pick a legible tone that low-contrast auto-invert can't.
+      // labels against whatever content sits behind the fixed nav.
+      // When a route sets an explicit pageFg, we paint labels in that
+      // color instead. While the mobile menu overlay is open we also drop
+      // the blend so the labels sit cleanly on the solid overlay.
       style={
-        pageFg
-          ? { color: pageFg }
+        pageFg || menuOpen
+          ? { color: pageFg ?? "#ffffff" }
           : { mixBlendMode: "difference" }
       }
     >
-      {/*
-        5-column grid, one nav item per column.
-
-        Alignment strategy:
-          - Column 1 (TORTO STUDIO): `justify-self-start` — flush against the
-            left `px-8` padding, so it lines up vertically with LISTA/GRELHA
-            in the bottom chrome.
-          - Column 5 (COPY EMAIL): `justify-self-end` — flush against the
-            right `px-8` padding, lining up with PT/EN.
-          - Columns 2–4 (WORK / SERVICES / ABOUT): `justify-self-center` — each
-            sits at the middle of its 1fr column. Column 3 is exactly the
-            viewport's middle column, so SERVICES lands at horizontal center
-            regardless of label widths.
-
-        Trade-off: the strictly equal center-to-center spacing between all
-        five items can't coexist with edge alignment unless the outer labels
-        happen to be the same width. Flushing to the edges makes the outer
-        gaps a touch wider than the inner ones — an intentional choice for
-        vertical alignment with the bottom chrome.
-      */}
-      {/* text-white is the default; overridden by `color: pageFg` set on
-          the parent nav when a case study specifies an explicit fg. */}
+      {/* ─── Desktop layout (md+) ─── */}
       <div
-        className="grid grid-cols-5 items-center px-8 py-5"
+        className="hidden md:grid grid-cols-5 items-center px-8 py-5"
         style={{ color: pageFg ?? "#ffffff" }}
       >
         <Link
@@ -104,9 +94,6 @@ export default function TopNav() {
         </Link>
 
         {links.map(({ href, labelKey }) => {
-          // WORK is active only on the Work index (/). Case studies live
-          // under /work/{slug} but they're their own context — no tab
-          // should read as "you are here" from the top nav on a case study.
           const active =
             href === "/" ? pathname === "/" : pathname.startsWith(href);
           return (
@@ -116,16 +103,6 @@ export default function TopNav() {
               className={`${type} justify-self-center`}
               data-cursor-ring
             >
-              {/*
-                Underline sits under the text via a bordered inner span so it
-                hugs the text width, not the padded parent link. Border color
-                is currentColor so blend-difference flips it in sync.
-
-                Always render a 3px border — transparent when inactive,
-                `currentColor` when active — so the layout reserves the same
-                vertical space on every route. Without this, switching from
-                WORK to SERVICES nudged the text by 3px on click.
-              */}
               <span
                 className={`inline-block pb-1 border-b-[3px] ${
                   active ? "border-current" : "border-transparent"
@@ -146,6 +123,83 @@ export default function TopNav() {
           {copied ? t("nav.copied") : t("nav.copyEmail")}
         </button>
       </div>
+
+      {/* ─── Mobile layout (<md) ─── */}
+      <div
+        className="flex md:hidden items-center justify-between px-5 py-4"
+        style={{ color: pageFg ?? "#ffffff" }}
+      >
+        <Link href="/" className={type} data-cursor-ring>
+          Torto Studio
+        </Link>
+        <button
+          type="button"
+          onClick={() => setMenuOpen((v) => !v)}
+          className={type}
+          aria-expanded={menuOpen}
+          aria-controls="mobile-menu"
+        >
+          {menuOpen ? "CLOSE" : "MENU"}
+        </button>
+      </div>
+
+      {/* ─── Mobile menu overlay ─── */}
+      {menuOpen && (
+        <div
+          id="mobile-menu"
+          className="pointer-events-auto md:hidden fixed inset-x-0 top-[54px] bottom-0 z-30 flex flex-col px-5 pt-6 pb-10"
+          style={{ backgroundColor: pageBg ?? "#000000", color: pageFg ?? "#ffffff" }}
+        >
+          <ul className="flex flex-col gap-4">
+            {links.map(({ href, labelKey }) => {
+              const active =
+                href === "/" ? pathname === "/" : pathname.startsWith(href);
+              return (
+                <li key={href}>
+                  <Link
+                    href={href}
+                    className="block text-[32px] font-bold uppercase leading-[1.1] tracking-normal"
+                  >
+                    <span
+                      className={`inline-block pb-1 border-b-[3px] ${
+                        active ? "border-current" : "border-transparent"
+                      }`}
+                    >
+                      {t(labelKey)}
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+
+          <div className="mt-auto flex flex-col gap-6">
+            <button
+              type="button"
+              onClick={onCopy}
+              className="text-left text-[18px] font-bold uppercase tracking-normal"
+            >
+              {copied ? t("nav.copied") : t("nav.copyEmail")}
+            </button>
+            <div className="flex items-center gap-6 text-[18px] font-bold uppercase tracking-normal">
+              <button
+                type="button"
+                onClick={() => setLang("pt")}
+                className={lang === "pt" ? "opacity-100" : "opacity-50"}
+              >
+                PT
+              </button>
+              <button
+                type="button"
+                onClick={() => setLang("en")}
+                className={lang === "en" ? "opacity-100" : "opacity-50"}
+              >
+                EN
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </nav>
   );
 }
