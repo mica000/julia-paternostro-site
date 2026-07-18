@@ -30,6 +30,11 @@ export default function BottomChrome() {
   const { pageFg } = usePageBg();
 
   const isWork = pathname === "/";
+  // Case studies host their own long-scroll layout with a footer — the
+  // fixed bottom chrome (only PT/EN there since LIST/GRID is Work-only)
+  // just floats over the content, so we hide it entirely on /work/*.
+  const isCaseStudy = pathname?.startsWith("/work/") ?? false;
+  if (isCaseStudy) return null;
 
   return (
     <nav
