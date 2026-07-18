@@ -145,31 +145,25 @@ export default function CaseStudy({ project }: { project: Project }) {
           willChange: "transform, opacity",
         }}
       >
-      <div className="mx-auto max-w-[1440px] px-8 pt-[225px]">
+      <div className="mx-auto max-w-[1440px] px-5 md:px-8 pt-[120px] md:pt-[225px]">
         {/* ────────────  header  ──────────── */}
-        <header className="mb-24">
+        <header className="mb-16 md:mb-24">
           {/*
-            Title — Figma "super large text" style: display-scale hero type,
-            natural case (no longer uppercased). At 120px with tight leading
-            and slightly negative tracking, it reads as a masthead rather
-            than an oversized label. mb-[150px] preserves the Figma gap
-            between the title baseline area and the meta row below.
-            TODO: dial the 120px / leading-[1.05] / tracking-[-0.02em]
-            values to the exact "super large text" tokens once the Figma
-            connector is authorized.
+            Title — Figma "super large text" style. Scales from a mobile-
+            friendly 44px up to the 120px desktop masthead. Left-aligned on
+            mobile so it reads as a headline rather than a compressed banner;
+            centered from md up per the original spec.
           */}
-          <h1 className="mb-[150px] text-center text-[120px] font-bold leading-[1.05] tracking-[-0.02em]">
+          <h1 className="mb-16 md:mb-[150px] text-left md:text-center text-[44px] sm:text-[64px] md:text-[96px] xl:text-[120px] font-bold leading-[1.05] tracking-[-0.02em] break-words">
             {project.title}
           </h1>
 
           {/*
-            4-column meta row. Figma places columns at x = 0 / 393 / 786 /
-            1179 inside a 1440-wide frame → each column ~261px, 132px gap
-            (about 9.2% of the content width). At narrower viewports the
-            132px value crushes the text columns, so the gap scales down
-            via responsive breakpoints and reaches the Figma value at xl+.
+            Meta row. Stacks to 1 column on mobile, becomes the 4-column
+            Figma layout from md up. Gap scales up so the tightest desktop
+            spacing lands at xl+.
           */}
-          <div className="grid grid-cols-4 gap-x-6 md:gap-x-10 lg:gap-x-16 xl:gap-x-[132px] gap-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-x-6 md:gap-x-10 lg:gap-x-16 xl:gap-x-[132px] gap-y-6">
             <MetaField label={LABEL.categorie[lang]}>
               {pick(project.category, lang)}
             </MetaField>
@@ -189,20 +183,20 @@ export default function CaseStudy({ project }: { project: Project }) {
           expressed as aspect ratios so the whole grid scales fluidly with
           viewport width without any media queries.
         */}
-        <section className="flex flex-col gap-5">
+        <section className="flex flex-col gap-3 md:gap-5">
           <Frame src={project.gallery[0]} ratio="1440/484" priority sizes="100vw" />
 
-          <div className="grid grid-cols-2 gap-5">
-            <Frame src={project.gallery[1]} ratio="710/484" sizes="(max-width: 1440px) 50vw, 720px" />
-            <Frame src={project.gallery[2]} ratio="710/484" sizes="(max-width: 1440px) 50vw, 720px" />
-            <Frame src={project.gallery[3]} ratio="710/484" sizes="(max-width: 1440px) 50vw, 720px" />
-            <Frame src={project.gallery[4]} ratio="710/484" sizes="(max-width: 1440px) 50vw, 720px" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-5">
+            <Frame src={project.gallery[1]} ratio="710/484" sizes="(max-width: 768px) 100vw, (max-width: 1440px) 50vw, 720px" />
+            <Frame src={project.gallery[2]} ratio="710/484" sizes="(max-width: 768px) 100vw, (max-width: 1440px) 50vw, 720px" />
+            <Frame src={project.gallery[3]} ratio="710/484" sizes="(max-width: 768px) 100vw, (max-width: 1440px) 50vw, 720px" />
+            <Frame src={project.gallery[4]} ratio="710/484" sizes="(max-width: 768px) 100vw, (max-width: 1440px) 50vw, 720px" />
           </div>
 
-          <div className="grid grid-cols-3 gap-5">
-            <Frame src={project.gallery[5]} ratio="468/292" sizes="(max-width: 1440px) 33vw, 468px" />
-            <Frame src={project.gallery[6]} ratio="468/292" sizes="(max-width: 1440px) 33vw, 468px" />
-            <Frame src={project.gallery[7]} ratio="468/292" sizes="(max-width: 1440px) 33vw, 468px" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-5">
+            <Frame src={project.gallery[5]} ratio="468/292" sizes="(max-width: 768px) 100vw, (max-width: 1440px) 33vw, 468px" />
+            <Frame src={project.gallery[6]} ratio="468/292" sizes="(max-width: 768px) 100vw, (max-width: 1440px) 33vw, 468px" />
+            <Frame src={project.gallery[7]} ratio="468/292" sizes="(max-width: 768px) 100vw, (max-width: 1440px) 33vw, 468px" />
           </div>
 
           <Frame src={project.gallery[8]} ratio="1440/484" sizes="100vw" />
@@ -215,7 +209,7 @@ export default function CaseStudy({ project }: { project: Project }) {
             The ~95px top padding matches Figma's empty space above the
             credits row (7px structural + 88px inner padding). */}
         {project.credits && (
-          <section className="grid grid-cols-4 gap-x-6 gap-y-6 pt-[95px] md:gap-x-10 lg:gap-x-16 xl:gap-x-[132px]">
+          <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-6 pt-16 md:pt-[95px] md:gap-x-10 lg:gap-x-16 xl:gap-x-[132px]">
             <MetaField label={LABEL.creativeDirection[lang]}>
               {project.credits.creativeDirection ?? CREDIT_PLACEHOLDER}
             </MetaField>
