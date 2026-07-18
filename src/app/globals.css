@@ -1,0 +1,91 @@
+@import "tailwindcss";
+
+/*
+  Torto Studio — design tokens
+  ----------------------------
+  A design-system showcase lives and dies by its tokens. Everything visual
+  (color, type, motion) is defined here once, then referenced by utility
+  classes. Change a value here and the whole site follows.
+*/
+
+:root {
+  /* Surfaces — a gallery reads best on near-black */
+  --background: #0a0a0a;
+  --surface: #141414;
+  --surface-hover: #1c1c1c;
+  --foreground: #f5f5f5;
+  --muted: #8a8a8a;
+  --border: #262626;
+
+  /* Brand accent — swap this one value to re-skin the studio */
+  --accent: #e8ff59;
+
+  /* Motion — shared timing so animation feels like one system */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-fast: 180ms;
+  --dur-base: 320ms;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --font-sans: var(--font-sf);
+  --font-mono: var(--font-geist-mono);
+
+  /*
+    San Francisco — Torto's primary typeface.
+    Uses the native Apple system font on macOS/iOS (SF Pro Text / SF Pro Display),
+    with a graceful fallback stack for other platforms. No web font download,
+    no FOUT — the OS supplies it.
+  */
+  --font-sf: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
+    "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sf);
+  -webkit-font-smoothing: antialiased;
+}
+
+/*
+  Tile hover — the scale and the transition duration are set inline via CSS
+  variables so they can be tuned live from the control panel without
+  rebuilding stylesheets or re-mounting components.
+*/
+.tile-hover:hover {
+  transform: scale(var(--tile-hover-scale, 1.06));
+}
+
+/*
+  Hide the OS cursor over the grid so the CustomCursor dot is the only one
+  visible there. The control panel (aside) keeps its native cursor. On nav
+  chrome, links + buttons keep the pointer hand (so the ring and the hand
+  can coexist), while empty space in the nav uses the default arrow.
+*/
+.tile-hover,
+.tile-hover * {
+  cursor: none;
+}
+aside, aside * {
+  cursor: auto !important;
+}
+nav a, nav button {
+  cursor: pointer;
+}
+
+/* Respect users who prefer less motion — accessibility baseline */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
