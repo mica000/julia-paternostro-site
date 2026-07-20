@@ -30,7 +30,7 @@
 */
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { pick, projectBg, type Project, type Section } from "@/lib/projects";
 import { useLang, usePageBg, type Lang } from "@/lib/state";
 import { useTransition } from "@/components/PageTransition";
@@ -214,17 +214,19 @@ export default function CaseStudy({ project }: { project: Project }) {
             </section>
             <ContextParagraph text={pick(project.context, lang)} />
             <section className="flex flex-col gap-3 md:gap-5">
+              {/* 2×2 block: each visual row (0,1) and (2,3) gets a
+                  left-then-right stagger. */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-5">
-                <Frame src={project.gallery[1]} ratio="710/484" sizes="(max-width: 768px) 100vw, (max-width: 1440px) 50vw, 720px" />
-                <Frame src={project.gallery[2]} ratio="710/484" sizes="(max-width: 768px) 100vw, (max-width: 1440px) 50vw, 720px" />
-                <Frame src={project.gallery[3]} ratio="710/484" sizes="(max-width: 768px) 100vw, (max-width: 1440px) 50vw, 720px" />
-                <Frame src={project.gallery[4]} ratio="710/484" sizes="(max-width: 768px) 100vw, (max-width: 1440px) 50vw, 720px" />
+                <Frame src={project.gallery[1]} ratio="710/484" sizes="(max-width: 768px) 100vw, (max-width: 1440px) 50vw, 720px" delay={0} />
+                <Frame src={project.gallery[2]} ratio="710/484" sizes="(max-width: 768px) 100vw, (max-width: 1440px) 50vw, 720px" delay={STAGGER_MS} />
+                <Frame src={project.gallery[3]} ratio="710/484" sizes="(max-width: 768px) 100vw, (max-width: 1440px) 50vw, 720px" delay={0} />
+                <Frame src={project.gallery[4]} ratio="710/484" sizes="(max-width: 768px) 100vw, (max-width: 1440px) 50vw, 720px" delay={STAGGER_MS} />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-5">
-                <Frame src={project.gallery[5]} ratio="468/292" sizes="(max-width: 768px) 100vw, (max-width: 1440px) 33vw, 468px" />
-                <Frame src={project.gallery[6]} ratio="468/292" sizes="(max-width: 768px) 100vw, (max-width: 1440px) 33vw, 468px" />
-                <Frame src={project.gallery[7]} ratio="468/292" sizes="(max-width: 768px) 100vw, (max-width: 1440px) 33vw, 468px" />
+                <Frame src={project.gallery[5]} ratio="468/292" sizes="(max-width: 768px) 100vw, (max-width: 1440px) 33vw, 468px" delay={0} />
+                <Frame src={project.gallery[6]} ratio="468/292" sizes="(max-width: 768px) 100vw, (max-width: 1440px) 33vw, 468px" delay={STAGGER_MS} />
+                <Frame src={project.gallery[7]} ratio="468/292" sizes="(max-width: 768px) 100vw, (max-width: 1440px) 33vw, 468px" delay={STAGGER_MS * 2} />
               </div>
 
               <Frame src={project.gallery[8]} ratio="1440/484" sizes="100vw" />
@@ -292,23 +294,80 @@ function MetaField({
   Frame — a gallery image slot. Uses `next/image` with `fill` inside an
   aspect-ratio box so the source image (any size) crops cleanly to the
   designed slot without hardcoded dimensions.
+
+  Reveal:
+    On first scroll-into-view the image is uncovered by a top-to-bottom
+    clip-path mask — the frame stays put, but the picture emerges from
+    the top edge down. Rows of side-by-side images stagger via `delay`
+    (0 for the left tile, ~80ms for the next, etc.) so the eye tracks
+    left → right without them all popping at once. Respects
+    prefers-reduced-motion by skipping the mask entirely.
 */
 function Frame({
   src,
   ratio,
   sizes,
   priority,
+  delay = 0,
 }: {
   src: string;
   /** CSS aspect-ratio expression, e.g. "1440/484". */
   ratio: string;
   sizes: string;
   priority?: boolean;
+  /** Reveal-start delay in ms. Used to stagger side-by-side tiles. */
+  delay?: number;
 }) {
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const [revealed, setRevealed] = useState(false);
+  const [reduce, setReduce] = useState(false);
+
+  useEffect(() => {
+    setReduce(
+      typeof window !== "undefined" &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    );
+  }, []);
+
+  useEffect(() => {
+    if (reduce) {
+      setRevealed(true);
+      return;
+    }
+    const el = wrapperRef.current;
+    if (!el) return;
+    // A generous rootMargin at the bottom triggers the reveal a beat
+    // before the image is fully in-view, so it feels like the image is
+    // welcoming the reader rather than catching up.
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            setRevealed(true);
+            io.disconnect();
+            break;
+          }
+        }
+      },
+      { rootMargin: "0px 0px -10% 0px", threshold: 0.01 }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [reduce]);
+
   return (
     <div
+      ref={wrapperRef}
       className="relative overflow-hidden"
-      style={{ aspectRatio: ratio.replace("/", " / ") }}
+      style={{
+        aspectRatio: ratio.replace("/", " / "),
+        // inset(top right bottom left) — start with the bottom fully
+        // clipped (nothing visible), then retract the bottom clip to
+        // uncover the image from the top down.
+        clipPath: revealed ? "inset(0 0 0 0)" : "inset(0 0 100% 0)",
+        transition: `clip-path 900ms cubic-bezier(0.77, 0, 0.175, 1) ${delay}ms`,
+        willChange: "clip-path",
+      }}
     >
       <Image
         src={src}
@@ -321,6 +380,11 @@ function Frame({
     </div>
   );
 }
+
+/** Per-column stagger for a row of N images. Keep it small so the
+    reveal reads as one gesture with left-to-right tracking, not a
+    cascade. */
+const STAGGER_MS = 80;
 
 // Figma defaults for section aspect ratios. Override on a per-section
 // basis via `ratio` when a specific tile needs to differ.
@@ -417,6 +481,10 @@ function Sections({ sections }: { sections: readonly Section[] }) {
                 src={src}
                 ratio={s.ratio ?? defaultRatio}
                 sizes={sizes}
+                // Left tile leads; each subsequent column trails by
+                // STAGGER_MS so the reveal reads left→right within the
+                // row.
+                delay={j * STAGGER_MS}
               />
             ))}
           </div>
