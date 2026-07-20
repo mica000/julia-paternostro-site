@@ -31,7 +31,7 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { defaultBg, invertHex, pick, type Project } from "@/lib/projects";
+import { defaultBg, invertHex, pick, type Project, type Section } from "@/lib/projects";
 import { useLang, usePageBg, type Lang } from "@/lib/state";
 import { useTransition } from "@/components/PageTransition";
 import CaseStudyFooter from "@/components/CaseStudyFooter";
@@ -145,68 +145,84 @@ export default function CaseStudy({ project }: { project: Project }) {
           willChange: "transform, opacity",
         }}
       >
-      <div className="mx-auto max-w-[1440px] px-8 pt-[225px]">
+      <div className="px-8 pt-[225px]">
         {/* ────────────  header  ──────────── */}
-        <header className="mb-24">
+        <header className="mb-[62px]">
           {/*
-            Title — Figma "super large text" style: display-scale hero type,
-            natural case (no longer uppercased). At 120px with tight leading
-            and slightly negative tracking, it reads as a masthead rather
-            than an oversized label. mb-[150px] preserves the Figma gap
-            between the title baseline area and the meta row below.
-            TODO: dial the 120px / leading-[1.05] / tracking-[-0.02em]
-            values to the exact "super large text" tokens once the Figma
-            connector is authorized.
+            Title — Figma "Super Large Title" token: SF Pro Bold 124/124,
+            tracking 0. Natural case (not uppercased). The mb-[86px] gap
+            below the title matches Figma's spacing between title and
+            meta row.
           */}
-          <h1 className="mb-[150px] text-center text-[120px] font-bold leading-[1.05] tracking-[-0.02em]">
+          <h1 className="mb-[86px] text-[124px] font-bold leading-[124px] tracking-normal">
             {project.title}
           </h1>
 
           {/*
-            4-column meta row. Figma places columns at x = 0 / 393 / 786 /
-            1179 inside a 1440-wide frame → each column ~261px, 132px gap
-            (about 9.2% of the content width). At narrower viewports the
-            132px value crushes the text columns, so the gap scales down
-            via responsive breakpoints and reaches the Figma value at xl+.
+            3-column meta row per Figma (node 12:235): CATEGORIE / YEAR /
+            CLIENT. Brief and context no longer live here — context
+            surfaces as the large paragraph below the intro hero. If a
+            project has no `credits.client` set, the third column still
+            renders (with an em-dash) so the layout stays consistent.
           */}
-          <div className="grid grid-cols-4 gap-x-6 md:gap-x-10 lg:gap-x-16 xl:gap-x-[132px] gap-y-6">
+          <div className="grid grid-cols-3 gap-x-6 md:gap-x-10 lg:gap-x-16 xl:gap-x-[132px] gap-y-6">
             <MetaField label={LABEL.categorie[lang]}>
               {pick(project.category, lang)}
             </MetaField>
             <MetaField label={LABEL.year[lang]}>{project.year}</MetaField>
-            <p className="text-sm leading-relaxed">
-              {pick(project.brief, lang)}
-            </p>
-            <p className="text-sm leading-relaxed">
-              {pick(project.context, lang)}
-            </p>
+            <MetaField label={LABEL.client[lang]}>
+              {project.credits?.client ?? CREDIT_PLACEHOLDER}
+            </MetaField>
           </div>
         </header>
 
-        {/* ────────────  gallery  ──────────── */}
-        {/*
-          The five-row layout below matches Figma exactly. Row heights are
-          expressed as aspect ratios so the whole grid scales fluidly with
-          viewport width without any media queries.
+        {/* ────────────  intro hero + context paragraph  ────────────
+          Per new Figma: the first gallery image renders on its own as
+          an intro hero, then a large 26px bold paragraph with the
+          project context sits below it. This introduces the project
+          before the fuller gallery grid unfolds.
+
+          Sources:
+          - Sections mode → sections[0] is pulled out as the intro; the
+            remaining sections render after the paragraph.
+          - Legacy gallery mode → gallery[0] is the intro; the remaining
+            8 slots render in the classic 2×2 / 3-col / hero pattern.
         */}
-        <section className="flex flex-col gap-5">
-          <Frame src={project.gallery[0]} ratio="1440/484" priority sizes="100vw" />
+        {project.sections && project.sections.length > 0 ? (
+          <>
+            <IntroHero section={project.sections[0]} />
+            <ContextParagraph text={pick(project.context, lang)} />
+            <Sections sections={project.sections.slice(1)} />
+          </>
+        ) : (
+          <>
+            <section className="mb-[86px]">
+              <Frame
+                src={project.gallery[0]}
+                ratio="1440/484"
+                priority
+                sizes="100vw"
+              />
+            </section>
+            <ContextParagraph text={pick(project.context, lang)} />
+            <section className="flex flex-col gap-5">
+              <div className="grid grid-cols-2 gap-5">
+                <Frame src={project.gallery[1]} ratio="710/484" sizes="(max-width: 1440px) 50vw, 720px" />
+                <Frame src={project.gallery[2]} ratio="710/484" sizes="(max-width: 1440px) 50vw, 720px" />
+                <Frame src={project.gallery[3]} ratio="710/484" sizes="(max-width: 1440px) 50vw, 720px" />
+                <Frame src={project.gallery[4]} ratio="710/484" sizes="(max-width: 1440px) 50vw, 720px" />
+              </div>
 
-          <div className="grid grid-cols-2 gap-5">
-            <Frame src={project.gallery[1]} ratio="710/484" sizes="(max-width: 1440px) 50vw, 720px" />
-            <Frame src={project.gallery[2]} ratio="710/484" sizes="(max-width: 1440px) 50vw, 720px" />
-            <Frame src={project.gallery[3]} ratio="710/484" sizes="(max-width: 1440px) 50vw, 720px" />
-            <Frame src={project.gallery[4]} ratio="710/484" sizes="(max-width: 1440px) 50vw, 720px" />
-          </div>
+              <div className="grid grid-cols-3 gap-5">
+                <Frame src={project.gallery[5]} ratio="468/292" sizes="(max-width: 1440px) 33vw, 468px" />
+                <Frame src={project.gallery[6]} ratio="468/292" sizes="(max-width: 1440px) 33vw, 468px" />
+                <Frame src={project.gallery[7]} ratio="468/292" sizes="(max-width: 1440px) 33vw, 468px" />
+              </div>
 
-          <div className="grid grid-cols-3 gap-5">
-            <Frame src={project.gallery[5]} ratio="468/292" sizes="(max-width: 1440px) 33vw, 468px" />
-            <Frame src={project.gallery[6]} ratio="468/292" sizes="(max-width: 1440px) 33vw, 468px" />
-            <Frame src={project.gallery[7]} ratio="468/292" sizes="(max-width: 1440px) 33vw, 468px" />
-          </div>
-
-          <Frame src={project.gallery[8]} ratio="1440/484" sizes="100vw" />
-        </section>
+              <Frame src={project.gallery[8]} ratio="1440/484" sizes="100vw" />
+            </section>
+          </>
+        )}
 
         {/* ────────────  credits  ────────────
             Rendered only when the project has any credit info set.
@@ -295,5 +311,107 @@ function Frame({
         className="object-cover"
       />
     </div>
+  );
+}
+
+// Figma defaults for section aspect ratios. Override on a per-section
+// basis via `ratio` when a specific tile needs to differ.
+//   - heroDefault  → 913 × 560   (~1.63:1 landscape). Full-width feature.
+//   - cols2Default → 447 × 560   (~0.80:1 portrait). Half-width portrait.
+//   - cols3Default → 292 × 405   (~0.72:1 portrait). Third-width portrait.
+const HERO_RATIO_DEFAULT = "913 / 560";
+const COLS2_RATIO_DEFAULT = "447 / 560";
+const COLS3_RATIO_DEFAULT = "292 / 405";
+
+/*
+  IntroHero — the first section rendered on its own with priority image
+  loading (LCP-eligible). Sits between the meta row and the context
+  paragraph per the new Figma. Only supports `hero`-kind sections — if
+  the first section happens to be a `cols` row, we still render it here
+  as a multi-column strip to preserve author intent.
+*/
+function IntroHero({ section }: { section: Section }) {
+  return (
+    <section className="mb-[86px]">
+      {section.kind === "hero" ? (
+        <Frame
+          src={section.src}
+          ratio={section.ratio ?? HERO_RATIO_DEFAULT}
+          priority
+          sizes="(max-width: 1440px) 100vw, 1440px"
+        />
+      ) : (
+        <Sections sections={[section]} />
+      )}
+    </section>
+  );
+}
+
+/*
+  ContextParagraph — the large-format paragraph that introduces the
+  project below the intro hero. Figma style: SF Pro Bold 26/32,
+  constrained to ~700px so lines wrap short and read like display copy
+  rather than body text.
+*/
+function ContextParagraph({ text }: { text: string }) {
+  return (
+    <p className="mb-[156px] max-w-[700px] text-[26px] font-bold leading-8 tracking-normal">
+      {text}
+    </p>
+  );
+}
+
+/*
+  Sections — flexible case-study layout driven by project.sections.
+
+  Each section is one row:
+    - hero:    a single full-width image
+    - cols(2): two images side by side
+    - cols(3): three images side by side
+  Aspect ratios default to the Figma tile geometry but can be overridden
+  per section (useful for wide-strip images like Delírio's Frame 6/7,
+  which are ~1905×585 → ratio "1905 / 585").
+
+  Gap between sections and within a section = 18px, matching the Figma
+  Delírio artboard.
+*/
+function Sections({ sections }: { sections: readonly Section[] }) {
+  return (
+    <section className="flex flex-col gap-[18px]">
+      {sections.map((s, i) => {
+        if (s.kind === "hero") {
+          return (
+            <Frame
+              key={i}
+              src={s.src}
+              ratio={s.ratio ?? HERO_RATIO_DEFAULT}
+              // First image benefits from priority for LCP; the rest lazy-load.
+              priority={i === 0}
+              sizes="(max-width: 1440px) 100vw, 1440px"
+            />
+          );
+        }
+        // cols variant — N images in a horizontal strip.
+        const defaultRatio =
+          s.cols === 2 ? COLS2_RATIO_DEFAULT : COLS3_RATIO_DEFAULT;
+        const gridCols = s.cols === 2 ? "grid-cols-2" : "grid-cols-3";
+        const sizes =
+          s.cols === 2
+            ? "(max-width: 1440px) 50vw, 720px"
+            : "(max-width: 1440px) 33vw, 480px";
+        return (
+          <div key={i} className={`grid ${gridCols} gap-[18px]`}>
+            {s.images.map((src, j) => (
+              <Frame
+                key={j}
+                src={src}
+                ratio={s.ratio ?? defaultRatio}
+                sizes={sizes}
+              />
+            ))}
+          </div>
+        );
+      })}
+    </section>
   );
 }

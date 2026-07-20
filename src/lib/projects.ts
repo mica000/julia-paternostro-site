@@ -73,7 +73,33 @@ export type Project = {
    * `1.0` on any project where cropping loses artwork.
    */
   tileAspect?: number;
+  /**
+   * Case-study layout as a flat list of sections, matching the Figma
+   * design where each section is a row: 1 full-width image, or an
+   * N-column strip of images. When set, the CaseStudy template renders
+   * `sections` instead of the fixed 9-slot `gallery` — so different
+   * projects can have wildly different densities without touching the
+   * template.
+   *
+   * `gallery` stays as the fallback: projects without `sections` keep
+   * rendering with the original 9-slot template (hero / 2×2 / 3-col /
+   * bottom hero) and don't need to migrate all at once.
+   */
+  sections?: Section[];
 };
+
+/**
+ * A single row in the case-study layout.
+ *   - `hero`: one full-width image. Optional `ratio` (CSS aspect-ratio
+ *     string, e.g. "913 / 560") — defaults to the Figma standard
+ *     landscape ratio.
+ *   - `cols`: an N-column strip. `images.length` must equal `cols`.
+ *     `ratio` describes one tile's aspect (w / h) — defaults are the
+ *     Figma tile aspects for 2-col and 3-col rows.
+ */
+export type Section =
+  | { kind: "hero"; src: string; ratio?: string }
+  | { kind: "cols"; cols: 2 | 3; images: string[]; ratio?: string };
 
 /** Fallback bg when a project hasn't picked its own. */
 export const defaultBg = "#0a0a0a";
@@ -129,6 +155,15 @@ function fallbackGallery(offset: number): string[] {
 
 const tile = (n: number) => `/Images/${String(n).padStart(2, "0")}-square.png`;
 
+/**
+ * Case-study asset path helper. Turns a bare filename ("Rectangle 1") into
+ * a URL-encoded path under `/Images/<Folder>/`. Handles spaces in the
+ * source filenames (Figma exports use them by default) by encoding to %20
+ * — matching the existing pattern used for `Images/without%20bg/`.
+ */
+const asset = (folder: string, name: string, ext = "webp") =>
+  `/Images/${folder}/${name.replace(/ /g, "%20")}.${ext}`;
+
 // -----------------------------------------------------------------------------
 // Projects
 // -----------------------------------------------------------------------------
@@ -179,6 +214,91 @@ export const projects: Project[] = [
     // is poor. Explicit deep warm near-black lands ~6:1 against coral,
     // harmonizes with the tropical palette, and passes WCAG AA at body size.
     fg: "#1a0500",
+    // Case-study layout matches the Figma artboard at node 41:272 — 16
+    // sections covering 28 optimized WebP files in public/Images/Delirio-
+    // Tropical/. Frames 6 and 7 are pre-composited icon strips (3 tiles
+    // baked into 1 wide image each), so they render as single hero-width
+    // frames with a wider aspect ratio (1905:585) instead of 3-col rows.
+    sections: [
+      { kind: "hero", src: asset("Delirio-Tropical", "Rectangle 1") },
+      { kind: "hero", src: asset("Delirio-Tropical", "Rectangle 54") },
+      { kind: "hero", src: asset("Delirio-Tropical", "Rectangle 55") },
+      {
+        kind: "cols",
+        cols: 3,
+        images: [
+          asset("Delirio-Tropical", "Rectangle 56"),
+          asset("Delirio-Tropical", "Rectangle 57"),
+          asset("Delirio-Tropical", "Rectangle 58"),
+        ],
+      },
+      {
+        kind: "hero",
+        src: asset("Delirio-Tropical", "Frame 6"),
+        ratio: "1905 / 585",
+      },
+      { kind: "hero", src: asset("Delirio-Tropical", "Rectangle 59") },
+      { kind: "hero", src: asset("Delirio-Tropical", "Rectangle 60") },
+      { kind: "hero", src: asset("Delirio-Tropical", "Rectangle 61") },
+      {
+        kind: "cols",
+        cols: 3,
+        images: [
+          asset("Delirio-Tropical", "Rectangle 62"),
+          asset("Delirio-Tropical", "Rectangle 63"),
+          asset("Delirio-Tropical", "Rectangle 64"),
+        ],
+      },
+      {
+        kind: "hero",
+        src: asset("Delirio-Tropical", "Frame 7"),
+        ratio: "1905 / 585",
+      },
+      {
+        kind: "cols",
+        cols: 2,
+        images: [
+          asset("Delirio-Tropical", "Rectangle 19"),
+          asset("Delirio-Tropical", "Rectangle 26"),
+        ],
+      },
+      {
+        kind: "cols",
+        cols: 2,
+        images: [
+          asset("Delirio-Tropical", "Rectangle 65"),
+          asset("Delirio-Tropical", "Rectangle 66"),
+        ],
+      },
+      { kind: "hero", src: asset("Delirio-Tropical", "Rectangle 76") },
+      {
+        kind: "cols",
+        cols: 3,
+        images: [
+          asset("Delirio-Tropical", "Rectangle 67"),
+          asset("Delirio-Tropical", "Rectangle 68"),
+          asset("Delirio-Tropical", "Rectangle 69"),
+        ],
+      },
+      {
+        kind: "cols",
+        cols: 3,
+        images: [
+          asset("Delirio-Tropical", "Rectangle 70"),
+          asset("Delirio-Tropical", "Rectangle 71"),
+          asset("Delirio-Tropical", "Rectangle 72"),
+        ],
+      },
+      {
+        kind: "cols",
+        cols: 3,
+        images: [
+          asset("Delirio-Tropical", "Rectangle 73"),
+          asset("Delirio-Tropical", "Rectangle 74"),
+          asset("Delirio-Tropical", "Rectangle 75"),
+        ],
+      },
+    ],
   },
   // ---------------------------------------------------------------------------
   // 2. Vivs — no Framer page yet; placeholder copy.
