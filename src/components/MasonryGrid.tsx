@@ -35,7 +35,7 @@
 import Image from "next/image";
 import { useMemo } from "react";
 import { getImages, type CanvasConfig } from "@/lib/config";
-import { projects, defaultBg } from "@/lib/projects";
+import { projects, projectBg } from "@/lib/projects";
 import { useTransition } from "@/components/PageTransition";
 
 type Props = Pick<
@@ -140,7 +140,7 @@ export default function MasonryGrid({
             style={{ rowGap: masonryGap }}
           >
             {col.map(({ project, src, aspect }) => {
-              const bgColor = project.bg ?? defaultBg;
+              const bgColor = projectBg(project);
               return (
                 <div
                   key={project.slug}

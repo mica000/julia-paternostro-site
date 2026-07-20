@@ -42,7 +42,7 @@ export default function CaseStudyFooter({ currentSlug }: { currentSlug: string }
   return (
     <section
       aria-label="More projects"
-      className="w-full px-8 mt-[150px] pt-10 pb-24"
+      className="w-full px-5 md:px-8 mt-24 md:mt-[150px] pt-8 md:pt-10 pb-24"
       style={{ borderTop: RULE, backgroundColor: FOOTER_TINT }}
     >
       <ul className="flex flex-col">
@@ -61,50 +61,54 @@ export default function CaseStudyFooter({ currentSlug }: { currentSlug: string }
                 // Fixed min-height locks every row at the same size regardless
                 // of how much (or how little) description copy the row carries.
                 // 80px thumb + 32px py-4 padding = 112px baseline.
-                className="flex min-h-[112px] items-center justify-between gap-6 py-4 transition-opacity duration-300"
+                className="flex min-h-[92px] md:min-h-[112px] items-center gap-3 md:gap-6 py-3 md:py-4 transition-opacity duration-300"
                 style={{ opacity: dimmed ? 0.35 : 1 }}
               >
-                {/* Column 1: thumbnail + title (Figma: 500px cluster) */}
-                <div className="flex items-center gap-4 shrink-0 min-w-0 basis-[500px]">
-                  <div className="relative h-[80px] w-[80px] flex-shrink-0 overflow-hidden">
+                {/* Column 1: thumbnail + title. On mobile the thumb shrinks
+                    to 56px and the title/meta stack vertically so a project
+                    with a long brief still fits at 320px+ without pushing
+                    the year off-screen. */}
+                <div className="flex items-center gap-3 md:gap-4 min-w-0 flex-1 md:flex-none md:shrink-0 md:basis-[500px]">
+                  <div className="relative h-[56px] w-[56px] md:h-[80px] md:w-[80px] flex-shrink-0 overflow-hidden">
                     <Image
                       src={p.tileImage}
                       alt=""
                       fill
-                      sizes="80px"
+                      sizes="(max-width: 768px) 56px, 80px"
                       // Same as the tile canvases — keep GIFs animated.
                       unoptimized={p.tileImage.endsWith(".gif")}
                       className="object-cover"
                     />
                   </div>
-                  {/* Figma text style "Title 2/Emphasized": 17/22 Bold. */}
-                  <p className="text-[17px] font-bold leading-[22px]">
-                    {p.title}
-                  </p>
+                  <div className="min-w-0 flex-1">
+                    {/* Figma text style "Title 2/Emphasized": 17/22 Bold. */}
+                    <p className="text-[15px] md:text-[17px] font-bold leading-[20px] md:leading-[22px] truncate">
+                      {p.title}
+                    </p>
+                    {/* Mobile-only meta line: category · year, since the
+                        dedicated columns are hidden below md. */}
+                    <p className="md:hidden mt-1 text-[12px] leading-[14px] opacity-70 truncate">
+                      {pick(p.category, lang)} · {p.year}
+                    </p>
+                  </div>
                 </div>
 
                 {/*
-                  Column 2: short brief.
-                  - `line-clamp-2` truncates long copy at exactly two lines.
-                  - `h-10` reserves those two lines even when the copy is
-                    short (or empty), so every row's description column is
-                    the same visual block. Combined with the row's
-                    `min-h-[92px]`, this makes row heights identical across
-                    projects — critical since hover-dimming makes any tiny
-                    size mismatch very obvious.
-                  - Widened from 261px → 440px per the studio's request.
+                  Column 2 (md+ only): short brief. `line-clamp-2` truncates
+                  long copy at two lines; `h-10` reserves the space so every
+                  row is the same height regardless of copy length.
                 */}
                 <p className="hidden md:block basis-[440px] shrink-0 h-10 text-[15px] leading-5 line-clamp-2 overflow-hidden">
                   {pick(p.brief, lang)}
                 </p>
 
-                {/* Column 3: category */}
-                <p className="basis-[261px] shrink-0 text-right text-[15px] leading-5">
+                {/* Column 3: category (md+ only — folded into the mobile meta line). */}
+                <p className="hidden md:block basis-[261px] shrink-0 text-right text-[15px] leading-5">
                   {pick(p.category, lang)}
                 </p>
 
-                {/* Column 4: year */}
-                <p className="basis-[109px] shrink-0 text-right text-[15px] leading-5">
+                {/* Column 4: year (md+ only). */}
+                <p className="hidden md:block basis-[109px] shrink-0 text-right text-[15px] leading-5">
                   {p.year}
                 </p>
               </Link>

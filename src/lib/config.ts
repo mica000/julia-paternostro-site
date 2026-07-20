@@ -113,19 +113,21 @@ export const defaultConfig: CanvasConfig = {
  * `slug` is threaded through so future click-to-navigate work can send
  * users directly to /work/{slug} without a second lookup.
  */
-import { projects, defaultBg } from "./projects";
+import { projects, projectBg } from "./projects";
 
 export const productMeta: {
   title: string;
   category: string;
   slug: string;
-  /** Case-study background — seeds the click-through color-morph transition. */
+  /** Case-study background — seeds the click-through color-morph transition.
+      Uses the darkened project bg so the transition lands on the same
+      color the case study actually paints. */
   bg: string;
 }[] = projects.map((p) => ({
   title: p.title,
   category: p.category.en,
   slug: p.slug,
-  bg: p.bg ?? defaultBg,
+  bg: projectBg(p),
 }));
 
 /**

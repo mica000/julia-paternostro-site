@@ -31,7 +31,7 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { defaultBg, invertHex, pick, type Project, type Section } from "@/lib/projects";
+import { pick, projectBg, type Project, type Section } from "@/lib/projects";
 import { useLang, usePageBg, type Lang } from "@/lib/state";
 import { useTransition } from "@/components/PageTransition";
 import CaseStudyFooter from "@/components/CaseStudyFooter";
@@ -66,16 +66,16 @@ export default function CaseStudy({ project }: { project: Project }) {
   const { lang } = useLang();
   const { end } = useTransition();
   const { setPageBg, setPageFg } = usePageBg();
-  const bg = project.bg ?? defaultBg;
-  // Auto-derive fg via invertHex (same shade the nav's mix-blend-mode
-  // renders) UNLESS the project explicitly overrides. The override exists
-  // for saturated warm bgs where the auto-invert lands on a complement
-  // with poor contrast — Delírio's coral being the poster child.
-  const fg = project.fg ?? invertHex(bg);
-  // When fg is explicit, we also want the top/bottom nav to render in that
-  // color instead of its usual mix-blend-mode invert. The context signals
-  // this to TopNav + BottomChrome — they swap treatments accordingly.
-  const explicitFg = project.fg ?? null;
+  // Site-wide dark treatment: every case study renders on a darkened
+  // version of the project's signature color, with white text. The
+  // per-project `fg` overrides are ignored so nothing on the site fights
+  // the dark palette; the hue survives just enough to identify the project.
+  const bg = projectBg(project);
+  const fg = "#ffffff";
+  // Nav + fixed chrome pick up this same explicit white so they never
+  // fall back to mix-blend-mode (which would compute a colored inverse
+  // against the darkened bg).
+  const explicitFg: string = fg;
 
   // Push page bg + fg into the shared context so NavFade matches the page
   // and the nav labels pick up the right treatment. Reset on unmount so
@@ -145,27 +145,35 @@ export default function CaseStudy({ project }: { project: Project }) {
           willChange: "transform, opacity",
         }}
       >
-      <div className="px-8 pt-[225px]">
+      {/*
+        No max-width — content spans full viewport per user request.
+        Padding scales down on mobile so tight viewports keep breathing room.
+      */}
+      <div className="px-5 md:px-8 pt-[120px] md:pt-[225px]">
         {/* ────────────  header  ──────────── */}
-        <header className="mb-[62px]">
+        <header className="mb-16 md:mb-[62px]">
           {/*
-            Title — Figma "Super Large Title" token: SF Pro Bold 124/124,
-            tracking 0. Natural case (not uppercased). The mb-[86px] gap
-            below the title matches Figma's spacing between title and
-            meta row.
+            Title — Figma "Super Large Title" token: SF Pro Bold, target
+            124/124 on desktop (xl+). Scales down through breakpoints for
+            mobile readability. `leading-[1.05]` keeps proportional line
+            height at any size instead of a fixed 124px value that would
+            over-space a 44px mobile title.
           */}
-          <h1 className="mb-[86px] text-[124px] font-bold leading-[124px] tracking-normal">
+          <h1 className="mb-16 md:mb-[86px] text-[44px] sm:text-[64px] md:text-[96px] xl:text-[124px] font-bold leading-[1.05] tracking-normal break-words">
+
             {project.title}
           </h1>
 
           {/*
             3-column meta row per Figma (node 12:235): CATEGORIE / YEAR /
             CLIENT. Brief and context no longer live here — context
-            surfaces as the large paragraph below the intro hero. If a
-            project has no `credits.client` set, the third column still
-            renders (with an em-dash) so the layout stays consistent.
+            surfaces as the large paragraph below the intro hero. Stacks
+            to a single column on mobile so labels don't crush at 390px.
+            If a project has no `credits.client` set, the third column
+            still renders (with an em-dash) so the layout stays consistent.
           */}
-          <div className="grid grid-cols-3 gap-x-6 md:gap-x-10 lg:gap-x-16 xl:gap-x-[132px] gap-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 md:gap-x-10 lg:gap-x-16 xl:gap-x-[132px] gap-y-6">
+
             <MetaField label={LABEL.categorie[lang]}>
               {pick(project.category, lang)}
             </MetaField>
@@ -196,7 +204,7 @@ export default function CaseStudy({ project }: { project: Project }) {
           </>
         ) : (
           <>
-            <section className="mb-[86px]">
+            <section className="mb-16 md:mb-[86px]">
               <Frame
                 src={project.gallery[0]}
                 ratio="1440/484"
@@ -205,18 +213,18 @@ export default function CaseStudy({ project }: { project: Project }) {
               />
             </section>
             <ContextParagraph text={pick(project.context, lang)} />
-            <section className="flex flex-col gap-5">
-              <div className="grid grid-cols-2 gap-5">
-                <Frame src={project.gallery[1]} ratio="710/484" sizes="(max-width: 1440px) 50vw, 720px" />
-                <Frame src={project.gallery[2]} ratio="710/484" sizes="(max-width: 1440px) 50vw, 720px" />
-                <Frame src={project.gallery[3]} ratio="710/484" sizes="(max-width: 1440px) 50vw, 720px" />
-                <Frame src={project.gallery[4]} ratio="710/484" sizes="(max-width: 1440px) 50vw, 720px" />
+            <section className="flex flex-col gap-3 md:gap-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-5">
+                <Frame src={project.gallery[1]} ratio="710/484" sizes="(max-width: 768px) 100vw, (max-width: 1440px) 50vw, 720px" />
+                <Frame src={project.gallery[2]} ratio="710/484" sizes="(max-width: 768px) 100vw, (max-width: 1440px) 50vw, 720px" />
+                <Frame src={project.gallery[3]} ratio="710/484" sizes="(max-width: 768px) 100vw, (max-width: 1440px) 50vw, 720px" />
+                <Frame src={project.gallery[4]} ratio="710/484" sizes="(max-width: 768px) 100vw, (max-width: 1440px) 50vw, 720px" />
               </div>
 
-              <div className="grid grid-cols-3 gap-5">
-                <Frame src={project.gallery[5]} ratio="468/292" sizes="(max-width: 1440px) 33vw, 468px" />
-                <Frame src={project.gallery[6]} ratio="468/292" sizes="(max-width: 1440px) 33vw, 468px" />
-                <Frame src={project.gallery[7]} ratio="468/292" sizes="(max-width: 1440px) 33vw, 468px" />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-5">
+                <Frame src={project.gallery[5]} ratio="468/292" sizes="(max-width: 768px) 100vw, (max-width: 1440px) 33vw, 468px" />
+                <Frame src={project.gallery[6]} ratio="468/292" sizes="(max-width: 768px) 100vw, (max-width: 1440px) 33vw, 468px" />
+                <Frame src={project.gallery[7]} ratio="468/292" sizes="(max-width: 768px) 100vw, (max-width: 1440px) 33vw, 468px" />
               </div>
 
               <Frame src={project.gallery[8]} ratio="1440/484" sizes="100vw" />
@@ -231,7 +239,7 @@ export default function CaseStudy({ project }: { project: Project }) {
             The ~95px top padding matches Figma's empty space above the
             credits row (7px structural + 88px inner padding). */}
         {project.credits && (
-          <section className="grid grid-cols-4 gap-x-6 gap-y-6 pt-[95px] md:gap-x-10 lg:gap-x-16 xl:gap-x-[132px]">
+          <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-6 pt-16 md:pt-[95px] md:gap-x-10 lg:gap-x-16 xl:gap-x-[132px]">
             <MetaField label={LABEL.creativeDirection[lang]}>
               {project.credits.creativeDirection ?? CREDIT_PLACEHOLDER}
             </MetaField>
@@ -332,7 +340,7 @@ const COLS3_RATIO_DEFAULT = "292 / 405";
 */
 function IntroHero({ section }: { section: Section }) {
   return (
-    <section className="mb-[86px]">
+    <section className="mb-16 md:mb-[86px]">
       {section.kind === "hero" ? (
         <Frame
           src={section.src}
@@ -355,7 +363,7 @@ function IntroHero({ section }: { section: Section }) {
 */
 function ContextParagraph({ text }: { text: string }) {
   return (
-    <p className="mb-[156px] max-w-[700px] text-[26px] font-bold leading-8 tracking-normal">
+    <p className="mb-16 md:mb-[156px] max-w-[700px] text-[18px] md:text-[26px] font-bold leading-snug md:leading-8 tracking-normal">
       {text}
     </p>
   );
@@ -377,7 +385,7 @@ function ContextParagraph({ text }: { text: string }) {
 */
 function Sections({ sections }: { sections: readonly Section[] }) {
   return (
-    <section className="flex flex-col gap-[18px]">
+    <section className="flex flex-col gap-3 md:gap-[18px]">
       {sections.map((s, i) => {
         if (s.kind === "hero") {
           return (
@@ -392,6 +400,8 @@ function Sections({ sections }: { sections: readonly Section[] }) {
           );
         }
         // cols variant — N images in a horizontal strip.
+        // Cols stay at their target count even on mobile; images are portrait
+        // aspect so N-cols-side-by-side reads fine down to 390px viewports.
         const defaultRatio =
           s.cols === 2 ? COLS2_RATIO_DEFAULT : COLS3_RATIO_DEFAULT;
         const gridCols = s.cols === 2 ? "grid-cols-2" : "grid-cols-3";
@@ -400,7 +410,7 @@ function Sections({ sections }: { sections: readonly Section[] }) {
             ? "(max-width: 1440px) 50vw, 720px"
             : "(max-width: 1440px) 33vw, 480px";
         return (
-          <div key={i} className={`grid ${gridCols} gap-[18px]`}>
+          <div key={i} className={`grid ${gridCols} gap-3 md:gap-[18px]`}>
             {s.images.map((src, j) => (
               <Frame
                 key={j}

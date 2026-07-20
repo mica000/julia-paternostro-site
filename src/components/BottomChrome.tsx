@@ -30,6 +30,11 @@ export default function BottomChrome() {
   const { pageFg } = usePageBg();
 
   const isWork = pathname === "/";
+  // Case studies host their own long-scroll layout with a footer — the
+  // fixed bottom chrome (only PT/EN there since LIST/GRID is Work-only)
+  // just floats over the content, so we hide it entirely on /work/*.
+  const isCaseStudy = pathname?.startsWith("/work/") ?? false;
+  if (isCaseStudy) return null;
 
   return (
     <nav
@@ -42,7 +47,7 @@ export default function BottomChrome() {
       }
     >
       <div
-        className="flex items-center justify-between px-8 py-5"
+        className="flex items-center justify-between px-5 md:px-8 py-3 md:py-5"
         style={{ color: pageFg ?? "#ffffff" }}
       >
         {/* Bottom-left: view toggle (Work page only) */}
@@ -98,7 +103,7 @@ function SegmentedToggle<T extends string>({
   onChange: (v: T) => void;
 }) {
   return (
-    <div className="flex items-center gap-6 text-[26px] font-bold uppercase leading-8 tracking-normal">
+    <div className="flex items-center gap-3 md:gap-6 text-[18px] md:text-[26px] font-bold uppercase leading-6 md:leading-8 tracking-normal">
       {options.map(({ value: v, label }) => {
         const active = value === v;
         return (

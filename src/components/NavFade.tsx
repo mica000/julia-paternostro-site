@@ -34,6 +34,7 @@
 */
 
 import type { CSSProperties } from "react";
+import { usePathname } from "next/navigation";
 import { useConfig, usePageBg } from "@/lib/state";
 
 // Fade band height. ~1.7× the nav's ~68px height — enough distance for the
@@ -75,6 +76,10 @@ const COLOR_TRANSITION_MS = 320;
 export default function NavFade() {
   const { config } = useConfig();
   const { pageBg } = usePageBg();
+  const pathname = usePathname();
+  // Case studies read as long-scroll articles — the bottom fade scrim
+  // there just competes with the footer border. Suppress it on /work/*.
+  const isCaseStudy = pathname?.startsWith("/work/") ?? false;
   // Prefer the page-scoped override (case study bg) when set; otherwise
   // follow the canvas config's own background. This is why navigating to
   // a cream case study no longer leaves a dark strip at the nav.
@@ -107,15 +112,17 @@ export default function NavFade() {
           WebkitMaskImage: TOP_MASK,
         }}
       />
-      <div
-        aria-hidden
-        className="pointer-events-none fixed inset-x-0 bottom-0 z-30"
-        style={{
-          ...common,
-          maskImage: BOTTOM_MASK,
-          WebkitMaskImage: BOTTOM_MASK,
-        }}
-      />
+      {!isCaseStudy && (
+        <div
+          aria-hidden
+          className="pointer-events-none fixed inset-x-0 bottom-0 z-30"
+          style={{
+            ...common,
+            maskImage: BOTTOM_MASK,
+            WebkitMaskImage: BOTTOM_MASK,
+          }}
+        />
+      )}
     </>
   );
 }
