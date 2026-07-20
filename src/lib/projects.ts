@@ -79,6 +79,36 @@ export type Project = {
 export const defaultBg = "#0a0a0a";
 
 /**
+ * Mix a hex color toward black by `amount` (0..1). At 0 the color is
+ * unchanged; at 1 it's pure black. Used site-wide so case study
+ * backgrounds keep a hint of the project's hue while staying dark
+ * enough for white body text to read at WCAG AA.
+ */
+export function darkenHex(hex: string, amount: number): string {
+  const h = hex.replace("#", "");
+  if (h.length !== 6) return hex;
+  const k = 1 - Math.max(0, Math.min(1, amount));
+  const r = Math.round(parseInt(h.slice(0, 2), 16) * k);
+  const g = Math.round(parseInt(h.slice(2, 4), 16) * k);
+  const b = Math.round(parseInt(h.slice(4, 6), 16) * k);
+  return (
+    "#" +
+    [r, g, b].map((x) => x.toString(16).padStart(2, "0")).join("")
+  );
+}
+
+/**
+ * Site-wide "dark variant" of a project's bg. All the loud saturated hues
+ * (coral, magenta, cream…) collapse to a near-black tint of the same hue,
+ * so the whole site reads as dark with white text and each project still
+ * has a subtle signature color.
+ */
+const DARK_MIX = 0.82;
+export function projectBg(project: Pick<Project, "bg">): string {
+  return darkenHex(project.bg ?? defaultBg, DARK_MIX);
+}
+
+/**
  * Compute the "difference-blend of white" color for a given background —
  * mathematically identical to `mix-blend-mode: difference` on white text
  * over the same bg, since |255 − bg| = 255 − bg when text is white.

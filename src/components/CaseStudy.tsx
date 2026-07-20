@@ -31,7 +31,7 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { defaultBg, invertHex, pick, type Project } from "@/lib/projects";
+import { pick, projectBg, type Project } from "@/lib/projects";
 import { useLang, usePageBg, type Lang } from "@/lib/state";
 import { useTransition } from "@/components/PageTransition";
 import CaseStudyFooter from "@/components/CaseStudyFooter";
@@ -66,16 +66,16 @@ export default function CaseStudy({ project }: { project: Project }) {
   const { lang } = useLang();
   const { end } = useTransition();
   const { setPageBg, setPageFg } = usePageBg();
-  const bg = project.bg ?? defaultBg;
-  // Auto-derive fg via invertHex (same shade the nav's mix-blend-mode
-  // renders) UNLESS the project explicitly overrides. The override exists
-  // for saturated warm bgs where the auto-invert lands on a complement
-  // with poor contrast — Delírio's coral being the poster child.
-  const fg = project.fg ?? invertHex(bg);
-  // When fg is explicit, we also want the top/bottom nav to render in that
-  // color instead of its usual mix-blend-mode invert. The context signals
-  // this to TopNav + BottomChrome — they swap treatments accordingly.
-  const explicitFg = project.fg ?? null;
+  // Site-wide dark treatment: every case study renders on a darkened
+  // version of the project's signature color, with white text. The
+  // per-project `fg` overrides are ignored so nothing on the site fights
+  // the dark palette; the hue survives just enough to identify the project.
+  const bg = projectBg(project);
+  const fg = "#ffffff";
+  // Nav + fixed chrome pick up this same explicit white so they never
+  // fall back to mix-blend-mode (which would compute a colored inverse
+  // against the darkened bg).
+  const explicitFg: string = fg;
 
   // Push page bg + fg into the shared context so NavFade matches the page
   // and the nav labels pick up the right treatment. Reset on unmount so
