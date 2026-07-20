@@ -33,7 +33,7 @@
 */
 
 import Image from "next/image";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { getImages, type CanvasConfig } from "@/lib/config";
 import { projects, projectBg } from "@/lib/projects";
 import { useTransition } from "@/components/PageTransition";
@@ -49,6 +49,7 @@ type Props = Pick<
   | "imageStyle"
   | "background"
   | "imageCrop"
+  | "breathe"
 >;
 
 // Cycle of default aspect ratios used when a project omits `tileAspect`.
@@ -76,11 +77,64 @@ export default function MasonryGrid({
   imageStyle,
   background,
   imageCrop,
+  breathe,
 }: Props) {
   const imageList = getImages(imageStyle);
   const objectFit =
     imageStyle === "without-bg" ? "object-contain" : "object-cover";
   const { begin } = useTransition();
+
+  /*
+    Breathe scroll — same feel as ScrollGrid but driven by native page
+    scroll instead of a hijacked wheel. Each scroll event charges an
+    energy value; a rAF loop decays it and writes the resulting scale
+    into a CSS variable on the grid container. Each tile's transform
+    reads `var(--breathe-scale, 1)` so idle tiles are unaffected and
+    hover still wins via `.tile-hover:hover`.
+  */
+  const gridRef = useRef<HTMLDivElement>(null);
+  const energy = useRef(0);
+  const currentScale = useRef(1);
+  const lastScrollY = useRef(0);
+  const reduce = useRef(false);
+  const breatheRef = useRef(breathe);
+  useEffect(() => {
+    breatheRef.current = breathe;
+  }, [breathe]);
+
+  useEffect(() => {
+    reduce.current =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    lastScrollY.current = window.scrollY;
+
+    const onScroll = () => {
+      const y = window.scrollY;
+      const dy = y - lastScrollY.current;
+      lastScrollY.current = y;
+      energy.current = Math.min(1, energy.current + Math.abs(dy) * 0.01);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    let id = 0;
+    const loop = () => {
+      energy.current *= 0.9;
+      if (reduce.current) energy.current = 0;
+      const target = 1 + energy.current * breatheRef.current;
+      currentScale.current += (target - currentScale.current) * 0.15;
+      const el = gridRef.current;
+      if (el) {
+        el.style.setProperty("--breathe-scale", currentScale.current.toFixed(4));
+      }
+      id = requestAnimationFrame(loop);
+    };
+    id = requestAnimationFrame(loop);
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      cancelAnimationFrame(id);
+    };
+  }, []);
 
   // Column-shortest packing. Running column heights are tracked in units of
   // "column widths" (each tile contributes `aspect` — since width is fixed
@@ -126,6 +180,7 @@ export default function MasonryGrid({
         keeps the last row above BottomChrome.
       */}
       <div
+        ref={gridRef}
         className="mx-auto grid pt-[120px] pb-[120px] px-8"
         style={{
           maxWidth: masonryMaxWidth,
@@ -142,36 +197,45 @@ export default function MasonryGrid({
             {col.map(({ project, src, aspect }) => {
               const bgColor = projectBg(project);
               return (
+                // Outer wrapper carries the breathe swell only. No
+                // transition so the rAF loop's small per-frame changes
+                // read instantly instead of lagging 300ms behind.
                 <div
                   key={project.slug}
-                  className="tile-hover relative w-full cursor-pointer overflow-hidden"
-                  data-title={project.title}
-                  data-category={project.category.en}
-                  data-slug={project.slug}
-                  data-bg={bgColor}
-                  onClick={(e) => onTileClick(e, project.slug, bgColor)}
-                  style={
-                    {
-                      // aspectRatio uses `w / h`, so a tile that's 1.4× taller
-                      // than wide expresses as "1 / 1.4".
-                      aspectRatio: `1 / ${aspect}`,
-                      borderRadius: radius,
-                      transformOrigin: "center center",
-                      transition: `transform ${hoverSpeed}ms cubic-bezier(0.22, 1, 0.36, 1)`,
-                      ["--tile-hover-scale" as string]: hoverScale,
-                    } as React.CSSProperties
-                  }
+                  style={{
+                    transform: "scale(var(--breathe-scale, 1))",
+                    transformOrigin: "center center",
+                    willChange: "transform",
+                  }}
                 >
-                  <Image
-                    src={src}
-                    alt=""
-                    fill
-                    draggable={false}
-                    sizes={`${Math.round(masonryMaxWidth / masonryCols)}px`}
-                    unoptimized={src.endsWith(".gif")}
-                    className={objectFit}
-                    style={{ transform: `scale(${imageCrop})` }}
-                  />
+                  <div
+                    className="tile-hover relative w-full cursor-pointer overflow-hidden"
+                    data-title={project.title}
+                    data-category={project.category.en}
+                    data-slug={project.slug}
+                    data-bg={bgColor}
+                    onClick={(e) => onTileClick(e, project.slug, bgColor)}
+                    style={
+                      {
+                        aspectRatio: `1 / ${aspect}`,
+                        borderRadius: radius,
+                        transformOrigin: "center center",
+                        transition: `transform ${hoverSpeed}ms cubic-bezier(0.22, 1, 0.36, 1)`,
+                        ["--tile-hover-scale" as string]: hoverScale,
+                      } as React.CSSProperties
+                    }
+                  >
+                    <Image
+                      src={src}
+                      alt=""
+                      fill
+                      draggable={false}
+                      sizes={`${Math.round(masonryMaxWidth / masonryCols)}px`}
+                      unoptimized={src.endsWith(".gif")}
+                      className={objectFit}
+                      style={{ transform: `scale(${imageCrop})` }}
+                    />
+                  </div>
                 </div>
               );
             })}

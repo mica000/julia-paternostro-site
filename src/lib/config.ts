@@ -75,7 +75,7 @@ export type CanvasConfig = {
 };
 
 export const defaultConfig: CanvasConfig = {
-  mode: "grid",
+  mode: "masonry",
   imageStyle: "with-bg",
   friction: 0.93,
   glide: 1.0,

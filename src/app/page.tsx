@@ -85,6 +85,7 @@ export default function Home() {
           imageStyle={config.imageStyle}
           background={config.background}
           imageCrop={config.imageCrop}
+          breathe={config.breathe}
         />
       )}
       <HoverPill accent={config.accent} />

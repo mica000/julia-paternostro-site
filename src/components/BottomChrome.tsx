@@ -1,45 +1,27 @@
 "use client";
 
 /*
-  BottomChrome — bottom-left view toggle + bottom-right language toggle
-  --------------------------------------------------------------------
-  Sits at the bottom edge of the viewport with the same adaptive-contrast
-  `mix-blend-mode: difference` treatment as TopNav. Two clusters:
-
-    LIST | GRID           (bottom-left)      PT | EN             (bottom-right)
-
-  View toggle (LIST/GRID):
-    - GRID  → CanvasConfig.mode = "grid"  → renders InfiniteCanvas (draggable)
-    - LIST  → CanvasConfig.mode = "list"  → renders ScrollGrid (wheel/vertical)
-    - Only meaningful on the Work page (`/`); hidden on About/Services so the
-      toggle doesn't imply it does something there.
-
-  Language toggle (PT/EN):
-    - Always visible so users can switch language from any route.
-    - Persisted to localStorage inside LanguageProvider.
+  BottomChrome — bottom-right language toggle
+  -------------------------------------------
+  Historically also hosted the LIST / GRID / ORBIT / MASONRY view toggle,
+  but Masonry is the only public view now so only PT/EN remains. Hidden
+  entirely on case study pages, which have their own long-scroll layout.
 */
 
 import { usePathname } from "next/navigation";
-import { useConfig, useLang, usePageBg, type Lang } from "@/lib/state";
-import type { Mode } from "@/lib/config";
+import { useLang, usePageBg, type Lang } from "@/lib/state";
 
 export default function BottomChrome() {
   const pathname = usePathname();
-  const { config, setConfig } = useConfig();
-  const { lang, setLang, t } = useLang();
+  const { lang, setLang } = useLang();
   const { pageFg } = usePageBg();
 
-  const isWork = pathname === "/";
-  // Case studies host their own long-scroll layout with a footer — the
-  // fixed bottom chrome (only PT/EN there since LIST/GRID is Work-only)
-  // just floats over the content, so we hide it entirely on /work/*.
   const isCaseStudy = pathname?.startsWith("/work/") ?? false;
   if (isCaseStudy) return null;
 
   return (
     <nav
       className="pointer-events-none fixed inset-x-0 bottom-0 z-40"
-      // Same treatment logic as TopNav — see comments there.
       style={
         pageFg
           ? { color: pageFg }
@@ -47,30 +29,9 @@ export default function BottomChrome() {
       }
     >
       <div
-        className="flex items-center justify-between px-5 md:px-8 py-3 md:py-5"
+        className="flex items-center justify-end px-5 md:px-8 py-3 md:py-5"
         style={{ color: pageFg ?? "#ffffff" }}
       >
-        {/* Bottom-left: view toggle (Work page only) */}
-        <div className="pointer-events-auto">
-          {isWork ? (
-            <SegmentedToggle
-              options={[
-                { value: "list", label: t("view.list") },
-                { value: "grid", label: t("view.grid") },
-                { value: "orbit", label: t("view.orbit") },
-                { value: "masonry", label: t("view.masonry") },
-              ]}
-              value={config.mode}
-              onChange={(v) => setConfig({ ...config, mode: v as Mode })}
-            />
-          ) : (
-            // Empty placeholder keeps the PT/EN cluster pinned to the right
-            // even when the LIST/GRID toggle is hidden.
-            <span />
-          )}
-        </div>
-
-        {/* Bottom-right: language toggle */}
         <div className="pointer-events-auto">
           <SegmentedToggle
             options={[
@@ -87,11 +48,8 @@ export default function BottomChrome() {
 }
 
 /*
-  SegmentedToggle
-  ---------------
-  Two labels side by side. The active label stays fully white; the inactive
-  label dims to 50%. No pill background, no chip — matches the Figma flat
-  treatment where the only affordance is the opacity change on hover/active.
+  SegmentedToggle — labels side by side; active label full opacity,
+  inactive dims to 50%. Flat treatment, no pill.
 */
 function SegmentedToggle<T extends string>({
   options,
