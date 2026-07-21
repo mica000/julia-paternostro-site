@@ -43,7 +43,7 @@ export default function CaseStudyFooter({ currentSlug }: { currentSlug: string }
     <section
       aria-label="More projects"
       className="w-full px-5 md:px-8 mt-24 md:mt-[150px] pt-8 md:pt-10 pb-24"
-      style={{ borderTop: RULE, backgroundColor: FOOTER_TINT }}
+      style={{ backgroundColor: FOOTER_TINT }}
     >
       <ul className="flex flex-col">
         {others.map((p) => {

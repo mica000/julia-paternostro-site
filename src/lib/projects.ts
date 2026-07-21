@@ -244,88 +244,92 @@ export const projects: Project[] = [
     // is poor. Explicit deep warm near-black lands ~6:1 against coral,
     // harmonizes with the tropical palette, and passes WCAG AA at body size.
     fg: "#1a0500",
-    // Case-study layout matches the Figma artboard at node 41:272 — 16
-    // sections covering 28 optimized WebP files in public/Images/Delirio-
-    // Tropical/. Frames 6 and 7 are pre-composited icon strips (3 tiles
-    // baked into 1 wide image each), so they render as single hero-width
-    // frames with a wider aspect ratio (1905:585) instead of 3-col rows.
+    // Case-study layout uses the re-exported Delírio images in
+    // public/Images/Delirio-Tropical/ (01–15, 19–32; 29 total). Files are
+    // named in reading order and grouped by their native aspect ratio:
+    //   - 01, 02, 03, 10, 11, 12, 23  → hero (1.63:1 landscape)
+    //   - 19, 20, 21, 22               → cols=2 (0.80:1 portrait)
+    //   - 04–06, 13–15, 24–32          → cols=3 (0.72:1 portrait)
+    //   - 07, 08, 09                   → cols=3 (1:1 square icon row)
     sections: [
-      { kind: "hero", src: asset("Delirio-Tropical", "Rectangle 1") },
-      { kind: "hero", src: asset("Delirio-Tropical", "Rectangle 54") },
-      { kind: "hero", src: asset("Delirio-Tropical", "Rectangle 55") },
+      { kind: "hero", src: asset("Delirio-Tropical", "01") },
+      { kind: "hero", src: asset("Delirio-Tropical", "02") },
+      { kind: "hero", src: asset("Delirio-Tropical", "03") },
       {
         kind: "cols",
         cols: 3,
         images: [
-          asset("Delirio-Tropical", "Rectangle 56"),
-          asset("Delirio-Tropical", "Rectangle 57"),
-          asset("Delirio-Tropical", "Rectangle 58"),
+          asset("Delirio-Tropical", "04"),
+          asset("Delirio-Tropical", "05"),
+          asset("Delirio-Tropical", "06"),
         ],
       },
       {
-        kind: "hero",
-        src: asset("Delirio-Tropical", "Frame 6"),
-        ratio: "1905 / 585",
+        // Square icon row — 3 × 1:1 tiles. Overrides the cols=3 default
+        // (0.72:1 portrait) so the icons don't get stretched vertically.
+        kind: "cols",
+        cols: 3,
+        ratio: "1 / 1",
+        images: [
+          asset("Delirio-Tropical", "07"),
+          asset("Delirio-Tropical", "08"),
+          asset("Delirio-Tropical", "09"),
+        ],
       },
-      { kind: "hero", src: asset("Delirio-Tropical", "Rectangle 59") },
-      { kind: "hero", src: asset("Delirio-Tropical", "Rectangle 60") },
-      { kind: "hero", src: asset("Delirio-Tropical", "Rectangle 61") },
+      { kind: "hero", src: asset("Delirio-Tropical", "10") },
+      { kind: "hero", src: asset("Delirio-Tropical", "11") },
+      { kind: "hero", src: asset("Delirio-Tropical", "12") },
       {
         kind: "cols",
         cols: 3,
         images: [
-          asset("Delirio-Tropical", "Rectangle 62"),
-          asset("Delirio-Tropical", "Rectangle 63"),
-          asset("Delirio-Tropical", "Rectangle 64"),
-        ],
-      },
-      {
-        kind: "hero",
-        src: asset("Delirio-Tropical", "Frame 7"),
-        ratio: "1905 / 585",
-      },
-      {
-        kind: "cols",
-        cols: 2,
-        images: [
-          asset("Delirio-Tropical", "Rectangle 19"),
-          asset("Delirio-Tropical", "Rectangle 26"),
+          asset("Delirio-Tropical", "13"),
+          asset("Delirio-Tropical", "14"),
+          asset("Delirio-Tropical", "15"),
         ],
       },
       {
         kind: "cols",
         cols: 2,
         images: [
-          asset("Delirio-Tropical", "Rectangle 65"),
-          asset("Delirio-Tropical", "Rectangle 66"),
-        ],
-      },
-      { kind: "hero", src: asset("Delirio-Tropical", "Rectangle 76") },
-      {
-        kind: "cols",
-        cols: 3,
-        images: [
-          asset("Delirio-Tropical", "Rectangle 67"),
-          asset("Delirio-Tropical", "Rectangle 68"),
-          asset("Delirio-Tropical", "Rectangle 69"),
+          asset("Delirio-Tropical", "19"),
+          asset("Delirio-Tropical", "20"),
         ],
       },
       {
         kind: "cols",
+        cols: 2,
+        images: [
+          asset("Delirio-Tropical", "21"),
+          asset("Delirio-Tropical", "22"),
+        ],
+      },
+      { kind: "hero", src: asset("Delirio-Tropical", "23") },
+      {
+        kind: "cols",
         cols: 3,
         images: [
-          asset("Delirio-Tropical", "Rectangle 70"),
-          asset("Delirio-Tropical", "Rectangle 71"),
-          asset("Delirio-Tropical", "Rectangle 72"),
+          asset("Delirio-Tropical", "24"),
+          asset("Delirio-Tropical", "25"),
+          asset("Delirio-Tropical", "26"),
         ],
       },
       {
         kind: "cols",
         cols: 3,
         images: [
-          asset("Delirio-Tropical", "Rectangle 73"),
-          asset("Delirio-Tropical", "Rectangle 74"),
-          asset("Delirio-Tropical", "Rectangle 75"),
+          asset("Delirio-Tropical", "27"),
+          asset("Delirio-Tropical", "28"),
+          asset("Delirio-Tropical", "29"),
+        ],
+      },
+      {
+        kind: "cols",
+        cols: 3,
+        images: [
+          asset("Delirio-Tropical", "30"),
+          asset("Delirio-Tropical", "31"),
+          asset("Delirio-Tropical", "32"),
         ],
       },
     ],

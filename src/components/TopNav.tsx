@@ -72,25 +72,42 @@ export default function TopNav() {
   return (
     <nav
       className={`pointer-events-none fixed inset-x-0 top-0 ${menuOpen ? "z-50" : "z-40"}`}
-      // Default treatment is `mix-blend-mode: difference` (auto-inverts
-      // labels against the content behind the fixed nav). When a route
-      // sets an explicit pageFg we paint labels in that color instead.
-      // While the mobile overlay is open we also drop the blend so labels
-      // sit cleanly on the solid overlay bg.
+      // Cash App-style adaptive contrast: `mix-blend-mode: difference`
+      // on white labels means the browser subtracts the layer below from
+      // white and paints the result — over a black bg you get white,
+      // over white you get black, and over any colored image you get
+      // the exact chromatic inverse. Labels stay legible over ANY
+      // content that scrolls beneath the fixed nav without us picking
+      // per-route colors.
+      //
+      // Exception: while the mobile menu overlay is open, drop the
+      // blend so labels sit as clean solid white on the overlay bg
+      // (the overlay itself is opaque, so blend would produce an
+      // unwanted inversion against it).
       style={
-        pageFg || menuOpen
-          ? { color: pageFg ?? "#ffffff" }
-          : { mixBlendMode: "difference" }
+        menuOpen
+          ? { color: "#ffffff" }
+          : { color: "#ffffff", mixBlendMode: "difference" }
       }
     >
-      {/* ─── Desktop layout (md+) — 3-column grid ─── */}
+      {/* ─── Desktop layout (md+) — 3-column grid ───
+          Per Figma (node 12:236): wordmark LEFT, WORK CENTER,
+          ABOUT RIGHT. WORK sitting dead-center gives the nav its
+          balance point — it's the primary destination. */}
       <div
         className="hidden md:grid grid-cols-3 items-center px-8 py-5"
-        style={{ color: pageFg ?? "#ffffff" }}
       >
         <Link
           href="/"
           className={`${type} justify-self-start`}
+          data-cursor-ring
+        >
+          Torto Studio
+        </Link>
+
+        <Link
+          href="/"
+          className={`${type} justify-self-center`}
           data-cursor-ring
         >
           <span
@@ -100,14 +117,6 @@ export default function TopNav() {
           >
             {t("nav.work")}
           </span>
-        </Link>
-
-        <Link
-          href="/"
-          className={`${type} justify-self-center`}
-          data-cursor-ring
-        >
-          Torto Studio
         </Link>
 
         <Link
@@ -128,7 +137,6 @@ export default function TopNav() {
       {/* ─── Mobile top bar (<md) — wordmark + MENU button ─── */}
       <div
         className="flex md:hidden items-center justify-between px-5 py-4"
-        style={{ color: pageFg ?? "#ffffff" }}
       >
         <Link href="/" className={type} data-cursor-ring>
           Torto Studio

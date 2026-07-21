@@ -34,7 +34,10 @@ import { join, extname, basename } from "node:path";
 import sharp from "sharp";
 
 // Tune these if the studio ever needs a different balance.
-const MAX_LONG_EDGE = 2000;
+// MAX_LONG_EDGE 3200 keeps the images sharp on 2× retina displays up to
+// ~1600px viewport, which covers most desktop monitors. Bump higher for
+// larger-format prints or ultrawide displays; drop lower to trim bytes.
+const MAX_LONG_EDGE = 3200;
 const WEBP_QUALITY = 85;
 
 // Accepts .png / .jpg / .jpeg from raw uploads AND .webp for the "re-optimize
