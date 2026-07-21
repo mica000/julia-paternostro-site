@@ -33,7 +33,7 @@
 */
 
 import Image from "next/image";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { getImages, type CanvasConfig } from "@/lib/config";
 import { projects, projectBg } from "@/lib/projects";
 import { useTransition } from "@/components/PageTransition";
@@ -84,57 +84,10 @@ export default function MasonryGrid({
     imageStyle === "without-bg" ? "object-contain" : "object-cover";
   const { begin } = useTransition();
 
-  /*
-    Breathe scroll — same feel as ScrollGrid but driven by native page
-    scroll instead of a hijacked wheel. Each scroll event charges an
-    energy value; a rAF loop decays it and writes the resulting scale
-    into a CSS variable on the grid container. Each tile's transform
-    reads `var(--breathe-scale, 1)` so idle tiles are unaffected and
-    hover still wins via `.tile-hover:hover`.
-  */
+  // Breathe-scroll disabled for now — the grid stays static as the reader
+  // scrolls. Retained gridRef so the ref-based DOM access below still
+  // resolves without conditional logic; nothing writes to its transform.
   const gridRef = useRef<HTMLDivElement>(null);
-  const energy = useRef(0);
-  const currentScale = useRef(1);
-  const lastScrollY = useRef(0);
-  const reduce = useRef(false);
-  const breatheRef = useRef(breathe);
-  useEffect(() => {
-    breatheRef.current = breathe;
-  }, [breathe]);
-
-  useEffect(() => {
-    reduce.current =
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    lastScrollY.current = window.scrollY;
-
-    const onScroll = () => {
-      const y = window.scrollY;
-      const dy = y - lastScrollY.current;
-      lastScrollY.current = y;
-      energy.current = Math.min(1, energy.current + Math.abs(dy) * 0.01);
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-
-    let id = 0;
-    const loop = () => {
-      energy.current *= 0.9;
-      if (reduce.current) energy.current = 0;
-      const target = 1 + energy.current * breatheRef.current;
-      currentScale.current += (target - currentScale.current) * 0.15;
-      const el = gridRef.current;
-      if (el) {
-        el.style.setProperty("--breathe-scale", currentScale.current.toFixed(4));
-      }
-      id = requestAnimationFrame(loop);
-    };
-    id = requestAnimationFrame(loop);
-
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      cancelAnimationFrame(id);
-    };
-  }, []);
 
   // Column-shortest packing. Running column heights are tracked in units of
   // "column widths" (each tile contributes `aspect` — since width is fixed
@@ -174,6 +127,12 @@ export default function MasonryGrid({
       className="min-h-screen w-full"
       style={{ backgroundColor: background }}
     >
+      {/* Hero reel — flashes through every project's tile image on mount
+          (portorocha.com-style intro tease), then settles on the first
+          project. Sits inside the same maxWidth column as the grid so
+          it aligns with the tiles below. */}
+      <HeroReel projects={projects} imageList={imageList} maxWidth={masonryMaxWidth} onTileClick={onTileClick} />
+
       {/*
         Content column: capped at masonryMaxWidth, centered. pt-[120px]
         clears the fixed TopNav (75px chrome + breathing room). pb-[120px]
@@ -181,7 +140,7 @@ export default function MasonryGrid({
       */}
       <div
         ref={gridRef}
-        className="mx-auto grid pt-[120px] pb-[120px] px-8"
+        className="mx-auto grid pb-[120px] px-8"
         style={{
           maxWidth: masonryMaxWidth,
           gridTemplateColumns: `repeat(${masonryCols}, 1fr)`,
@@ -197,17 +156,7 @@ export default function MasonryGrid({
             {col.map(({ project, src, aspect }) => {
               const bgColor = projectBg(project);
               return (
-                // Outer wrapper carries the breathe swell only. No
-                // transition so the rAF loop's small per-frame changes
-                // read instantly instead of lagging 300ms behind.
-                <div
-                  key={project.slug}
-                  style={{
-                    transform: "scale(var(--breathe-scale, 1))",
-                    transformOrigin: "center center",
-                    willChange: "transform",
-                  }}
-                >
+                <div key={project.slug}>
                   <div
                     className="tile-hover relative w-full cursor-pointer overflow-hidden"
                     data-title={project.title}
@@ -240,6 +189,103 @@ export default function MasonryGrid({
               );
             })}
           </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/*
+  HeroReel — portorocha.com-style intro tease.
+
+  On mount, cycles rapidly through every project's tile image (one
+  image every FRAME_MS, total ≈ N × FRAME_MS ~= 1s for a typical
+  10-project set) then settles on the first project. The cycling
+  itself is what makes the reader register "there's a lot in here" —
+  it's not a gallery, it's a flash of every canvas the site can offer.
+
+  Uses <Image priority> for the first frame so it lands on the LCP path;
+  subsequent frames swap `src` in place on the same node so the browser
+  reuses its decoded frame. `unoptimized` on GIFs so they animate.
+
+  Clickable — same navigation as tiles below via the shared color-morph
+  transition. `data-cursor-ring` + `data-title`/`data-category` mean the
+  HoverPill picks up the currently-visible project.
+*/
+function HeroReel({
+  projects,
+  imageList,
+  maxWidth,
+  onTileClick,
+}: {
+  projects: readonly (typeof import("@/lib/projects").projects)[number][];
+  imageList: string[];
+  maxWidth: number;
+  onTileClick: (
+    e: React.MouseEvent<HTMLDivElement>,
+    slug: string,
+    bgColor: string
+  ) => void;
+}) {
+  // 3s per photo — slow enough to actually read the project, and the
+  // reel loops forever so it doubles as an ambient rotating hero.
+  const FRAME_MS = 3000;
+  const [idx, setIdx] = useState(0);
+
+  useEffect(() => {
+    // Loop through every project indefinitely. Modulo wrap so we come
+    // back around to the first project after the last one.
+    const id = window.setInterval(() => {
+      setIdx((prev) => (prev + 1) % projects.length);
+    }, FRAME_MS);
+    return () => window.clearInterval(id);
+  }, [projects.length]);
+
+  const active = projects[idx];
+  const src = imageList[idx];
+  const bgColor = projectBg(active);
+
+  return (
+    <div
+      className="mx-auto pt-[120px] pb-[140px] px-8"
+      style={{ maxWidth }}
+    >
+      <div
+        // No `.tile-hover` and no `data-*` cursor attrs — the reel is a
+        // passive rotating hero, not a hoverable tile. Clicking still
+        // routes through the color-morph transition to the currently-
+        // shown project's case study.
+        className="relative w-full cursor-pointer overflow-hidden"
+        onClick={(e) => onTileClick(e, active.slug, bgColor)}
+        style={{
+          aspectRatio: "16 / 9",
+          backgroundColor: bgColor,
+          // Smooth color crossfade between projects so the bg swap
+          // between images doesn't hard-cut.
+          transition: "background-color 400ms cubic-bezier(0.22, 1, 0.36, 1)",
+        }}
+      >
+        {/* Stack every project image absolutely inside the frame; only
+            the active one sits at opacity 1. Prevents the flash-to-bg
+            you'd get from swapping a single `<img>` src per interval,
+            because the browser has all frames decoded and ready — the
+            transition is just a CSS opacity change. */}
+        {imageList.map((imgSrc, i) => (
+          <Image
+            key={imgSrc}
+            src={imgSrc}
+            alt=""
+            fill
+            priority={i === 0}
+            sizes="100vw"
+            draggable={false}
+            unoptimized={imgSrc.endsWith(".gif")}
+            className="object-cover"
+            style={{
+              opacity: i === idx ? 1 : 0,
+              transition: "opacity 400ms cubic-bezier(0.22, 1, 0.36, 1)",
+            }}
+          />
         ))}
       </div>
     </div>

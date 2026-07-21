@@ -83,11 +83,10 @@ export default function HoverPill({ accent }: { accent: string }) {
         meta ? "opacity-100" : "opacity-0"
       }`}
     >
-      <div className="flex items-center gap-3 rounded-full border border-white/20 bg-black/30 px-3 py-2 pr-5 shadow-2xl backdrop-blur-2xl">
-        <div
-          className="grid h-9 w-9 flex-shrink-0 place-items-center rounded-full"
-          style={{ backgroundColor: accent }}
-        >
+      <div className="flex items-center gap-2 rounded-full border border-white/20 bg-black/30 py-2 pl-4 pr-5 shadow-2xl backdrop-blur-2xl">
+        <div className="grid h-4 w-4 flex-shrink-0 place-items-center">
+          {/* Arrow icon on its own — no accent-filled circle. Stroke is
+              white to sit cleanly on the dark pill bg. */}
           <svg
             width="14"
             height="14"
@@ -97,7 +96,7 @@ export default function HoverPill({ accent }: { accent: string }) {
           >
             <path
               d="M3.5 10.5L10.5 3.5M10.5 3.5H4.5M10.5 3.5V9.5"
-              stroke="black"
+              stroke="white"
               strokeWidth="1.8"
               strokeLinecap="round"
               strokeLinejoin="round"
