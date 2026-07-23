@@ -16,7 +16,10 @@
 
 import { useEffect, useRef, useState } from "react";
 
-type Meta = { title: string; category: string } | null;
+// `line2` is the pill's second line: a surface can supply `data-subtitle`
+// (e.g. the parallax stage → "Go to project"); tiles that only carry
+// `data-category` fall back to that.
+type Meta = { title: string; line2: string } | null;
 
 // Offset from the cursor to the pill's anchor (which is vertically centered
 // on the pill's left edge). Right and slightly below the pointer, matching
@@ -41,13 +44,21 @@ export default function HoverPill({ accent }: { accent: string }) {
       target.current.y = e.clientY;
 
       const el = document.elementFromPoint(e.clientX, e.clientY);
-      const tile = (el as HTMLElement | null)?.closest<HTMLElement>(".tile-hover");
+      // `.tile-hover` covers the grid/list canvases; `[data-cursor-ring]`
+      // lets other surfaces (e.g. the parallax stage) opt into the SAME tip
+      // by carrying data-title / data-category. Anything matched without a
+      // data-title (nav links, toggles) just clears the tip below.
+      const tile = (el as HTMLElement | null)?.closest<HTMLElement>(
+        ".tile-hover, [data-cursor-ring]"
+      );
       if (tile && tile.dataset.title) {
-        // Only re-render if the tile identity actually changed.
+        const title = tile.dataset.title;
+        const line2 = tile.dataset.subtitle ?? tile.dataset.category ?? "";
+        // Only re-render when the shown content actually changes.
         setMeta((prev) =>
-          prev?.title === tile.dataset.title
+          prev?.title === title && prev?.line2 === line2
             ? prev
-            : { title: tile.dataset.title!, category: tile.dataset.category ?? "" }
+            : { title, line2 }
         );
       } else {
         setMeta((prev) => (prev ? null : prev));
@@ -108,7 +119,7 @@ export default function HoverPill({ accent }: { accent: string }) {
             {meta?.title ?? "—"}
           </div>
           <div className="text-sm leading-tight text-white/60">
-            {meta?.category ?? ""}
+            {meta?.line2 ?? ""}
           </div>
         </div>
       </div>

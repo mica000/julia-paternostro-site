@@ -390,14 +390,14 @@ function ModeToggle({
   onChange: (m: Mode) => void;
 }) {
   return (
-    <div className="flex gap-1 rounded-full border border-white/10 bg-white/5 p-1">
-      {(["grid", "list", "orbit", "masonry"] as const).map((m) => {
+    <div className="flex flex-wrap gap-1 rounded-2xl border border-white/10 bg-white/5 p-1">
+      {(["grid", "list", "orbit", "masonry", "index2", "editorial", "parallax"] as const).map((m) => {
         const active = mode === m;
         return (
           <button
             key={m}
             onClick={() => onChange(m)}
-            className={`flex-1 rounded-full px-3 py-1.5 text-sm font-medium capitalize transition-colors ${
+            className={`flex-1 min-w-[70px] rounded-full px-3 py-1.5 text-sm font-medium capitalize transition-colors ${
               active ? "bg-white text-black" : "text-white/60 hover:text-white"
             }`}
           >

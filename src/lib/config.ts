@@ -6,7 +6,7 @@
   out of sync when a slider moves.
 */
 
-export type Mode = "grid" | "list" | "orbit" | "masonry";
+export type Mode = "grid" | "list" | "orbit" | "masonry" | "index2" | "editorial" | "parallax";
 export type ImageStyle = "with-bg" | "without-bg";
 
 export type CanvasConfig = {
@@ -72,6 +72,11 @@ export type CanvasConfig = {
   masonryGap: number;
   /** Masonry mode — max content width in px; grid centers when viewport is wider. */
   masonryMaxWidth: number;
+  /** Parallax mode — whether the "Show all" detail list is open. Lives in the
+      shared config (not local component state) so the TopNav's "Show all"
+      item — which is rendered up in the root layout — can toggle the list
+      that ParallaxIndex renders down in the page. */
+  parallaxShowAll: boolean;
 };
 
 export const defaultConfig: CanvasConfig = {
@@ -102,6 +107,7 @@ export const defaultConfig: CanvasConfig = {
   masonryCols: 3,
   masonryGap: 20,
   masonryMaxWidth: 1400,
+  parallaxShowAll: false,
 };
 
 /**

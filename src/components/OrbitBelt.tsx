@@ -255,6 +255,9 @@ export default function OrbitBelt({
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerUp}
+      // Opt out of Lenis smooth scroll — this belt drives its own
+      // wheel/drag motion; Lenis must not intercept the wheel here.
+      data-lenis-prevent
       className="fixed inset-0 cursor-grab touch-none select-none overflow-hidden active:cursor-grabbing"
       style={{
         backgroundColor: background,

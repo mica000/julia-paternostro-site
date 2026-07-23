@@ -40,6 +40,14 @@ export type Project = {
   /** Square thumbnail used on the Work tile grid. */
   tileImage: string;
   /**
+   * Optional dedicated image for the Index 2 (IndexList) split-screen view,
+   * exported at the index slot's landscape proportion (~913:560) so it fills
+   * the frame cleanly. When unset, IndexList falls back to `tileImage`
+   * (square, letterboxed via object-contain). Lets a few hero projects show
+   * a proper landscape crop in the index without affecting any other view.
+   */
+  indexImage?: string;
+  /**
    * Case-study gallery images, in render order. The template renders
    * exactly 9 slots (hero, 2×2, 3-col, bottom hero); extra images are
    * ignored and shorter arrays wrap around.
@@ -232,6 +240,7 @@ export const projects: Project[] = [
       pt: "Delírio Tropical é um festival de música em Espírito Santo, Brasil, criado para honrar e amplificar a rica cena cultural da região. A primeira edição, realizada em janeiro de 2024, reuniu 76 artistas de gêneros diversos, celebrando a identidade musical do estado.",
     },
     tileImage: tile(1),
+    indexImage: "/Images/Index2/delirio-tropical.webp",
     gallery: fallbackGallery(0),
     credits: {
       creativeDirection: "Julia Paternostro",
@@ -394,8 +403,97 @@ export const projects: Project[] = [
       pt: "Realizada em fevereiro de 2025, com um mês de produção. Mesmo DNA visual do Delírio Tropical original, reajustado para a temporada de São João.",
     },
     tileImage: tile(4),
+    indexImage: "/Images/Index2/sao-joao.webp",
     gallery: fallbackGallery(3),
     bg: "#0f2b1e",
+    // Case-study layout — 30 re-exported images under
+    // public/Images/Delirio-Sao-Joao/ (01–30), grouped by native aspect:
+    //   - 01–03, 07–10, 19–20, 29–30 → hero landscapes (~1.71–1.83:1)
+    //   - 04–06                       → 3-col square row (1:1)
+    //   - 11–12, 27–28                → 2-col portraits (0.80:1, cols2 default)
+    //   - 13–18, 24–26                → 3-col portraits (0.80:1, ratio override)
+    //   - 21–23                       → 3-col portraits (0.72:1, cols3 default)
+    // Explicit ratios prevent object-cover cropping.
+    sections: [
+      { kind: "hero", src: asset("Delirio-Sao-Joao", "01"), ratio: "2739 / 1542" },
+      { kind: "hero", src: asset("Delirio-Sao-Joao", "02"), ratio: "2740 / 1599" },
+      { kind: "hero", src: asset("Delirio-Sao-Joao", "03"), ratio: "2740 / 1542" },
+      {
+        kind: "cols",
+        cols: 3,
+        ratio: "1 / 1",
+        images: [
+          asset("Delirio-Sao-Joao", "04"),
+          asset("Delirio-Sao-Joao", "05"),
+          asset("Delirio-Sao-Joao", "06"),
+        ],
+      },
+      { kind: "hero", src: asset("Delirio-Sao-Joao", "07"), ratio: "2740 / 1542" },
+      { kind: "hero", src: asset("Delirio-Sao-Joao", "08"), ratio: "2740 / 1542" },
+      { kind: "hero", src: asset("Delirio-Sao-Joao", "09"), ratio: "2740 / 1542" },
+      { kind: "hero", src: asset("Delirio-Sao-Joao", "10"), ratio: "2740 / 1542" },
+      {
+        // Portrait pair — 1342×1682 (~0.80:1) matches the cols2 default.
+        kind: "cols",
+        cols: 2,
+        images: [
+          asset("Delirio-Sao-Joao", "11"),
+          asset("Delirio-Sao-Joao", "12"),
+        ],
+      },
+      {
+        kind: "cols",
+        cols: 3,
+        ratio: "877 / 1097",
+        images: [
+          asset("Delirio-Sao-Joao", "13"),
+          asset("Delirio-Sao-Joao", "14"),
+          asset("Delirio-Sao-Joao", "15"),
+        ],
+      },
+      {
+        kind: "cols",
+        cols: 3,
+        ratio: "877 / 1095",
+        images: [
+          asset("Delirio-Sao-Joao", "16"),
+          asset("Delirio-Sao-Joao", "17"),
+          asset("Delirio-Sao-Joao", "18"),
+        ],
+      },
+      { kind: "hero", src: asset("Delirio-Sao-Joao", "19"), ratio: "2740 / 1542" },
+      { kind: "hero", src: asset("Delirio-Sao-Joao", "20"), ratio: "2740 / 1542" },
+      {
+        // Portrait row — 877×1217 (~0.72:1) matches the cols3 default.
+        kind: "cols",
+        cols: 3,
+        images: [
+          asset("Delirio-Sao-Joao", "21"),
+          asset("Delirio-Sao-Joao", "22"),
+          asset("Delirio-Sao-Joao", "23"),
+        ],
+      },
+      {
+        kind: "cols",
+        cols: 3,
+        ratio: "877 / 1095",
+        images: [
+          asset("Delirio-Sao-Joao", "24"),
+          asset("Delirio-Sao-Joao", "25"),
+          asset("Delirio-Sao-Joao", "26"),
+        ],
+      },
+      {
+        kind: "cols",
+        cols: 2,
+        images: [
+          asset("Delirio-Sao-Joao", "27"),
+          asset("Delirio-Sao-Joao", "28"),
+        ],
+      },
+      { kind: "hero", src: asset("Delirio-Sao-Joao", "29"), ratio: "2740 / 1500" },
+      { kind: "hero", src: asset("Delirio-Sao-Joao", "30"), ratio: "2740 / 1542" },
+    ],
   },
   // ---------------------------------------------------------------------------
   // 5. Prêmio Inoves — no Framer page yet; placeholder copy.
@@ -434,8 +532,78 @@ export const projects: Project[] = [
       pt: "Os personagens representam a transmissão do legado entre gerações e o incentivo ao novo. O movimento para frente simboliza trabalho árduo, evolução constante e um olhar voltado para o futuro. A estética mistura elementos analógicos e digitais — texturas de película, colagens, glitches visuais e cores intensas se unem para criar uma linguagem visual vibrante e emocional.",
     },
     tileImage: tile(6),
+    indexImage: "/Images/Index2/30-festival.webp",
     gallery: fallbackGallery(5),
     bg: "#ffd9d9",
+    // Case-study layout — 26 re-exported images under
+    // public/Images/30-FCV/ (01–26), grouped by native aspect ratio:
+    //   - 01–06, 16–18, 25–26 → hero (1.63:1 landscape)
+    //   - 07–15, 19–21        → 3-col square rows (1:1)
+    //   - 22–24               → 3-col portrait row (0.72:1, cols3 default)
+    // Explicit ratios prevent object-cover cropping.
+    sections: [
+      { kind: "hero", src: asset("30-FCV", "01"), ratio: "2740 / 1682" },
+      { kind: "hero", src: asset("30-FCV", "02"), ratio: "2740 / 1682" },
+      { kind: "hero", src: asset("30-FCV", "03"), ratio: "2740 / 1682" },
+      { kind: "hero", src: asset("30-FCV", "04"), ratio: "2740 / 1682" },
+      { kind: "hero", src: asset("30-FCV", "05"), ratio: "2740 / 1682" },
+      { kind: "hero", src: asset("30-FCV", "06"), ratio: "2740 / 1682" },
+      {
+        kind: "cols",
+        cols: 3,
+        ratio: "1 / 1",
+        images: [
+          asset("30-FCV", "07"),
+          asset("30-FCV", "08"),
+          asset("30-FCV", "09"),
+        ],
+      },
+      {
+        kind: "cols",
+        cols: 3,
+        ratio: "1 / 1",
+        images: [
+          asset("30-FCV", "10"),
+          asset("30-FCV", "11"),
+          asset("30-FCV", "12"),
+        ],
+      },
+      {
+        kind: "cols",
+        cols: 3,
+        ratio: "1 / 1",
+        images: [
+          asset("30-FCV", "13"),
+          asset("30-FCV", "14"),
+          asset("30-FCV", "15"),
+        ],
+      },
+      { kind: "hero", src: asset("30-FCV", "16"), ratio: "2740 / 1682" },
+      { kind: "hero", src: asset("30-FCV", "17"), ratio: "2740 / 1682" },
+      { kind: "hero", src: asset("30-FCV", "18"), ratio: "2740 / 1682" },
+      {
+        kind: "cols",
+        cols: 3,
+        ratio: "1 / 1",
+        images: [
+          asset("30-FCV", "19"),
+          asset("30-FCV", "20"),
+          asset("30-FCV", "21"),
+        ],
+      },
+      {
+        // Portrait row — 877×1217 (~0.72:1) matches the cols3 default.
+        kind: "cols",
+        cols: 3,
+        images: [
+          asset("30-FCV", "22"),
+          asset("30-FCV", "23"),
+          asset("30-FCV", "24"),
+        ],
+      },
+      { kind: "hero", src: asset("30-FCV", "25"), ratio: "2740 / 1682" },
+      { kind: "hero", src: asset("30-FCV", "26"), ratio: "2740 / 1682" },
+    ],
   },
   // ---------------------------------------------------------------------------
   // 7. Tenda Lab — Framer content.
@@ -456,6 +624,96 @@ export const projects: Project[] = [
     tileImage: tile(7),
     gallery: fallbackGallery(6),
     bg: "#f0eee8",
+    // Case-study layout — 32 re-exported images under
+    // public/Images/Tenda-Lab/ (01–32), grouped by native aspect ratio:
+    //   - 01–04, 09–11, 18–20 → hero landscapes (varying 1.63–1.88:1)
+    //   - 08                   → wide banner strip (3.63:1)
+    //   - 05–07, 12–17, 21–32  → 3-col square rows (1:1)
+    // Explicit ratios prevent object-cover cropping.
+    sections: [
+      { kind: "hero", src: asset("Tenda-Lab", "01"), ratio: "2740 / 1682" },
+      { kind: "hero", src: asset("Tenda-Lab", "02"), ratio: "2740 / 1682" },
+      { kind: "hero", src: asset("Tenda-Lab", "03"), ratio: "2740 / 1542" },
+      { kind: "hero", src: asset("Tenda-Lab", "04"), ratio: "2740 / 1542" },
+      {
+        kind: "cols",
+        cols: 3,
+        ratio: "1 / 1",
+        images: [
+          asset("Tenda-Lab", "05"),
+          asset("Tenda-Lab", "06"),
+          asset("Tenda-Lab", "07"),
+        ],
+      },
+      // Wide banner — 2740×755 (~3.63:1). Full-width strip.
+      { kind: "hero", src: asset("Tenda-Lab", "08"), ratio: "2740 / 755" },
+      { kind: "hero", src: asset("Tenda-Lab", "09"), ratio: "2740 / 1542" },
+      { kind: "hero", src: asset("Tenda-Lab", "10"), ratio: "2740 / 1542" },
+      { kind: "hero", src: asset("Tenda-Lab", "11"), ratio: "2740 / 1456" },
+      {
+        kind: "cols",
+        cols: 3,
+        ratio: "1 / 1",
+        images: [
+          asset("Tenda-Lab", "12"),
+          asset("Tenda-Lab", "13"),
+          asset("Tenda-Lab", "14"),
+        ],
+      },
+      {
+        kind: "cols",
+        cols: 3,
+        ratio: "1 / 1",
+        images: [
+          asset("Tenda-Lab", "15"),
+          asset("Tenda-Lab", "16"),
+          asset("Tenda-Lab", "17"),
+        ],
+      },
+      { kind: "hero", src: asset("Tenda-Lab", "18"), ratio: "2740 / 1542" },
+      { kind: "hero", src: asset("Tenda-Lab", "19"), ratio: "2740 / 1542" },
+      { kind: "hero", src: asset("Tenda-Lab", "20"), ratio: "2740 / 1473" },
+      {
+        kind: "cols",
+        cols: 3,
+        ratio: "1 / 1",
+        images: [
+          asset("Tenda-Lab", "21"),
+          asset("Tenda-Lab", "22"),
+          asset("Tenda-Lab", "23"),
+        ],
+      },
+      {
+        kind: "cols",
+        cols: 3,
+        ratio: "1 / 1",
+        images: [
+          asset("Tenda-Lab", "24"),
+          asset("Tenda-Lab", "25"),
+          asset("Tenda-Lab", "26"),
+        ],
+      },
+      {
+        kind: "cols",
+        cols: 3,
+        ratio: "1 / 1",
+        images: [
+          asset("Tenda-Lab", "27"),
+          asset("Tenda-Lab", "28"),
+          asset("Tenda-Lab", "29"),
+        ],
+      },
+      {
+        kind: "cols",
+        cols: 3,
+        ratio: "1 / 1",
+        images: [
+          asset("Tenda-Lab", "30"),
+          asset("Tenda-Lab", "31"),
+          asset("Tenda-Lab", "32"),
+        ],
+      },
+    ],
   },
   // ---------------------------------------------------------------------------
   // 8. Samba que eu quero ver — no Framer page yet; placeholder copy.
@@ -572,4 +830,46 @@ export const projects: Project[] = [
  */
 export function getProject(slug: string): Project | undefined {
   return projects.find((p) => p.slug === slug);
+}
+
+/**
+ * The first `count` gallery images of a project, flattened from its
+ * `sections` in reading order (a hero contributes its `src`; a cols row
+ * contributes its `images` left-to-right). Used by the Index 2 view to
+ * auto-cycle a small preview reel when an image-rich project is the active
+ * selection. Projects without `sections` return an empty array — the index
+ * just shows their single tile/index image instead of a reel.
+ */
+export function projectPreviewImages(
+  project: Pick<Project, "sections">,
+  count = 4
+): string[] {
+  if (!project.sections) return [];
+  const urls: string[] = [];
+  for (const s of project.sections) {
+    if (s.kind === "hero") urls.push(s.src);
+    else urls.push(...s.images);
+    if (urls.length >= count) break;
+  }
+  return urls.slice(0, count);
+}
+
+/**
+ * A handful of images for a project, in reading order — used by the
+ * Parallax index to scatter satellite images around the hero and to fill
+ * the "Show all" thumbnail strips. Prefers the real case-study `sections`
+ * imagery when a project has it; otherwise falls back to the `gallery`
+ * array (which every project has, even if placeholder), and finally to the
+ * single tile image. Always returns at least one URL.
+ */
+export function projectImageSet(
+  project: Pick<Project, "sections" | "gallery" | "tileImage">,
+  count = 6
+): string[] {
+  const fromSections = project.sections
+    ? projectPreviewImages(project, count)
+    : [];
+  const base = fromSections.length ? fromSections : project.gallery ?? [];
+  const set = base.length ? base : [project.tileImage];
+  return set.slice(0, count);
 }

@@ -272,7 +272,7 @@ function HeroReel({
             transition is just a CSS opacity change. */}
         {imageList.map((imgSrc, i) => (
           <Image
-            key={imgSrc}
+            key={projects[i]?.slug ?? i}
             src={imgSrc}
             alt=""
             fill

@@ -13,6 +13,9 @@ import InfiniteCanvas from "@/components/InfiniteCanvas";
 import ScrollGrid from "@/components/ScrollGrid";
 import OrbitBelt from "@/components/OrbitBelt";
 import MasonryGrid from "@/components/MasonryGrid";
+import IndexList from "@/components/IndexList";
+import EditorialIndex from "@/components/EditorialIndex";
+import ParallaxIndex from "@/components/ParallaxIndex";
 import ControlPanel from "@/components/ControlPanel";
 import HoverPill from "@/components/HoverPill";
 import { useConfig } from "@/lib/state";
@@ -86,6 +89,19 @@ export default function Home() {
           background={config.background}
           imageCrop={config.imageCrop}
           breathe={config.breathe}
+        />
+      )}
+      {config.mode === "index2" && (
+        <IndexList
+          imageStyle={config.imageStyle}
+          background={config.background}
+        />
+      )}
+      {config.mode === "editorial" && <EditorialIndex />}
+      {config.mode === "parallax" && (
+        <ParallaxIndex
+          imageStyle={config.imageStyle}
+          background={config.background}
         />
       )}
       <HoverPill accent={config.accent} />

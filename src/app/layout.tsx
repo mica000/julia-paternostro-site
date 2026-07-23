@@ -7,6 +7,7 @@ import BottomChrome from "@/components/BottomChrome";
 import NavFade from "@/components/NavFade";
 import CustomCursor from "@/components/CustomCursor";
 import { TransitionProvider } from "@/components/PageTransition";
+import SmoothScroll from "@/components/SmoothScroll";
 
 /*
   Root layout
@@ -44,13 +45,15 @@ export default function RootLayout({
           <LanguageProvider>
             <PageBackgroundProvider>
               <TransitionProvider>
-                {children}
-                <NavFade />
-                <TopNav />
-                <BottomChrome />
-                {/* Global — ring appears over any element opted-in via
-                    `.tile-hover` or `data-cursor-ring`. */}
-                <CustomCursor />
+                <SmoothScroll>
+                  {children}
+                  <NavFade />
+                  <TopNav />
+                  <BottomChrome />
+                  {/* Global — ring appears over any element opted-in via
+                      `.tile-hover` or `data-cursor-ring`. */}
+                  <CustomCursor />
+                </SmoothScroll>
               </TransitionProvider>
             </PageBackgroundProvider>
           </LanguageProvider>
