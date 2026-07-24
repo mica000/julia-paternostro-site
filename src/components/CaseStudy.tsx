@@ -35,6 +35,7 @@ import { pick, projectBg, type Project, type Section } from "@/lib/projects";
 import { useLang, usePageBg, type Lang } from "@/lib/state";
 import { useTransition } from "@/components/PageTransition";
 import CaseStudyFooter from "@/components/CaseStudyFooter";
+import LangToggle from "@/components/LangToggle";
 
 // Column labels — kept local to this component. Extend/edit here if the
 // designer changes the wording.
@@ -150,7 +151,7 @@ export default function CaseStudy({ project }: { project: Project }) {
         No max-width — content spans full viewport per user request.
         Padding scales down on mobile so tight viewports keep breathing room.
       */}
-      <div className="px-5 md:px-8 pt-[120px] md:pt-[225px]">
+      <div className="px-[44px] pt-[120px] md:pt-[225px]">
         {/* ────────────  header  ────────────
             Just the title now. Per Figma (node 12:286) the meta row
             (CATEGORIE / YEAR / CLIENT) and credits row have both moved
@@ -164,7 +165,7 @@ export default function CaseStudy({ project }: { project: Project }) {
             height at any size instead of a fixed 124px value that would
             over-space a 44px mobile title.
           */}
-          <h1 className="text-[44px] sm:text-[64px] md:text-[96px] xl:text-[124px] font-bold leading-[1.05] tracking-normal break-words">
+          <h1 className="text-[44px] sm:text-[64px] md:text-[96px] xl:text-[124px] font-bold leading-[1.05] tracking-[-0.02em] break-words">
             {project.title}
           </h1>
         </header>
@@ -229,7 +230,7 @@ export default function CaseStudy({ project }: { project: Project }) {
             The ~95px top padding matches Figma's empty space above the
             first row. Rows use equal 3-column split so labels align
             vertically between rows. Mobile stacks single-column. */}
-        <section className="pt-16 md:pt-[95px] flex flex-col gap-y-[40px] md:gap-y-[40px]">
+        <section className="pt-16 md:pt-[95px] flex flex-col gap-y-10">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 md:gap-x-10 gap-y-6">
             <MetaField label={LABEL.categorie[lang]}>
               {pick(project.category, lang)}
@@ -260,6 +261,17 @@ export default function CaseStudy({ project }: { project: Project }) {
           Its own vertical padding replaces the max-w block's old
           pb-[194px], keeping the last row clear of the fixed bottom nav. */}
       <CaseStudyFooter currentSlug={project.slug} />
+      </div>
+
+      {/* Language toggle — pinned bottom-right, mirroring the index footer
+          (Figma node 197:570). The case study nav matches the index (no
+          switch up there); the switch lives here instead. Desktop only — on
+          mobile it stays in the nav's MENU overlay. The wrapper is
+          click-through so it never blocks the gallery beneath it. Sits
+          OUTSIDE the rise-in wrapper so it's present immediately, like the
+          fixed nav. */}
+      <div className="pointer-events-none fixed bottom-[44px] right-[44px] z-30 hidden md:flex">
+        <LangToggle className="pointer-events-auto" />
       </div>
     </main>
   );

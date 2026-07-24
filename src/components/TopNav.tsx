@@ -176,11 +176,12 @@ export default function TopNav() {
             {t("nav.about")}
           </Link>
           {/* Language — an iOS-style switch (Figma node 268:1491): the knob
-              slides across and the EN/PT label rides the opposite side. On the
-              index it lives in the footer (bottom-right, Figma node 197:570)
-              instead, so it's suppressed here there; every other route has no
-              footer, so it stays in the nav. See LangToggle. */}
-          {!isHome && <LangToggle />}
+              slides across and the EN/PT label rides the opposite side. It
+              lives in the footer, not the nav, on the routes that have one:
+              the index (bottom-right, Figma node 197:570) and every case study
+              (in CaseStudyFooter). Secondary routes like /about have no footer,
+              so there it stays in the nav. See LangToggle. */}
+          {!isHome && !caseStudySlug && <LangToggle />}
         </div>
 
         {/* Center — positioned absolutely rather than as a flex/grid cell so
