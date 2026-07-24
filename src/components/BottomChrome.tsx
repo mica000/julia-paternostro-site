@@ -3,27 +3,28 @@
 /*
   BottomChrome — bottom-right language toggle
   -------------------------------------------
-  Historically also hosted the LIST / GRID / ORBIT / MASONRY view toggle,
-  but Masonry is the only public view now so only PT/EN remains. Hidden
-  entirely on case study pages, which have their own long-scroll layout.
+  Historically also hosted the LIST / GRID / ORBIT / MASONRY view toggle;
+  those views are gone, so only PT/EN remains and this only ever renders on
+  the secondary routes (/about, /services). The index and the case studies
+  both own their own bottom edge — see the bail-outs below.
 */
 
 import { usePathname } from "next/navigation";
-import { useConfig, useLang, usePageBg, type Lang } from "@/lib/state";
+import { useLang, usePageBg, type Lang } from "@/lib/state";
 
 export default function BottomChrome() {
   const pathname = usePathname();
   const { lang, setLang } = useLang();
   const { pageFg } = usePageBg();
-  const { config } = useConfig();
 
+  // Case studies have their own long-scroll layout and footer.
   const isCaseStudy = pathname?.startsWith("/work/") ?? false;
   if (isCaseStudy) return null;
 
-  // Parallax mode uses the Figma footer spec: "English · Portuguese",
-  // centered, 13px. Every other mode keeps the compact PT/EN toggle at the
-  // bottom-right.
-  const isParallax = pathname === "/" && config.mode === "parallax";
+  // The index renders its OWN footer (tagline · language · year) from inside
+  // ParallaxIndex, because that footer needs the active project — state that
+  // lives down there. Bail out so the two don't stack.
+  if (pathname === "/") return null;
 
   return (
     <nav
@@ -35,25 +36,15 @@ export default function BottomChrome() {
       }
     >
       <div
-        className={`flex items-center px-5 md:px-8 py-3 md:py-5 ${
-          isParallax ? "justify-center" : "justify-end"
-        }`}
+        className="flex items-center justify-end px-5 md:px-8 py-3 md:py-5"
         style={{ color: pageFg ?? "#ffffff" }}
       >
         <div className="pointer-events-auto">
           <SegmentedToggle
-            compact={isParallax}
-            options={
-              isParallax
-                ? [
-                    { value: "en", label: "English" },
-                    { value: "pt", label: "Portuguese" },
-                  ]
-                : [
-                    { value: "pt", label: "PT" },
-                    { value: "en", label: "EN" },
-                  ]
-            }
+            options={[
+              { value: "pt", label: "PT" },
+              { value: "en", label: "EN" },
+            ]}
             value={lang}
             onChange={(v) => setLang(v as Lang)}
           />
@@ -71,22 +62,13 @@ function SegmentedToggle<T extends string>({
   options,
   value,
   onChange,
-  compact = false,
 }: {
   options: { value: T; label: string }[];
   value: T;
   onChange: (v: T) => void;
-  /** Parallax footer variant — 13px, mixed-case, active semibold. */
-  compact?: boolean;
 }) {
   return (
-    <div
-      className={
-        compact
-          ? "flex items-center gap-3 text-[13px] leading-4 tracking-normal"
-          : "flex items-center gap-3 md:gap-6 text-[18px] md:text-[26px] font-bold uppercase leading-6 md:leading-8 tracking-normal"
-      }
-    >
+    <div className="flex items-center gap-3 md:gap-6 text-[18px] md:text-[26px] font-bold uppercase leading-6 md:leading-8 tracking-normal">
       {options.map(({ value: v, label }) => {
         const active = value === v;
         return (
@@ -96,13 +78,7 @@ function SegmentedToggle<T extends string>({
             onClick={() => onChange(v)}
             data-cursor-ring
             className={`cursor-pointer transition-opacity ${
-              compact
-                ? active
-                  ? "opacity-100 font-semibold"
-                  : "opacity-40 hover:opacity-70"
-                : active
-                  ? "opacity-100"
-                  : "opacity-50 hover:opacity-80"
+              active ? "opacity-100" : "opacity-50 hover:opacity-80"
             }`}
           >
             {label}

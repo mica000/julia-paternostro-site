@@ -80,6 +80,9 @@ export default function NavFade() {
   // Case studies read as long-scroll articles — the bottom fade scrim
   // there just competes with the footer border. Suppress it on /work/*.
   const isCaseStudy = pathname?.startsWith("/work/") ?? false;
+  // The index draws its own footer with a backdrop blur and no colour scrim —
+  // this bottom gradient sat on top of it as a visible dark band.
+  const isIndex = pathname === "/";
   // Prefer the page-scoped override (case study bg) when set; otherwise
   // follow the canvas config's own background. This is why navigating to
   // a cream case study no longer leaves a dark strip at the nav.
@@ -112,7 +115,7 @@ export default function NavFade() {
           WebkitMaskImage: TOP_MASK,
         }}
       />
-      {!isCaseStudy && (
+      {!isCaseStudy && !isIndex && (
         <div
           aria-hidden
           className="pointer-events-none fixed inset-x-0 bottom-0 z-30"

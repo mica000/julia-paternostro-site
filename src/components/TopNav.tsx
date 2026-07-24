@@ -1,34 +1,37 @@
 "use client";
 
 /*
-  TopNav — adaptive-contrast, three-region navigation
-  ---------------------------------------------------
-  Layout matches the Figma spec (node 12:235):
+  TopNav — one navigation, every route
+  ------------------------------------
+  Layout (Figma node 122:1145):
 
-    [ WORK ]                [ TORTO STUDIO ]                    [ ABOUT ]
+    [ Julia Paternostro  About  English ]   [ center ]   [ Copy email ]
 
-  Three items only. WORK links to /, TORTO STUDIO is the wordmark (also
-  links to /), ABOUT links to /about. The previous SERVICES link and
-  COPY EMAIL button have been dropped — /services still exists as a
-  route but is no longer surfaced.
+  Everything the reader can act on now sits in ONE group on the left — the
+  wordmark, About, and the language switch — with Copy email alone on the
+  right. The center belongs to the Show-all chip.
 
-  Desktop (md+): 3-column grid with WORK left, TORTO STUDIO centered,
-  ABOUT right.
+  This treatment used to be scoped to the parallax index while every other
+  route got a louder 18/26px uppercase bar with a difference blend. The index
+  is now the only index, so the parallax spec IS the site nav — case studies
+  included. That means one type scale (SF Regular 13/16, mixed case), one
+  padding (44 sides / 30 vertical desktop, 44 all round on mobile) and one
+  color rule, everywhere.
 
-  Mobile (<md): wordmark on the left, MENU button on the right. Tapping
-  MENU opens a full-screen overlay that stacks the same 3 items plus a
-  PT/EN toggle so language switching is reachable even when the bottom
-  chrome is scrolled out of view.
+  Only the CENTER cell changes by route:
+    - Index ("/")   → the "Show all" glass chip, toggling the detail list.
+    - Case study    → the PROJECT NAME, revealed only once the big page title
+                      has scrolled up behind the nav. Before that it's blank
+                      so the name doesn't duplicate the on-page title.
+    - Anything else → empty. The wordmark already returns the reader home.
 
-  - Uppercase, wide tracking, SF font (inherited from body).
-  - `mix-blend-mode: difference` keeps every element legible over any
-    canvas content — white text stays white on dark, flips to the
-    complement on colored / light backgrounds. When a case study sets an
-    explicit pageFg (site-wide dark palette), the blend is dropped in
-    favor of that color.
-  - Active link (matched via `usePathname`) shows a single-pixel
-    underline. TORTO STUDIO deliberately has no underline treatment —
-    it's the wordmark, not a section indicator.
+  Color: a case study pushes an explicit white into the page-bg context and
+  the nav uses it; everywhere else the nav paints Figma's #fbfbfb. The old
+  `mix-blend-mode: difference` trick is gone — it inverted the Show-all chip's
+  translucent fill into mush, and every surface the nav sits over is dark.
+
+  Mobile (<md): wordmark left, MENU right. MENU opens a full-screen overlay
+  with About / Contact plus a PT/EN toggle, so language stays reachable.
 */
 
 import Link from "next/link";
@@ -36,6 +39,15 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useConfig, useLang, usePageBg, type Lang } from "@/lib/state";
 import { getProject } from "@/lib/projects";
+import ShowAllIcon, { CHIP_CLASS } from "@/components/ShowAllIcon";
+
+// TODO: replace with the real studio email once available.
+const STUDIO_EMAIL = "hello@torto.studio";
+
+// Height of the mobile top bar (pt-[44px] + 16px line-height + pb-4), used to
+// park the menu overlay directly beneath it. Keep in sync with the index's
+// Show-all top padding, which clears the same bar.
+const MOBILE_BAR_H = 76;
 
 export default function TopNav() {
   const pathname = usePathname();
@@ -44,30 +56,7 @@ export default function TopNav() {
   const { config, setConfig } = useConfig();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  // Center-nav has three jobs depending on route:
-  //   - Home ("/")   → a MODE TOGGLE flipping between the masonry "grid"
-  //                    view and the split-screen "list" (index2) view.
-  //                    Label reads GRID in list mode, LIST otherwise.
-  //   - Case study   → the PROJECT NAME, revealed only once the big page
-  //                    title has scrolled up behind the nav (see the reveal
-  //                    effect below). Before that it's blank so the name
-  //                    doesn't duplicate the on-page title.
-  //   - Anything else → empty. The old "WORK" link was removed; the
-  //                    wordmark already returns the reader home.
   const isHome = pathname === "/";
-  const inListMode = config.mode === "index2";
-  const centerLabel = inListMode ? "GRID" : "LIST"; // only used on Home
-  const onCenterClick = (e: React.MouseEvent) => {
-    if (!isHome) return; // let the <Link> navigate normally
-    e.preventDefault();
-    setConfig({ ...config, mode: inListMode ? "masonry" : "index2" });
-  };
-
-  // Parallax mode uses the Figma "parallax frame" nav spec: 17px, mixed-case,
-  // with "Show all" as the center item (toggles the detail list) and an
-  // "About · Contact" pair on the right. Only affects Home in parallax mode;
-  // every other mode/route keeps the existing chrome untouched.
-  const isParallax = isHome && config.mode === "parallax";
   const showAllOpen = config.parallaxShowAll;
   const toggleShowAll = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -88,7 +77,7 @@ export default function TopNav() {
   // in its opening position. The check reads a single getBoundingClientRect
   // and setState no-ops when the boolean is unchanged, so running it on every
   // scroll event is cheap — same pattern as the gallery Frame reveal.
-  const REVEAL_AT = 72; // px — approx. fixed-nav height (py-5 + line-height)
+  const REVEAL_AT = 76; // px — fixed-nav height (30 + 16 + 30)
   const [nameRevealed, setNameRevealed] = useState(false);
   useEffect(() => {
     // Off a case study there's no title to track and the name span isn't
@@ -112,6 +101,25 @@ export default function TopNav() {
     };
   }, [caseStudySlug]);
 
+  // Copy email — writes the studio address to the clipboard and flashes
+  // "Copied" for 1.5s, so the click has a visible result without opening a
+  // mail client the reader may not use.
+  const [copied, setCopied] = useState(false);
+  useEffect(() => {
+    if (!copied) return;
+    const id = window.setTimeout(() => setCopied(false), 1500);
+    return () => window.clearTimeout(id);
+  }, [copied]);
+  const copyEmail = async () => {
+    try {
+      await navigator.clipboard.writeText(STUDIO_EMAIL);
+      setCopied(true);
+    } catch {
+      // Clipboard blocked (insecure origin, denied permission) — stay silent
+      // rather than flashing a success the reader didn't get.
+    }
+  };
+
   // Close the mobile menu on route change so the reader lands on the next
   // page instead of behind an overlay.
   useEffect(() => {
@@ -128,82 +136,63 @@ export default function TopNav() {
     };
   }, [menuOpen]);
 
-  // Shared type class for every nav item. In parallax mode it's the Figma
-  // 17px mixed-case treatment; otherwise the standard 18/26px uppercase.
-  const type = isParallax
-    ? "pointer-events-auto cursor-pointer text-[17px] font-bold leading-[22px] tracking-normal"
-    : "pointer-events-auto cursor-pointer text-[18px] md:text-[26px] font-bold uppercase leading-[22px] md:leading-8 tracking-normal";
-
-  // ABOUT underlines only on the /about route. The center toggle is a plain
-  // action (GRID/LIST) with no active state, and case studies get no active
-  // tab either — they're their own context, reached from the grid.
-  const aboutActive = pathname.startsWith("/about");
+  // ONE type scale for the whole bar — Figma "Body/Regular" (node 122:1145):
+  // SF Pro Regular 13 / 16, no tracking. The wordmark, About, the language
+  // switch, Copy email, the chip label and the case-study project name are all
+  // this size; nothing up here is emphasised over anything else.
+  const type =
+    "pointer-events-auto cursor-pointer text-[13px] font-normal leading-4 tracking-normal";
 
   return (
     <nav
       className={`pointer-events-none fixed inset-x-0 top-0 ${menuOpen ? "z-50" : "z-40"}`}
-      // Cash App-style adaptive contrast: `mix-blend-mode: difference`
-      // on white labels means the browser subtracts the layer below from
-      // white and paints the result — over a black bg you get white,
-      // over white you get black, and over any colored image you get
-      // the exact chromatic inverse. Labels stay legible over ANY
-      // content that scrolls beneath the fixed nav without us picking
-      // per-route colors.
-      //
-      // Exception: while the mobile menu overlay is open, drop the
-      // blend so labels sit as clean solid white on the overlay bg
-      // (the overlay itself is opaque, so blend would produce an
-      // unwanted inversion against it).
-      style={
-        menuOpen
-          ? { color: "#ffffff" }
-          : { color: "#ffffff", mixBlendMode: "difference" }
-      }
+      style={{
+        // Case studies push an explicit foreground into the page-bg context;
+        // the index and the secondary routes use Figma's near-white. The
+        // mobile overlay is opaque, so it always gets plain white.
+        color: menuOpen ? "#ffffff" : pageFg ?? "#fbfbfb",
+      }}
     >
-      {/* ─── Desktop layout (md+) — 3-column grid ───
-          Per Figma (node 12:236): wordmark LEFT, WORK CENTER,
-          ABOUT RIGHT. WORK sitting dead-center gives the nav its
-          balance point — it's the primary destination. */}
-      <div
-        className="hidden md:grid grid-cols-3 items-center px-8 py-5"
-      >
-        <Link
-          href="/"
-          className={`${type} justify-self-start`}
-          data-cursor-ring
-        >
-          Julia Paternostro
-        </Link>
+      {/* ─── Desktop layout (md+) ─── */}
+      <div className="relative hidden md:flex items-center justify-between px-[44px] py-[30px]">
+        {/* Left group — Figma's 56px gap. The wordmark, About and the language
+            switch travel together; nothing else lives on this side. */}
+        <div className="flex items-center gap-[56px]">
+          <Link href="/" className={type} data-cursor-ring>
+            Julia Paternostro
+          </Link>
+          <Link href="/about" className={type} data-cursor-ring>
+            {t("nav.about")}
+          </Link>
+          {/* Language reads as the CURRENT language and swaps on click — a
+              single word rather than a PT | EN pair, matching the design. */}
+          <button
+            type="button"
+            onClick={() => setLang((lang === "en" ? "pt" : "en") as Lang)}
+            className={type}
+            data-cursor-ring
+          >
+            {lang === "en" ? "English" : "Português"}
+          </button>
+        </div>
 
-        {/* Center cell — always rendered (even when empty) so the 3-col
-            grid keeps ABOUT pinned to the right. Contents depend on route:
-            Home = mode toggle, case study = scroll-revealed project name. */}
-        <div className="justify-self-center">
-          {isParallax ? (
-            // Parallax: center item toggles the detail list — labelled
-            // "Menu" when closed and "Close" when open. No underline; the
-            // label change alone signals the state.
+        {/* Center — positioned absolutely rather than as a flex/grid cell so
+            it is pinned to the middle of the VIEWPORT no matter how wide the
+            left and right groups grow. A 3-column grid only centers while
+            those two happen to balance; translated labels break that. */}
+        <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+          {isHome ? (
+            // Index: a chip (Figma node 197:312) that toggles the detail
+            // list — "Show all" when closed, "Close" when open.
             <button
               type="button"
               onClick={toggleShowAll}
-              className={type}
+              className={`pointer-events-auto ${CHIP_CLASS}`}
               data-cursor-ring
             >
-              {showAllOpen ? t("parallax.close") : t("parallax.menu")}
+              <ShowAllIcon open={showAllOpen} />
+              {showAllOpen ? t("parallax.close") : t("parallax.showAll")}
             </button>
-          ) : isHome ? (
-            // Center toggle — a plain ACTION, no active/underline state.
-            // The label always names the view you'll switch TO: in list
-            // (index2) view it reads GRID, in grid (masonry) view it reads
-            // LIST. So it never indicates "you are here" — it's a button.
-            <Link
-              href="/"
-              onClick={onCenterClick}
-              className={type}
-              data-cursor-ring
-            >
-              {centerLabel}
-            </Link>
           ) : project ? (
             <span
               className={type}
@@ -213,9 +202,7 @@ export default function TopNav() {
                 // Fade + slight rise-in, echoing the case study's own reveal
                 // language. Non-interactive — it's a label, not a link.
                 opacity: nameRevealed ? 1 : 0,
-                transform: nameRevealed
-                  ? "translateY(0)"
-                  : "translateY(6px)",
+                transform: nameRevealed ? "translateY(0)" : "translateY(6px)",
                 transition:
                   "opacity 500ms cubic-bezier(0.22, 1, 0.36, 1), transform 500ms cubic-bezier(0.22, 1, 0.36, 1)",
                 pointerEvents: "none",
@@ -226,31 +213,20 @@ export default function TopNav() {
           ) : null}
         </div>
 
-        <div className="justify-self-end flex items-center gap-4 md:gap-5">
-          <Link href="/about" className={type} data-cursor-ring>
-            <span
-              className={`inline-block pb-1 border-b-[3px] ${
-                aboutActive ? "border-current" : "border-transparent"
-              }`}
-            >
-              {t("nav.about")}
-            </span>
-          </Link>
-          {/* Contact — parallax spec only. No dedicated route yet, so it
-              points at /about (where contact info will live). */}
-          {isParallax && (
-            <Link href="/about" className={type} data-cursor-ring>
-              <span className="inline-block pb-1 border-b-[3px] border-transparent">
-                {t("nav.contact")}
-              </span>
-            </Link>
-          )}
-        </div>
+        {/* Right — Copy email, alone. No underline rule anywhere on the bar:
+            the Figma spec has no active state up here, and the wordmark is
+            the only "you are here" cue. */}
+        <button type="button" onClick={copyEmail} className={type} data-cursor-ring>
+          {copied ? t("nav.copied") : t("nav.copyEmail")}
+        </button>
       </div>
 
       {/* ─── Mobile top bar (<md) — wordmark + MENU button ─── */}
       <div
-        className="flex md:hidden items-center justify-between px-5 py-4"
+        // 44px on every side so the wordmark lines up with the project names
+        // in the timeline below and with the Show-all chip bottom-right —
+        // one frame for the whole mobile layout.
+        className="flex md:hidden items-center justify-between px-[44px] pt-[44px] pb-4"
       >
         <Link href="/" className={type} data-cursor-ring>
           Julia Paternostro
@@ -270,66 +246,35 @@ export default function TopNav() {
       {menuOpen && (
         <div
           id="mobile-menu"
-          className="pointer-events-auto md:hidden fixed inset-x-0 top-[54px] bottom-0 z-30 flex flex-col px-5 pt-6 pb-10"
+          className="pointer-events-auto md:hidden fixed inset-x-0 bottom-0 z-30 flex flex-col px-[44px] pt-6 pb-10"
           style={{
+            // Sits directly under the mobile bar.
+            top: MOBILE_BAR_H,
             backgroundColor: pageBg ?? "#000000",
             color: pageFg ?? "#ffffff",
           }}
         >
-          {/* Stacked links — only the 2 real destinations, since TORTO
-              STUDIO already sits in the top bar as the home affordance. */}
+          {/* About plus the email — the wordmark in the top bar is already the
+              home affordance, and Show-all lives in a floating chip at the
+              bottom-right (rendered by ParallaxIndex). */}
           <ul className="flex flex-col gap-4">
-            {/* Center toggle only appears on Home (GRID/LIST). On case
-                studies and other routes the old WORK link is gone — the
-                wordmark up top returns the reader home. */}
-            {isHome && (
-              <li>
-                {isParallax ? (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      toggleShowAll(e);
-                      setMenuOpen(false);
-                    }}
-                    className="block text-[32px] font-bold uppercase leading-[1.1] tracking-normal"
-                  >
-                    {showAllOpen ? t("parallax.close") : t("parallax.menu")}
-                  </button>
-                ) : (
-                  <Link
-                    href="/"
-                    onClick={onCenterClick}
-                    className="block text-[32px] font-bold uppercase leading-[1.1] tracking-normal"
-                  >
-                    {centerLabel}
-                  </Link>
-                )}
-              </li>
-            )}
             <li>
               <Link
                 href="/about"
                 className="block text-[32px] font-bold uppercase leading-[1.1] tracking-normal"
               >
-                <span
-                  className={`inline-block pb-1 border-b-[3px] ${
-                    aboutActive ? "border-current" : "border-transparent"
-                  }`}
-                >
-                  {t("nav.about")}
-                </span>
+                {t("nav.about")}
               </Link>
             </li>
-            {isParallax && (
-              <li>
-                <Link
-                  href="/about"
-                  className="block text-[32px] font-bold uppercase leading-[1.1] tracking-normal"
-                >
-                  {t("nav.contact")}
-                </Link>
-              </li>
-            )}
+            <li>
+              <button
+                type="button"
+                onClick={copyEmail}
+                className="block text-left text-[32px] font-bold uppercase leading-[1.1] tracking-normal"
+              >
+                {copied ? t("nav.copied") : t("nav.copyEmail")}
+              </button>
+            </li>
           </ul>
 
           {/* PT/EN pinned to the bottom of the overlay so language switch

@@ -24,21 +24,21 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { defaultConfig, type CanvasConfig } from "./config";
+import { defaultConfig, type SiteConfig } from "./config";
 
 // -----------------------------------------------------------------------------
-// Canvas config
+// Site config
 // -----------------------------------------------------------------------------
 
 type ConfigCtx = {
-  config: CanvasConfig;
-  setConfig: (next: CanvasConfig) => void;
+  config: SiteConfig;
+  setConfig: (next: SiteConfig) => void;
 };
 
 const ConfigContext = createContext<ConfigCtx | null>(null);
 
 export function ConfigProvider({ children }: { children: ReactNode }) {
-  const [config, setConfig] = useState<CanvasConfig>(defaultConfig);
+  const [config, setConfig] = useState<SiteConfig>(defaultConfig);
   const value = useMemo(() => ({ config, setConfig }), [config]);
   return <ConfigContext.Provider value={value}>{children}</ConfigContext.Provider>;
 }
@@ -62,24 +62,12 @@ export type Lang = "en" | "pt";
 */
 const dicts = {
   en: {
-    "nav.work": "WORK",
-    "nav.services": "SERVICES",
-    // Stored mixed-case; the non-parallax nav applies `uppercase` via CSS,
-    // while the parallax nav renders them as-is (Figma spec).
+    // Stored mixed-case — the nav renders them as-is (Figma spec).
     "nav.about": "About",
-    "nav.contact": "Contact",
-    "nav.copyEmail": "COPY EMAIL",
-    "nav.copied": "COPIED",
-    "view.list": "LIST",
-    "view.grid": "GRID",
-    "view.orbit": "ORBIT",
-    "view.masonry": "MASONRY",
-    "view.index2": "INDEX 2",
-    "view.parallax": "PARALLAX",
+    "nav.copyEmail": "Copy email",
+    "nav.copied": "Copied",
     "parallax.showAll": "Show all",
-    "parallax.menu": "Menu",
     "parallax.close": "Close",
-    "parallax.explore": "Explore this project",
     "parallax.goToProject": "Go to project",
     "about.title": "About",
     "about.body":
@@ -89,22 +77,11 @@ const dicts = {
       "Brand identity, editorial design, packaging, type design, and web design.",
   },
   pt: {
-    "nav.work": "TRABALHOS",
-    "nav.services": "SERVIÇOS",
     "nav.about": "Sobre",
-    "nav.contact": "Contato",
-    "nav.copyEmail": "COPIAR EMAIL",
-    "nav.copied": "COPIADO",
-    "view.list": "LISTA",
-    "view.grid": "GRELHA",
-    "view.orbit": "ÓRBITA",
-    "view.masonry": "MOSAICO",
-    "view.index2": "ÍNDICE 2",
-    "view.parallax": "PARALAXE",
+    "nav.copyEmail": "Copiar email",
+    "nav.copied": "Copiado",
     "parallax.showAll": "Ver todos",
-    "parallax.menu": "Menu",
     "parallax.close": "Fechar",
-    "parallax.explore": "Explorar projeto",
     "parallax.goToProject": "Ir para o projeto",
     "about.title": "Sobre",
     "about.body":

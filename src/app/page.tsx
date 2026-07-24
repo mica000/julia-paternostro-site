@@ -1,111 +1,26 @@
 "use client";
 
 /*
-  Home (Work)
-  -----------
-  Reads the shared canvas config from context (so BottomChrome's LIST/GRID
-  toggle drives the same state) and renders the appropriate canvas. Overlays
-  the Work-specific chrome: hover pill, custom cursor, control panel. TopNav
-  and BottomChrome live in the root layout, so they aren't mounted here.
+  Home (Index)
+  ------------
+  One index treatment: ParallaxIndex. This page used to switch between seven
+  experimental canvases driven by a control panel; that panel and the other
+  six modes are gone. All that's left is the stage plus the hover pill that
+  labels whatever the cursor is over. TopNav, BottomChrome and the custom
+  cursor live in the root layout, so they aren't mounted here.
 */
 
-import InfiniteCanvas from "@/components/InfiniteCanvas";
-import ScrollGrid from "@/components/ScrollGrid";
-import OrbitBelt from "@/components/OrbitBelt";
-import MasonryGrid from "@/components/MasonryGrid";
-import IndexList from "@/components/IndexList";
-import EditorialIndex from "@/components/EditorialIndex";
 import ParallaxIndex from "@/components/ParallaxIndex";
-import ControlPanel from "@/components/ControlPanel";
 import HoverPill from "@/components/HoverPill";
 import { useConfig } from "@/lib/state";
 
 export default function Home() {
-  const { config, setConfig } = useConfig();
+  const { config } = useConfig();
 
   return (
     <>
-      {config.mode === "grid" && (
-        <InfiniteCanvas
-          friction={config.friction}
-          glide={config.glide}
-          cell={config.cell}
-          cols={config.cols}
-          rows={config.rows}
-          gap={config.gap}
-          parallax={config.parallax}
-          radius={config.radius}
-          hoverScale={config.hoverScale}
-          hoverSpeed={config.hoverSpeed}
-          imageStyle={config.imageStyle}
-          background={config.background}
-          imageCrop={config.imageCrop}
-          tileRatio={config.tileRatio}
-        />
-      )}
-      {config.mode === "list" && (
-        <ScrollGrid
-          cols={config.cols}
-          rows={config.rows}
-          gap={config.gap}
-          radius={config.radius}
-          breathe={config.breathe}
-          maxWidth={config.maxWidth}
-          hoverScale={config.hoverScale}
-          hoverSpeed={config.hoverSpeed}
-          imageStyle={config.imageStyle}
-          background={config.background}
-          imageCrop={config.imageCrop}
-          friction={config.friction}
-          glide={config.glide}
-          tileRatio={config.tileRatio}
-        />
-      )}
-      {config.mode === "orbit" && (
-        <OrbitBelt
-          orbitRadius={config.orbitRadius}
-          orbitTilt={config.orbitTilt}
-          orbitArc={config.orbitArc}
-          orbitCardSize={config.orbitCardSize}
-          orbitPerspective={config.orbitPerspective}
-          imageStyle={config.imageStyle}
-          background={config.background}
-          hoverScale={config.hoverScale}
-          hoverSpeed={config.hoverSpeed}
-          imageCrop={config.imageCrop}
-          friction={config.friction}
-          glide={config.glide}
-        />
-      )}
-      {config.mode === "masonry" && (
-        <MasonryGrid
-          masonryCols={config.masonryCols}
-          masonryGap={config.masonryGap}
-          masonryMaxWidth={config.masonryMaxWidth}
-          radius={config.radius}
-          hoverScale={config.hoverScale}
-          hoverSpeed={config.hoverSpeed}
-          imageStyle={config.imageStyle}
-          background={config.background}
-          imageCrop={config.imageCrop}
-          breathe={config.breathe}
-        />
-      )}
-      {config.mode === "index2" && (
-        <IndexList
-          imageStyle={config.imageStyle}
-          background={config.background}
-        />
-      )}
-      {config.mode === "editorial" && <EditorialIndex />}
-      {config.mode === "parallax" && (
-        <ParallaxIndex
-          imageStyle={config.imageStyle}
-          background={config.background}
-        />
-      )}
-      <HoverPill accent={config.accent} />
-      <ControlPanel config={config} onChange={setConfig} />
+      <ParallaxIndex background={config.background} />
+      <HoverPill />
     </>
   );
 }

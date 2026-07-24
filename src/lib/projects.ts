@@ -36,6 +36,10 @@ export type Project = {
   category: Localized;
   year: string;
   brief: Localized;
+  /** One-line summary shown in the parallax footer (Figma node 197:582).
+      Short enough to sit in a 160px column. When absent, the footer falls
+      back to a clipped opening of `brief`. */
+  tagline?: Localized;
   context: Localized;
   /** Square thumbnail used on the Work tile grid. */
   tileImage: string;
@@ -231,6 +235,10 @@ export const projects: Project[] = [
     title: "Delírio Tropical",
     category: { en: "Branding", pt: "Branding" },
     year: "2024",
+    tagline: {
+      en: "Funky brand for a music festival in Espírito Santo.",
+      pt: "Marca funky para um festival de música no Espírito Santo.",
+    },
     brief: {
       en: "The festival's visual identity channels this spirit into a bold and immersive experience. Wild, surreal, and electrifying, it blends vibrant colors, halftone textures, and striking graphic compositions. The result is a retro-futuristic aesthetic infused with adventure and dreamlike intensity — where music and visuals collide in hypnotic harmony.",
       pt: "A identidade visual do festival canaliza esse espírito para uma experiência ousada e imersiva. Selvagem, surreal e eletrizante, mistura cores vibrantes, texturas em retícula e composições gráficas marcantes. O resultado é uma estética retro-futurista impregnada de aventura e intensidade onírica — onde música e visuais colidem em harmonia hipnótica.",

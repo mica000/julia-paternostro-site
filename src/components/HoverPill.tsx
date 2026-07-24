@@ -15,6 +15,7 @@
 */
 
 import { useEffect, useRef, useState } from "react";
+import { GLASS } from "@/lib/glass";
 
 // `line2` is the pill's second line: a surface can supply `data-subtitle`
 // (e.g. the parallax stage → "Go to project"); tiles that only carry
@@ -27,7 +28,7 @@ type Meta = { title: string; line2: string } | null;
 const OFFSET_X = 24;
 const OFFSET_Y = 4;
 
-export default function HoverPill({ accent }: { accent: string }) {
+export default function HoverPill() {
   const pillRef = useRef<HTMLDivElement>(null);
   const [meta, setMeta] = useState<Meta>(null);
   // Target = live cursor position; current = eased-toward-target position.
@@ -94,7 +95,12 @@ export default function HoverPill({ accent }: { accent: string }) {
         meta ? "opacity-100" : "opacity-0"
       }`}
     >
-      <div className="flex items-center gap-2 rounded-full border border-white/20 bg-black/30 py-2 pl-4 pr-5 shadow-2xl backdrop-blur-2xl">
+      {/* Same material as the "Show all" chip (see lib/glass) — these two are
+          the only floating pills on the site and they sit next to each other
+          on the index, so they share one surface. Only the metrics differ:
+          this one carries two lines of text, so it's a touch tighter
+          vertically and wider horizontally. */}
+      <div className={`flex items-center gap-2 py-2 pl-4 pr-5 ${GLASS}`}>
         <div className="grid h-4 w-4 flex-shrink-0 place-items-center">
           {/* Arrow icon on its own — no accent-filled circle. Stroke is
               white to sit cleanly on the dark pill bg. */}
@@ -115,10 +121,15 @@ export default function HoverPill({ accent }: { accent: string }) {
           </svg>
         </div>
         <div className="whitespace-nowrap">
-          <div className="text-base font-medium leading-tight text-white">
+          {/* Both lines sit at the index's one type size — Body/Regular 13/16.
+              The title used to be 17/22 bold, which made the pill shout next
+              to a nav where nothing is larger than 13px. The hierarchy now
+              comes from WEIGHT and opacity instead of size: bold at full
+              white for the title, regular at 70% for the line under it. */}
+          <div className="text-[13px] font-bold leading-4 text-white">
             {meta?.title ?? "—"}
           </div>
-          <div className="text-sm leading-tight text-white/60">
+          <div className="text-[13px] font-normal leading-4 text-white/70">
             {meta?.line2 ?? ""}
           </div>
         </div>
