@@ -47,14 +47,16 @@ import {
   useRef,
   useState,
 } from "react";
+import { projects, projectBg, projectImageSet, pick } from "@/lib/projects";
 import {
-  projects,
-  projectBg,
-  projectImageSet,
-  pick,
-} from "@/lib/projects";
+  compositionFor,
+  heroSrc,
+  satelliteImagesFor,
+  COMPOSITIONS_MOBILE,
+} from "@/lib/compositions";
 import { useTransition } from "@/components/PageTransition";
 import ShowAllIcon, { CHIP_CLASS } from "@/components/ShowAllIcon";
+import LangToggle from "@/components/LangToggle";
 import { useLang, useConfig } from "@/lib/state";
 
 type Props = {
@@ -154,166 +156,11 @@ const HERO_BOX =
   "aspect-[913/560] max-w-[1140px] w-[86vw] md:w-[min(58vw,88vh)] lg:w-[min(62vw,91vh)]";
 
 /*
-  Satellite compositions — the hover-revealed complementary images.
-
-  Positions are transcribed EXACTLY from the Figma "Parallax index + hover on
-  project" frame (node 120:385, 1920×1314): each slot is the box's center
-  offset from the frame center, as fractions of frame width (dx) and height
-  (dy), plus its width as a fraction of frame width (w) and its exact aspect
-  ratio. No rotation — boxes sit straight, as drawn.
-
-  `depth` scales the cursor drift only (bigger = drifts more px); it never
-  moves a box away from its Figma anchor by more than SAT_DRIFT.
-
-  Per-project compositions:
-    Every project can have its own arrangement. `COMPOSITIONS` maps a project
-    slug to its slot list; anything not listed uses the default Figma
-    composition below. To add one, draw the frame in Figma and transcribe the
-    boxes the same way (center offset + width fraction + ratio).
+  Satellite compositions, asset maps and geometry helpers now live in
+  @/lib/compositions (data in compositions.json) so the live stage and the
+  ?edit=1 editor share one source. `SatSlot`, `compositionFor`,
+  `SATELLITE_IMAGES` and `heroSrc` are imported at the top of this file.
 */
-type SatSlot = { dx: number; dy: number; w: number; ratio: string; depth: number };
-
-// Node 120:385 "Images" layer, hero (Rectangle 1) excluded:
-//   Rectangle 57  → 276.93,157.73  292.19×405.53   (portrait, top-left)
-//   Frame 11      → 534,86         614.64×377.20   (landscape, top-center)
-//   Rectangle 56  → 1453.87,213.21 212.25×294.58   (small portrait, top-right)
-//   Rectangle 55  → 168.84,839.93  480×294.58      (landscape, bottom-left)
-//   Frame 10      → 823,658        913.22×560.45   (large landscape,
-//                    BOTTOM-RIGHT, overlapping the hero's corner — in the
-//                    Figma tree it's nested inside the "05" wrapper at
-//                    (712,453) + (111,205), i.e. absolute 823,658)
-const FIGMA_COMPOSITION: SatSlot[] = [
-  { dx: -0.2797, dy: -0.2256, w: 0.1522, ratio: "292 / 406", depth: 0.5 },
-  { dx: -0.0618, dy: -0.291, w: 0.3201, ratio: "615 / 377", depth: 0.7 },
-  { dx: 0.3125, dy: -0.2256, w: 0.1105, ratio: "212 / 295", depth: 0.6 },
-  { dx: -0.287, dy: 0.2513, w: 0.25, ratio: "480 / 295", depth: 0.4 },
-  { dx: 0.1665, dy: 0.214, w: 0.4756, ratio: "913 / 560", depth: 0.55 },
-];
-
-/*
-  Finalized per-project compositions — Figma section 252:324 "Index and
-  satelites images", one 1920×1314 frame per project. Same transcription rule
-  as above: dx/dy are the box center's offset from the FRAME center as
-  fractions of 1920 / 1314, `w` is its width over 1920, `ratio` its exact
-  aspect. The big 1200×736 rectangle in each frame is the HERO, so it is not
-  a slot here — it goes in HERO_IMAGES below.
-
-  `depth` is not in Figma; it only scales cursor drift. It's assigned by
-  reading distance, near-to-far: small far-flung cutouts get more (0.7–0.8),
-  the large slabs that sit close to the hero get less (0.4–0.5), so the mesh
-  separates into planes instead of sliding as one sheet.
-
-  Slot order = image order in SATELLITE_IMAGES. Keep the two in step.
-*/
-const COMPOSITIONS: Record<string, SatSlot[]> = {
-  // Frame 245:291
-  "delirio-tropical": [
-    // The palm keeps Figma's x. It was pulled inward with the toucan, but it
-    // never had the toucan's problem: the project list occupies y 346–554 on
-    // a 1440×900 screen and the palm sits above it, so its left position was
-    // costing nothing. Only its y is nudged (0.02 toward centre) from the
-    // Figma anchor of −0.212.
-    { dx: -0.3744, dy: -0.19, w: 0.0992, ratio: "190 / 241", depth: 0.8 }, // palm tree, textured
-    { dx: -0.24, dy: -0.3038, w: 0.191, ratio: "367 / 390", depth: 0.7 }, // fruit slices
-    { dx: -0.1061, dy: -0.2877, w: 0.2229, ratio: "428 / 267", depth: 0.6 }, // drink illustration
-    { dx: 0.1643, dy: -0.3523, w: 0.0882, ratio: "169 / 127", depth: 0.8 }, // crab
-    { dx: 0.3076, dy: -0.2619, w: 0.1522, ratio: "292 / 406", depth: 0.65 }, // palm tree character
-    // The toucan IS pulled in — 0.08 of the frame width right of its Figma
-    // anchor (−0.304), plus 0.02 up. At Figma's x its left edge landed at
-    // ~109px on a 1440 screen and it ran straight through the project list,
-    // which ends at 208px.
-    { dx: -0.224, dy: 0.14, w: 0.24, ratio: "461 / 598", depth: 0.5 }, // toucan drummer
-    { dx: 0.2261, dy: 0.1894, w: 0.4415, ratio: "848 / 520", depth: 0.4 }, // logo
-  ],
-  // Frame 245:293
-  "delirio-sao-joao": [
-    { dx: -0.2881, dy: -0.2255, w: 0.3159, ratio: "607 / 401", depth: 0.5 }, // banner + tambourine
-    { dx: -0.1291, dy: -0.3262, w: 0.1096, ratio: "211 / 207", depth: 0.8 }, // zabumba drum
-    { dx: 0.1792, dy: -0.2476, w: 0.1046, ratio: "201 / 455", depth: 0.75 }, // casaca character
-    { dx: 0.3194, dy: -0.2255, w: 0.1874, ratio: "360 / 514", depth: 0.6 }, // lineup poster
-    { dx: -0.2847, dy: 0.2181, w: 0.2015, ratio: "387 / 352", depth: 0.55 }, // church
-    { dx: -0.0988, dy: 0.3252, w: 0.2059, ratio: "395 / 233", depth: 0.7 }, // colorful boats
-    { dx: 0.2698, dy: 0.2284, w: 0.3012, ratio: "578 / 325", depth: 0.45 }, // icon grid
-  ],
-  // Frame 245:292 ("30-FCV")
-  fcv: [
-    { dx: -0.3125, dy: -0.1259, w: 0.2196, ratio: "422 / 259", depth: 0.6 }, // FCV logo
-    { dx: -0.121, dy: -0.2802, w: 0.3442, ratio: "661 / 406", depth: 0.45 }, // poster wall mockup
-    { dx: 0.1931, dy: -0.334, w: 0.1953, ratio: "375 / 116", depth: 0.8 }, // eye, red
-    { dx: 0.2902, dy: -0.2393, w: 0.1622, ratio: "1 / 1", depth: 0.65 }, // woman portrait collage
-    { dx: -0.327, dy: 0.0733, w: 0.1326, ratio: "255 / 183", depth: 0.8 }, // eye with lashes
-    { dx: -0.22, dy: 0.2772, w: 0.368, ratio: "707 / 353", depth: 0.4 }, // t-shirt + pattern
-    { dx: 0.0752, dy: 0.4203, w: 0.166, ratio: "319 / 243", depth: 0.75 }, // eye, pink
-    { dx: 0.2757, dy: 0.1671, w: 0.2351, ratio: "451 / 560", depth: 0.5 }, // cameraman collage
-  ],
-};
-
-function compositionFor(slug: string): SatSlot[] {
-  return COMPOSITIONS[slug] ?? FIGMA_COMPOSITION;
-}
-
-/*
-  The finalized compositions get their own asset folder, one per Figma frame.
-  Filenames are the Figma LAYER names, slugified — so re-exporting a layer
-  lands on the same path and nothing here has to change. All WebP: the PNGs
-  the studio exported at 2× were 36 MB across the three projects and are
-  4.6 MB as WebP, with alpha preserved (most of these are cutouts).
-*/
-const sat = (folder: string, name: string) =>
-  `/Images/img-satelites/${folder}/${name}.webp`;
-
-/*
-  Main hero image per project (the big center image) — the 1200×736 rectangle
-  each Figma frame is built around. Falls back to the project's indexImage /
-  first gallery image when it isn't listed here.
-*/
-const HERO_IMAGES: Record<string, string> = {
-  "delirio-tropical": sat("delirio-tropical", "tropical-lettering-background"),
-  "delirio-sao-joao": sat("sao-joao", "delirio-tropical-sao-joao-banner"),
-  fcv: sat("30-fcv", "festival-collage-eyes-and-stars"),
-};
-
-/*
-  Satellite images in SLOT ORDER — index i here fills slot i of the same
-  project's entry in COMPOSITIONS, so the two lists must stay the same length
-  and the same order. A project with no entry falls back to its gallery.
-*/
-const SATELLITE_IMAGES: Record<string, string[]> = {
-  "delirio-tropical": [
-    "palm-tree-textured",
-    "fruit-slices",
-    "delirio-tropical-drink-illustration",
-    "crab-character",
-    "palm-tree-character",
-    "toucan-drummer",
-    "delirio-tropical-logo",
-  ].map((n) => sat("delirio-tropical", n)),
-  "delirio-sao-joao": [
-    "banner-and-tambourine",
-    "zabumba-drum",
-    "casaca-instrument-character",
-    "festival-lineup-poster",
-    "church-with-palm-trees",
-    "colorful-boats",
-    "sao-joao-festival-icon-grid",
-  ].map((n) => sat("sao-joao", n)),
-  fcv: [
-    "festival-de-cinema-de-vitoria-logo",
-    "festival-poster-wall-mockup",
-    "eye-illustration-red",
-    "woman-portrait-collage",
-    "eye-illustration-with-lashes",
-    "t-shirt-and-pattern-mockup",
-    "eye-illustration-pink",
-    "cameraman-collage-character",
-  ].map((n) => sat("30-fcv", n)),
-};
-
-/** Big hero image for a project — prefer its landscape index image, then the
-    first case-study image, then the square tile. */
-function heroSrc(p: (typeof projects)[number]): string {
-  return HERO_IMAGES[p.slug] ?? p.indexImage ?? projectImageSet(p, 1)[0];
-}
 
 /*
   Deterministic 0..1 "jitter" from a string seed (FNV-1a hash). Used to give
@@ -463,27 +310,24 @@ export default function ParallaxIndex({ background }: Props) {
   useEffect(() => {
     revealRef.current = reveal;
   }, [reveal]);
-  // This project's satellite arrangement (Figma default or per-slug override)
-  // and the images that fill its slots, in reading order.
-  const composition = useMemo(() => compositionFor(active.slug), [active.slug]);
+  // This project's satellite arrangement (desktop Figma override, or the
+  // portrait override on mobile) and the images that fill its slots.
+  const composition = useMemo(
+    () => compositionFor(active.slug, isMobile),
+    [active.slug, isMobile]
+  );
+  // Whether the ACTIVE arrangement is a mobile (viewport-relative) one — the
+  // rAF loop reads this to map dx/dy against the raw viewport instead of the
+  // contained landscape frame. A ref so the frame-by-frame loop needn't re-run.
+  const mobileCompActive = isMobile && !!COMPOSITIONS_MOBILE[active.slug];
+  const mobileCompRef = useRef(mobileCompActive);
+  useEffect(() => {
+    mobileCompRef.current = mobileCompActive;
+  }, [mobileCompActive]);
   const activeSatellites = useMemo(
-    () =>
-      SATELLITE_IMAGES[active.slug] ??
-      projectImageSet(active, composition.length),
+    () => satelliteImagesFor(active, composition.length),
     [active, composition]
   );
-
-  // Footer one-liner. Projects that haven't been given a `tagline` yet fall
-  // back to the opening of their brief, clipped so it still fits the 160px
-  // column instead of spilling down the page.
-  const tagline = useMemo(() => {
-    if (active.tagline) return pick(active.tagline, lang);
-    const text = pick(active.brief, lang).replace(/\s+/g, " ").trim();
-    const firstSentence = text.split(/(?<=\.)\s/)[0] ?? text;
-    return firstSentence.length > 72
-      ? `${firstSentence.slice(0, 71).trimEnd()}…`
-      : firstSentence;
-  }, [active, lang]);
 
   // Arm the soft reveal. Runs when hovering starts OR when the active project
   // changes while hovering: we first drop the satellites to hidden, then a
@@ -571,8 +415,19 @@ export default function ParallaxIndex({ background }: Props) {
       const now = performance.now();
       // During the post-step cooldown, swallow input (and its accumulation)
       // so a wheel notch's momentum tail can't roll into a second step.
+      //
+      // The lock is REFRESHED on every swallowed event, not just held for a
+      // fixed window. A trackpad flick keeps emitting inertial events for well
+      // over a second, far longer than the cooldown; without the refresh the
+      // lock expired mid-inertia and the very next tail event — over a 26px
+      // threshold — fired a second step, so one flick advanced two projects.
+      // Pushing the lock forward on each event means it only releases once the
+      // wheel has actually gone quiet for a full cooldown, i.e. the inertia has
+      // died. A deliberate second scroll comes after a real pause, so it still
+      // registers.
       if (now < wheelLockUntil.current) {
         wheelAccum.current = 0;
+        wheelLockUntil.current = now + WHEEL_COOLDOWN_MS;
         return;
       }
       wheelAccum.current += e.deltaY;
@@ -756,11 +611,17 @@ export default function ParallaxIndex({ background }: Props) {
         // sized off vw by the same logic.
         let frameW = vw;
         let frameH = vh;
-        if (isMobileRef.current) {
+        if (isMobileRef.current && !mobileCompRef.current) {
+          // Mobile, but this project has NO portrait override: fall back to
+          // fitting the landscape frame inside the viewport (contain), which
+          // keeps the desktop arrangement's proportions.
           const scale = Math.min(vw / 1920, vh / 1314);
           frameW = 1920 * scale;
           frameH = 1314 * scale;
         }
+        // Mobile WITH a portrait override, and desktop, both fall through to
+        // frameW = vw / frameH = vh: the override's dx/dy are already viewport
+        // fractions, and on desktop the viewport ~IS the 1920×1314 frame.
         for (let k = 0; k < sats.children.length; k++) {
           const s = sats.children[k] as HTMLElement;
           const dx = Number(s.dataset.dx) || 0;
@@ -974,7 +835,8 @@ export default function ParallaxIndex({ background }: Props) {
 
           {/* ─── Active project category (right) — vertically centred on the
                 page, right-aligned in a 160px column (Figma node 197:591).
-                The year moved to the footer. ─── */}
+                The year lives in the Show-all list; the footer tagline that
+                used to sit at the bottom was removed. ─── */}
           <div
             // Desktop only — on mobile it collided with the artwork and the
             // category isn't worth the crowding.
@@ -1142,25 +1004,14 @@ export default function ParallaxIndex({ background }: Props) {
             </div>
           </div>
 
-          {/* ─── Footer (Figma node 197:570) — the active project's one-line
-                tagline, and nothing else. It used to also carry the language
-                toggle and the year; the language switch moved up into the nav
-                and the year now rides beside the category in the Show-all
-                list, which left one centred 200px column down here.
-                Padding: 44 sides, 30 top, 44 bottom. ─── */}
-          <div
-            // Hidden on mobile: the bottom of the screen belongs to the
-            // timeline there, and the tagline would crowd it.
-            // No backdrop blur and no colour scrim — the blur smeared any
-            // artwork that reached the bottom of the stage into a soft
-            // rectangular haze, which read as a bug rather than as glass.
-            // (Figma's node does carry a 6.5px blur; it's deliberately off.)
-            className="pointer-events-none absolute inset-x-0 bottom-0 z-10 hidden items-end justify-center px-[44px] pb-[44px] pt-[30px] md:flex"
-            style={{ color: "#fbfbfb" }}
-          >
-            <p className="text-[13px] font-normal leading-4" style={{ width: 200 }}>
-              {tagline}
-            </p>
+          {/* ─── Footer (Figma node 197:570) — now just the language toggle,
+                pinned bottom-right where the design places it (the tagline that
+                used to share this row was removed). Desktop only: the bottom of
+                a phone belongs to the timeline, and the mobile menu already
+                carries the switch. The wrapper is click-through; only the
+                toggle takes pointer events. Padding: 44 right, 44 bottom. ─── */}
+          <div className="pointer-events-none absolute bottom-[44px] right-[44px] z-10 hidden md:flex">
+            <LangToggle className="pointer-events-auto" />
           </div>
         </>
       }

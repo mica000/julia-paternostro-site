@@ -37,9 +37,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useConfig, useLang, usePageBg, type Lang } from "@/lib/state";
+import { useConfig, useLang, usePageBg } from "@/lib/state";
 import { getProject } from "@/lib/projects";
 import ShowAllIcon, { CHIP_CLASS } from "@/components/ShowAllIcon";
+import LangToggle from "@/components/LangToggle";
 
 // TODO: replace with the real studio email once available.
 const STUDIO_EMAIL = "hello@torto.studio";
@@ -51,7 +52,7 @@ const MOBILE_BAR_H = 76;
 
 export default function TopNav() {
   const pathname = usePathname();
-  const { t, lang, setLang } = useLang();
+  const { t } = useLang();
   const { pageFg, pageBg } = usePageBg();
   const { config, setConfig } = useConfig();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -174,16 +175,12 @@ export default function TopNav() {
           <Link href="/about" className={type} data-cursor-ring>
             {t("nav.about")}
           </Link>
-          {/* Language reads as the CURRENT language and swaps on click — a
-              single word rather than a PT | EN pair, matching the design. */}
-          <button
-            type="button"
-            onClick={() => setLang((lang === "en" ? "pt" : "en") as Lang)}
-            className={type}
-            data-cursor-ring
-          >
-            {lang === "en" ? "English" : "Português"}
-          </button>
+          {/* Language — an iOS-style switch (Figma node 268:1491): the knob
+              slides across and the EN/PT label rides the opposite side. On the
+              index it lives in the footer (bottom-right, Figma node 197:570)
+              instead, so it's suppressed here there; every other route has no
+              footer, so it stays in the nav. See LangToggle. */}
+          {!isHome && <LangToggle />}
         </div>
 
         {/* Center — positioned absolutely rather than as a flex/grid cell so
@@ -287,19 +284,11 @@ export default function TopNav() {
             </li>
           </ul>
 
-          {/* PT/EN pinned to the bottom of the overlay so language switch
-              stays reachable even when the fixed BottomChrome is off. */}
-          <div className="mt-auto flex items-center gap-6 text-[18px] font-bold uppercase tracking-normal">
-            {(["pt", "en"] as const).map((l) => (
-              <button
-                key={l}
-                type="button"
-                onClick={() => setLang(l as Lang)}
-                className={lang === l ? "opacity-100" : "opacity-50"}
-              >
-                {l.toUpperCase()}
-              </button>
-            ))}
+          {/* Language switch pinned to the bottom of the overlay so it stays
+              reachable even when the fixed BottomChrome is off. Same iOS-style
+              toggle as the desktop nav. */}
+          <div className="mt-auto">
+            <LangToggle />
           </div>
         </div>
       )}
