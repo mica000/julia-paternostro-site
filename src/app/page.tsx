@@ -10,12 +10,26 @@
   cursor live in the root layout, so they aren't mounted here.
 */
 
+import { useEffect, useState } from "react";
 import ParallaxIndex from "@/components/ParallaxIndex";
 import HoverPill from "@/components/HoverPill";
+import CompositionEditor from "@/components/CompositionEditor";
 import { useConfig } from "@/lib/state";
 
 export default function Home() {
   const { config } = useConfig();
+
+  // Dev-only composition editor: open "/?edit=1". The flag is read in an effect
+  // (after mount) rather than during render, so the server HTML and the first
+  // client render always match the normal stage — no hydration mismatch. When
+  // editing, the editor swaps in on the next client tick; the stage's brief
+  // mount is harmless. Normal visitors never take the editor path.
+  const [edit, setEdit] = useState(false);
+  useEffect(() => {
+    setEdit(new URLSearchParams(window.location.search).get("edit") === "1");
+  }, []);
+
+  if (edit) return <CompositionEditor />;
 
   return (
     <>
