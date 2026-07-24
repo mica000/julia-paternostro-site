@@ -2,104 +2,118 @@
   "desktop": {
     "delirio-tropical": [
       {
-        "dx": -0.3744,
-        "dy": -0.19,
+        "dx": -0.3319,
+        "dy": -0.1936,
         "w": 0.0992,
         "ratio": "190 / 241",
-        "depth": 0.8
+        "depth": 0.8,
+        "src": "/Images/img-satelites/delirio-tropical/palm-tree-textured.webp"
       },
       {
-        "dx": -0.24,
-        "dy": -0.3038,
+        "dx": 0.2034,
+        "dy": -0.131,
         "w": 0.191,
         "ratio": "367 / 390",
-        "depth": 0.7
+        "depth": 0.7,
+        "src": "/Images/img-satelites/delirio-tropical/fruit-slices.webp"
       },
       {
-        "dx": -0.1061,
-        "dy": -0.2877,
-        "w": 0.2229,
+        "dx": -0.22,
+        "dy": 0.2064,
+        "w": 0.3051,
         "ratio": "428 / 267",
-        "depth": 0.6
+        "depth": 0.6,
+        "src": "/Images/img-satelites/delirio-tropical/delirio-tropical-drink-illustration.webp"
       },
       {
-        "dx": 0.1643,
+        "dx": 0.1201,
         "dy": -0.3523,
         "w": 0.0882,
         "ratio": "169 / 127",
-        "depth": 0.8
+        "depth": 0.8,
+        "src": "/Images/img-satelites/delirio-tropical/crab-character.webp"
       },
       {
-        "dx": 0.3076,
-        "dy": -0.2619,
+        "dx": 0.3221,
+        "dy": -0.282,
         "w": 0.1522,
         "ratio": "520 / 728",
-        "depth": 0.65
+        "depth": 0.65,
+        "src": "/Images/img-satelites/delirio-tropical/08.gif"
       },
       {
-        "dx": -0.224,
-        "dy": 0.14,
+        "dx": -0.2208,
+        "dy": -0.2043,
         "w": 0.24,
         "ratio": "461 / 598",
-        "depth": 0.5
+        "depth": 0.5,
+        "src": "/Images/img-satelites/delirio-tropical/toucan-drummer.webp"
       },
       {
-        "dx": 0.2261,
-        "dy": 0.1894,
+        "dx": 0.1752,
+        "dy": 0.2083,
         "w": 0.4415,
         "ratio": "848 / 520",
-        "depth": 0.4
+        "depth": 0.4,
+        "src": "/Images/img-satelites/delirio-tropical/delirio-tropical-logo.webp"
       }
     ],
     "delirio-sao-joao": [
       {
-        "dx": -0.2881,
-        "dy": -0.2255,
+        "dx": -0.2458,
+        "dy": -0.1966,
         "w": 0.3159,
         "ratio": "607 / 401",
-        "depth": 0.5
+        "depth": 0.5,
+        "src": "/Images/img-satelites/sao-joao/banner-and-tambourine.webp"
       },
       {
         "dx": -0.1291,
         "dy": -0.3262,
         "w": 0.1096,
         "ratio": "211 / 207",
-        "depth": 0.8
+        "depth": 0.8,
+        "src": "/Images/img-satelites/sao-joao/zabumba-drum.webp"
       },
       {
-        "dx": 0.1792,
-        "dy": -0.2476,
+        "dx": 0.2,
+        "dy": -0.2747,
         "w": 0.1046,
         "ratio": "201 / 455",
-        "depth": 0.75
+        "depth": 0.75,
+        "src": "/Images/img-satelites/sao-joao/casaca-instrument-character.webp"
       },
       {
-        "dx": 0.3194,
-        "dy": -0.2255,
+        "dx": 0.3267,
+        "dy": -0.2011,
         "w": 0.1874,
         "ratio": "360 / 514",
-        "depth": 0.6
+        "depth": 0.6,
+        "src": "/Images/img-satelites/sao-joao/festival-lineup-poster.webp"
       },
       {
-        "dx": -0.2847,
-        "dy": 0.2181,
+        "dx": -0.2435,
+        "dy": 0.208,
         "w": 0.2015,
         "ratio": "387 / 352",
-        "depth": 0.55
+        "depth": 0.55,
+        "src": "/Images/img-satelites/sao-joao/church-with-palm-trees.webp"
       },
       {
-        "dx": -0.0988,
-        "dy": 0.3252,
+        "dx": -0.0673,
+        "dy": 0.3139,
         "w": 0.2059,
         "ratio": "395 / 233",
-        "depth": 0.7
+        "depth": 0.7,
+        "src": "/Images/img-satelites/sao-joao/colorful-boats.webp"
       },
       {
-        "dx": 0.2698,
-        "dy": 0.2284,
+        "dx": 0.2541,
+        "dy": 0.2504,
         "w": 0.3012,
         "ratio": "578 / 325",
-        "depth": 0.45
+        "depth": 0.45,
+        "src": "/Images/img-satelites/sao-joao/sao-joao-festival-icon-grid.webp"
       }
     ],
     "fcv": [
@@ -108,109 +122,208 @@
         "dy": -0.1259,
         "w": 0.2196,
         "ratio": "422 / 259",
-        "depth": 0.6
+        "depth": 0.6,
+        "src": "/Images/img-satelites/30-fcv/festival-de-cinema-de-vitoria-logo.webp"
       },
       {
         "dx": -0.121,
         "dy": -0.2802,
         "w": 0.3442,
         "ratio": "661 / 406",
-        "depth": 0.45
+        "depth": 0.45,
+        "src": "/Images/img-satelites/30-fcv/festival-poster-wall-mockup.webp"
       },
       {
         "dx": 0.1931,
         "dy": -0.334,
         "w": 0.1953,
         "ratio": "375 / 116",
-        "depth": 0.8
+        "depth": 0.8,
+        "src": "/Images/img-satelites/30-fcv/eye-illustration-red.webp"
       },
       {
         "dx": 0.2902,
         "dy": -0.2393,
         "w": 0.1622,
         "ratio": "1 / 1",
-        "depth": 0.65
+        "depth": 0.65,
+        "src": "/Images/img-satelites/30-fcv/woman-portrait-collage.webp"
       },
       {
         "dx": -0.327,
         "dy": 0.0733,
         "w": 0.1326,
         "ratio": "255 / 183",
-        "depth": 0.8
+        "depth": 0.8,
+        "src": "/Images/img-satelites/30-fcv/eye-illustration-with-lashes.webp"
       },
       {
         "dx": -0.22,
         "dy": 0.2772,
         "w": 0.368,
         "ratio": "707 / 353",
-        "depth": 0.4
+        "depth": 0.4,
+        "src": "/Images/img-satelites/30-fcv/t-shirt-and-pattern-mockup.webp"
       },
       {
         "dx": 0.0752,
         "dy": 0.4203,
         "w": 0.166,
         "ratio": "319 / 243",
-        "depth": 0.75
+        "depth": 0.75,
+        "src": "/Images/img-satelites/30-fcv/eye-illustration-pink.webp"
       },
       {
         "dx": 0.2757,
         "dy": 0.1671,
         "w": 0.2351,
         "ratio": "451 / 560",
-        "depth": 0.5
+        "depth": 0.5,
+        "src": "/Images/img-satelites/30-fcv/cameraman-collage-character.webp"
       }
     ]
   },
   "mobile": {
     "delirio-tropical": [
       {
-        "dx": -0.33,
-        "dy": -0.14,
+        "dx": -0.4686,
+        "dy": -0.1277,
         "w": 0.2,
         "ratio": "190 / 241",
-        "depth": 0.8
+        "depth": 0.8,
+        "src": "/Images/img-satelites/delirio-tropical/palm-tree-textured.webp"
       },
       {
-        "dx": -0.06,
-        "dy": -0.24,
-        "w": 0.28,
-        "ratio": "367 / 390",
-        "depth": 0.7
-      },
-      {
-        "dx": -0.24,
-        "dy": 0.03,
-        "w": 0.34,
-        "ratio": "428 / 267",
-        "depth": 0.6
-      },
-      {
-        "dx": 0.29,
-        "dy": -0.22,
+        "dx": 0.1475,
+        "dy": -0.2582,
         "w": 0.15,
         "ratio": "169 / 127",
-        "depth": 0.8
+        "depth": 0.8,
+        "src": "/Images/img-satelites/delirio-tropical/crab-character.webp"
       },
       {
-        "dx": 0.3,
-        "dy": 0.22,
-        "w": 0.3,
+        "dx": 0.3976,
+        "dy": -0.1035,
+        "w": 0.2397,
         "ratio": "520 / 728",
-        "depth": 0.75
+        "depth": 0.75,
+        "src": "/Images/img-satelites/delirio-tropical/08.gif"
       },
       {
-        "dx": -0.3,
-        "dy": 0.2,
-        "w": 0.3,
+        "dx": -0.3054,
+        "dy": 0.0698,
+        "w": 0.3854,
         "ratio": "461 / 598",
-        "depth": 0.5
+        "depth": 0.5,
+        "src": "/Images/img-satelites/delirio-tropical/toucan-drummer.webp"
       },
       {
-        "dx": 0.06,
-        "dy": 0.33,
+        "dx": 0.2426,
+        "dy": 0.2073,
         "w": 0.46,
         "ratio": "848 / 520",
-        "depth": 0.4
+        "depth": 0.4,
+        "src": "/Images/img-satelites/delirio-tropical/delirio-tropical-logo.webp"
+      }
+    ],
+    "delirio-sao-joao": [
+      {
+        "dx": -0.3563,
+        "dy": -0.1263,
+        "w": 0.415,
+        "ratio": "607 / 401",
+        "depth": 0.5,
+        "src": "/Images/img-satelites/sao-joao/banner-and-tambourine.webp"
+      },
+      {
+        "dx": 0.1792,
+        "dy": -0.1648,
+        "w": 0.1538,
+        "ratio": "201 / 455",
+        "depth": 0.75,
+        "src": "/Images/img-satelites/sao-joao/casaca-instrument-character.webp"
+      },
+      {
+        "dx": 0.3868,
+        "dy": -0.0654,
+        "w": 0.1874,
+        "ratio": "360 / 514",
+        "depth": 0.6,
+        "src": "/Images/img-satelites/sao-joao/festival-lineup-poster.webp"
+      },
+      {
+        "dx": -0.226,
+        "dy": 0.1474,
+        "w": 0.2335,
+        "ratio": "387 / 352",
+        "depth": 0.55,
+        "src": "/Images/img-satelites/sao-joao/church-with-palm-trees.webp"
+      },
+      {
+        "dx": 0.2863,
+        "dy": 0.24,
+        "w": 0.3379,
+        "ratio": "395 / 233",
+        "depth": 0.7,
+        "src": "/Images/img-satelites/sao-joao/colorful-boats.webp"
+      }
+    ],
+    "fcv": [
+      {
+        "dx": -0.3703,
+        "dy": -0.1621,
+        "w": 0.3483,
+        "ratio": "422 / 259",
+        "depth": 0.6,
+        "src": "/Images/img-satelites/30-fcv/festival-de-cinema-de-vitoria-logo.webp"
+      },
+      {
+        "dx": 0.1015,
+        "dy": 0.1441,
+        "w": 0.4789,
+        "ratio": "661 / 406",
+        "depth": 0.45,
+        "src": "/Images/img-satelites/30-fcv/festival-poster-wall-mockup.webp"
+      },
+      {
+        "dx": 0.07,
+        "dy": 0.3022,
+        "w": 0.1953,
+        "ratio": "375 / 116",
+        "depth": 0.8,
+        "src": "/Images/img-satelites/30-fcv/eye-illustration-red.webp"
+      },
+      {
+        "dx": 0.3812,
+        "dy": -0.1391,
+        "w": 0.1872,
+        "ratio": "1 / 1",
+        "depth": 0.65,
+        "src": "/Images/img-satelites/30-fcv/woman-portrait-collage.webp"
+      },
+      {
+        "dx": -0.427,
+        "dy": -0.0243,
+        "w": 0.1326,
+        "ratio": "255 / 183",
+        "depth": 0.8,
+        "src": "/Images/img-satelites/30-fcv/eye-illustration-with-lashes.webp"
+      },
+      {
+        "dx": 0.1377,
+        "dy": -0.2148,
+        "w": 0.216,
+        "ratio": "319 / 243",
+        "depth": 0.75,
+        "src": "/Images/img-satelites/30-fcv/eye-illustration-pink.webp"
+      },
+      {
+        "dx": 0.334,
+        "dy": 0.252,
+        "w": 0.2351,
+        "ratio": "451 / 560",
+        "depth": 0.5,
+        "src": "/Images/img-satelites/30-fcv/cameraman-collage-character.webp"
       }
     ]
   }

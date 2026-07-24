@@ -22,6 +22,7 @@ type SatSlot = {
   w: number;
   ratio: string;
   depth: number;
+  src?: string;
 };
 
 const FILE = join(process.cwd(), "src", "lib", "compositions.json");
@@ -38,6 +39,7 @@ function isSlot(v: unknown): v is SatSlot {
     typeof s.w === "number" &&
     typeof s.ratio === "string" &&
     typeof s.depth === "number" &&
+    (s.src === undefined || typeof s.src === "string") &&
     [s.dx, s.dy, s.w, s.depth].every(Number.isFinite)
   );
 }
@@ -101,6 +103,7 @@ export async function POST(request: Request) {
     w: r4(s.w),
     ratio: s.ratio,
     depth: r4(s.depth),
+    ...(s.src ? { src: s.src } : {}),
   }));
 
   try {

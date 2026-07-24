@@ -22,6 +22,11 @@ export type SatSlot = {
   w: number;
   ratio: string;
   depth: number;
+  // The tile's image. Baked into the slot (not a parallel list) so a tile is
+  // one self-contained unit the editor can move, resize, OR delete. Optional
+  // only for the FIGMA_COMPOSITION fallback, which has none — those projects
+  // fall back to their gallery images.
+  src?: string;
 };
 
 // Default arrangement for any project without its own entry (Figma node
@@ -59,48 +64,19 @@ export const HERO_IMAGES: Record<string, string> = {
   fcv: sat("30-fcv", "festival-collage-eyes-and-stars"),
 };
 
-// Satellite images in SLOT ORDER — index i fills slot i of the same project's
-// composition entry, so the two lists stay the same length and order.
-export const SATELLITE_IMAGES: Record<string, string[]> = {
-  "delirio-tropical": [
-    sat("delirio-tropical", "palm-tree-textured"),
-    sat("delirio-tropical", "fruit-slices"),
-    sat("delirio-tropical", "delirio-tropical-drink-illustration"),
-    sat("delirio-tropical", "crab-character"),
-    // Animated eye tile (GIF plays via the <Image>'s unoptimized branch).
-    "/Images/img-satelites/delirio-tropical/08.gif",
-    sat("delirio-tropical", "toucan-drummer"),
-    sat("delirio-tropical", "delirio-tropical-logo"),
-  ],
-  "delirio-sao-joao": [
-    "banner-and-tambourine",
-    "zabumba-drum",
-    "casaca-instrument-character",
-    "festival-lineup-poster",
-    "church-with-palm-trees",
-    "colorful-boats",
-    "sao-joao-festival-icon-grid",
-  ].map((n) => sat("sao-joao", n)),
-  fcv: [
-    "festival-de-cinema-de-vitoria-logo",
-    "festival-poster-wall-mockup",
-    "eye-illustration-red",
-    "woman-portrait-collage",
-    "eye-illustration-with-lashes",
-    "t-shirt-and-pattern-mockup",
-    "eye-illustration-pink",
-    "cameraman-collage-character",
-  ].map((n) => sat("30-fcv", n)),
-};
-
 /** Big hero image for a project — its hero override, else index/gallery. */
 export function heroSrc(p: Project): string {
   return HERO_IMAGES[p.slug] ?? p.indexImage ?? projectImageSet(p, 1)[0];
 }
 
-/** Images that fill a project's slots, in reading order (gallery fallback). */
-export function satelliteImagesFor(p: Project, count: number): string[] {
-  return SATELLITE_IMAGES[p.slug] ?? projectImageSet(p, count);
+/*
+  Image for each slot, in order. Each slot now carries its own `src`, so the
+  image comes straight off the slot. For a project on the FIGMA_COMPOSITION
+  fallback (no per-slot src), fill from its gallery in reading order.
+*/
+export function satelliteImagesFor(p: Project, slots: SatSlot[]): string[] {
+  const gallery = projectImageSet(p, slots.length);
+  return slots.map((s, i) => s.src ?? gallery[i]);
 }
 
 export { projects };

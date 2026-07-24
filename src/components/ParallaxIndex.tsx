@@ -325,7 +325,7 @@ export default function ParallaxIndex({ background }: Props) {
     mobileCompRef.current = mobileCompActive;
   }, [mobileCompActive]);
   const activeSatellites = useMemo(
-    () => satelliteImagesFor(active, composition.length),
+    () => satelliteImagesFor(active, composition),
     [active, composition]
   );
 

@@ -127,7 +127,15 @@ function EditorCanvas({
   });
   const dragRef = useRef<DragState | null>(null);
 
-  const images = satelliteImagesFor(project, slots.length || 8);
+  const images = satelliteImagesFor(project, slots);
+
+  // Delete the tile at index i (and clear the selection if it was that one).
+  const deleteSlot = (i: number) =>
+    setSlots((prev) => {
+      const next = prev.filter((_, k) => k !== i);
+      setSelected((sel) => (sel === i ? null : sel != null && sel > i ? sel - 1 : sel));
+      return next;
+    });
 
   // Placement math — the SAME origin/frame the live stage uses.
   const cx = vp.w / 2;
@@ -177,6 +185,19 @@ function EditorCanvas({
       window.removeEventListener("pointerup", onUp);
     };
   }, [vp.w, vp.h, K]);
+
+  // Delete/Backspace removes the selected tile (ignored while typing in a
+  // field, though the editor has none today).
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Delete" && e.key !== "Backspace") return;
+      if (selected == null) return;
+      e.preventDefault();
+      deleteSlot(selected);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [selected]);
 
   const startMove = (i: number) => (e: React.PointerEvent) => {
     e.preventDefault();
@@ -289,6 +310,19 @@ function EditorCanvas({
               <span className="pointer-events-none absolute -left-1 -top-1 rounded-full bg-black/70 px-1.5 text-[11px] leading-4 text-white">
                 {i}
               </span>
+              {/* delete (top-right) — pointerdown stops the move drag from arming */}
+              <button
+                type="button"
+                aria-label={`Delete tile ${i}`}
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  deleteSlot(i);
+                }}
+                className="absolute -right-2 -top-2 flex h-5 w-5 cursor-pointer items-center justify-center rounded-full border border-white/60 bg-red-500 text-[12px] leading-none text-white hover:bg-red-400"
+              >
+                ×
+              </button>
               {/* resize handle (bottom-right) */}
               <span
                 onPointerDown={startResize(i)}
