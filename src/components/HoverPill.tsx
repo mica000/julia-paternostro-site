@@ -15,7 +15,7 @@
 */
 
 import { useEffect, useRef, useState } from "react";
-import { GLASS } from "@/lib/glass";
+import { PILL } from "@/lib/glass";
 
 // `line2` is the pill's second line: a surface can supply `data-subtitle`
 // (e.g. the parallax stage → "Go to project"); tiles that only carry
@@ -30,7 +30,18 @@ const OFFSET_Y = 4;
 
 export default function HoverPill() {
   const pillRef = useRef<HTMLDivElement>(null);
-  const [meta, setMeta] = useState<Meta>(null);
+  /*
+    Two pieces of state, deliberately: WHAT the pill says and WHETHER it's
+    showing. They were one before, and that's where the stray "—" came from —
+    leaving a tile cleared the content, so the pill had nothing to render
+    while it faded and fell back to a placeholder dash.
+
+    `shown` is never cleared: it keeps the last title through the fade-out, so
+    the pill leaves saying what it said. `visible` is the only thing that
+    changes when the cursor lands on nothing.
+  */
+  const [shown, setShown] = useState<Meta>(null);
+  const [visible, setVisible] = useState(false);
   // Target = live cursor position; current = eased-toward-target position.
   // Keeping both in refs so the rAF loop reads/writes them without
   // triggering re-renders per frame.
@@ -55,14 +66,17 @@ export default function HoverPill() {
       if (tile && tile.dataset.title) {
         const title = tile.dataset.title;
         const line2 = tile.dataset.subtitle ?? tile.dataset.category ?? "";
-        // Only re-render when the shown content actually changes.
-        setMeta((prev) =>
+        // Only re-render when the shown content actually changes — moving
+        // within one tile is free.
+        setShown((prev) =>
           prev?.title === title && prev?.line2 === line2
             ? prev
             : { title, line2 }
         );
+        setVisible(true);
       } else {
-        setMeta((prev) => (prev ? null : prev));
+        // Hide, but keep the text so it survives the fade-out.
+        setVisible(false);
       }
     };
 
@@ -91,48 +105,84 @@ export default function HoverPill() {
     <div
       ref={pillRef}
       data-native-cursor
-      className={`pointer-events-none fixed left-0 top-0 z-40 transition-opacity duration-200 will-change-transform ${
-        meta ? "opacity-100" : "opacity-0"
-      }`}
+      className="pointer-events-none fixed left-0 top-0 z-40 will-change-transform"
     >
-      {/* Same material as the "Show all" chip (see lib/glass) — these two are
-          the only floating pills on the site and they sit next to each other
-          on the index, so they share one surface. Only the metrics differ:
-          this one carries two lines of text, so it's a touch tighter
-          vertically and wider horizontally. */}
-      <div className={`flex items-center gap-2 py-2 pl-4 pr-5 ${GLASS}`}>
-        <div className="grid h-4 w-4 flex-shrink-0 place-items-center">
-          {/* Arrow icon on its own — no accent-filled circle. Stroke is
-              white to sit cleanly on the dark pill bg. */}
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 14 14"
-            fill="none"
-            aria-hidden
-          >
-            <path
-              d="M3.5 10.5L10.5 3.5M10.5 3.5H4.5M10.5 3.5V9.5"
-              stroke="white"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+      {/*
+        Show / hide — blur, opacity and a small scale together, the way the
+        interfaces.dev controls do it. Opacity alone made the pill a flat card
+        switching on and off; blurring it out as it goes reads as the label
+        RESOLVING rather than appearing, which suits something that tracks the
+        cursor. 200ms ease-out: quick enough to keep up with the pointer,
+        slow enough to see.
+
+        This wrapper owns the whole visual state, so the outer element is left
+        to positioning alone and the two can't fight over opacity.
+
+        `filter: none` at rest, NOT `blur(0px)` — and the difference is not
+        cosmetic. Any filter other than `none` makes an element a "backdrop
+        root", which cuts its descendants off from the page behind them: the
+        glass keeps its backdrop-filter but has nothing left to sample, so the
+        pill goes flat. A zero blur is still a filter. `none` interpolates
+        with `blur(4px)` exactly the same way, so the animation is unchanged
+        and the backdrop survives at rest, which is when it's seen.
+      */}
+      <div
+        style={{
+          opacity: visible ? 1 : 0,
+          filter: visible ? "none" : "blur(4px)",
+          transform: visible ? "scale(1)" : "scale(0.96)",
+          transformOrigin: "left center",
+          transition:
+            "opacity 200ms ease-out, filter 200ms ease-out, transform 200ms ease-out",
+        }}
+      >
+      {/* The same PILL as the "Show all" chip — material AND metrics. These
+          two are the only floating pills on the site and they overlap on the
+          index, where any difference in height reads as a mistake. Only the
+          weight differs: this one is bold, the chip regular. */}
+      <div
+        className={`font-bold ${PILL}`}
+        // White, always. The label used to measure the artwork underneath and
+        // flip to black ink over anything pale; the glass now carries its own
+        // black tint, so the backdrop is dark enough for white type wherever
+        // the pill travels and the flip only made the label inconsistent.
+        style={{ color: "#ffffff" }}
+      >
+        {/* 16px, the same box as the chip's glyph — it used to be a 14px icon
+            centred in a 16px cell, which left it visibly smaller than the
+            mark next to it. Takes the pill's ink via currentColor. */}
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 14 14"
+          fill="none"
+          aria-hidden
+          className="shrink-0"
+        >
+          <path
+            d="M3.5 10.5L10.5 3.5M10.5 3.5H4.5M10.5 3.5V9.5"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+        {/* ONE line — the action, not the name. The project's title was the
+            headline here and the action sat under it in a dimmer 65%; but the
+            title is already on screen (the timeline names it, the list names
+            it), so the pill was repeating what the reader could see and
+            whispering the one thing they couldn't. Now it says only the
+            action, in the weight the title used to have: 13/16 bold.
+
+            Falls back to the title for any surface that supplies no subtitle,
+            so a tile carrying just `data-title` still says something.
+
+            Reads from `shown`, which outlives `visible` — see the note on the
+            state above. */}
+        <div className="whitespace-nowrap text-[13px] font-bold leading-4">
+          {shown?.line2 || shown?.title || ""}
         </div>
-        <div className="whitespace-nowrap">
-          {/* Both lines sit at the index's one type size — Body/Regular 13/16.
-              The title used to be 17/22 bold, which made the pill shout next
-              to a nav where nothing is larger than 13px. The hierarchy now
-              comes from WEIGHT and opacity instead of size: bold at full
-              white for the title, regular at 70% for the line under it. */}
-          <div className="text-[13px] font-bold leading-4 text-white">
-            {meta?.title ?? "—"}
-          </div>
-          <div className="text-[13px] font-normal leading-4 text-white/70">
-            {meta?.line2 ?? ""}
-          </div>
-        </div>
+      </div>
       </div>
     </div>
   );

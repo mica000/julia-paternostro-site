@@ -80,7 +80,35 @@ nav a, nav button {
   cursor: pointer;
 }
 
-/* Respect users who prefer less motion — accessibility baseline */
+/*
+  Show-all sheet — slides down from the top edge and back up.
+
+  Only `transform` moves: it skips layout and paint and runs on the GPU.
+  Animating `top` or `height` would cover the same distance and re-lay-out the
+  whole list on every frame. Durations and easing are set inline by the
+  component, which owns the in/out asymmetry.
+*/
+@keyframes sheet-in {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes sheet-out {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-100%);
+  }
+}
+
+/* Respect users who prefer less motion — accessibility baseline.
+   This covers the sheet too: the keyframes still run, but in 0.01ms, so the
+   list simply appears rather than travelling. */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

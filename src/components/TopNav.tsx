@@ -63,6 +63,16 @@ export default function TopNav() {
     setConfig({ ...config, parallaxShowAll: !config.parallaxShowAll });
   };
 
+  // The wordmark is the way back to the index — and "the index" means the
+  // stage, not the detail list. On another route the href does the work; ON
+  // the index a click navigates nowhere, so without this the open Show-all
+  // list (or the mobile menu) would just sit there and the wordmark would
+  // look broken. Closing both here covers every route with one handler.
+  const goHome = () => {
+    setMenuOpen(false);
+    if (config.parallaxShowAll) setConfig({ ...config, parallaxShowAll: false });
+  };
+
   // Which case study are we on? Slug is the 2nd path segment of /work/[slug].
   const caseStudySlug = pathname.startsWith("/work/")
     ? pathname.split("/")[2] ?? null
@@ -158,7 +168,7 @@ export default function TopNav() {
         {/* Left group — Figma's 56px gap. The wordmark, About and the language
             switch travel together; nothing else lives on this side. */}
         <div className="flex items-center gap-[56px]">
-          <Link href="/" className={type} data-cursor-ring>
+          <Link href="/" className={type} onClick={goHome} data-cursor-ring>
             Julia Paternostro
           </Link>
           <Link href="/about" className={type} data-cursor-ring>
@@ -228,7 +238,7 @@ export default function TopNav() {
         // one frame for the whole mobile layout.
         className="flex md:hidden items-center justify-between px-[44px] pt-[44px] pb-4"
       >
-        <Link href="/" className={type} data-cursor-ring>
+        <Link href="/" className={type} onClick={goHome} data-cursor-ring>
           Julia Paternostro
         </Link>
         <button

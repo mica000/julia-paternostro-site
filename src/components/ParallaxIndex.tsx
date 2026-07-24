@@ -90,7 +90,7 @@ const SAT_DRIFT = 70;
 const MOUSE_SMOOTH = 0.1;
 // Grace period after a project change: the hero stands ALONE for this long
 // before hovering can reveal the complementary images.
-const REVEAL_GRACE_MS = 1000;
+const REVEAL_GRACE_MS = 500;
 // Timeline (left project list, Figma node 197:592). Row pitch = 16px
 // line-height + 8px gap; the window shows ~9 rows and clips the rest.
 const TIMELINE_PITCH = 24;
@@ -101,13 +101,38 @@ const TIMELINE_HEIGHT = 208;
 const TIMELINE_MARKER_W = 30;
 // How many images each "Show all" row puts in its scrollable strip. Capped
 // rather than unbounded: Delírio alone has 28 case-study images, and 12 rows
-// of that would mount several hundred <Image>s. Everything past the strip's
-// visible edge is lazily loaded by the browser, so the cost is the DOM nodes,
-// not the bytes.
-const STRIP_IMAGES = 5;
+// of that would mount several hundred <Image>s.
+//
+// FOUR, not five, and the number is a layout decision as much as a budget one:
+// four landscape thumbs plus the CTA tile is what lets the whole row — name,
+// blurb and imagery side by side — fit a 13" laptop. At five the row couldn't
+// close under ~1500px and had to stack.
+const STRIP_IMAGES = 4;
 // Side of the glass "Go to project" tile that closes each strip — square, and
 // the same height as the thumbnails so the row reads as one band.
 const CTA_TILE = 100;
+/*
+  Show-all sheet motion.
+
+  Emil Kowalski's blueprint, applied:
+  - The sheet is an element ENTERING and EXITING the viewport, so ease-out —
+    it accelerates away from the top edge immediately and settles at the end,
+    which is what makes it feel like a response to the click rather than a
+    scheduled animation. The curve is the site's existing --ease-out token,
+    already an ease-out-quint.
+  - Drawers belong in the 200–300ms band. This one travels a whole viewport
+    height, and duration should match distance, so it takes the top of it.
+  - The exit runs ~20% faster. Leaving should never feel like waiting.
+  - Only `transform` animates: it skips layout and paint and stays on the GPU.
+    (Height or top would animate the same distance and jank the whole way.)
+
+  No per-row stagger. Twelve rows at even 30ms apart is 360ms of cascade on
+  top of the sheet's own 300 — past the point where it stops reading as
+  responsive. The sheet arriving IS the animation; the rows are its content,
+  not twelve separate events.
+*/
+const SHEET_IN_MS = 300;
+const SHEET_OUT_MS = 240;
 // Calm-down period after a shake dismissal before the images may return.
 const SHAKE_CALM_MS = 1100;
 // Shake detection (per mousemove event). Energy accumulates from cursor
@@ -165,48 +190,123 @@ const FIGMA_COMPOSITION: SatSlot[] = [
   { dx: 0.1665, dy: 0.214, w: 0.4756, ratio: "913 / 560", depth: 0.55 },
 ];
 
-// Per-slug overrides — add entries as their Figma frames are drawn, e.g.:
-//   "tenda-lab": [ { dx: ..., dy: ..., w: ..., ratio: "...", depth: ... }, ... ]
-const COMPOSITIONS: Record<string, SatSlot[]> = {};
+/*
+  Finalized per-project compositions — Figma section 252:324 "Index and
+  satelites images", one 1920×1314 frame per project. Same transcription rule
+  as above: dx/dy are the box center's offset from the FRAME center as
+  fractions of 1920 / 1314, `w` is its width over 1920, `ratio` its exact
+  aspect. The big 1200×736 rectangle in each frame is the HERO, so it is not
+  a slot here — it goes in HERO_IMAGES below.
+
+  `depth` is not in Figma; it only scales cursor drift. It's assigned by
+  reading distance, near-to-far: small far-flung cutouts get more (0.7–0.8),
+  the large slabs that sit close to the hero get less (0.4–0.5), so the mesh
+  separates into planes instead of sliding as one sheet.
+
+  Slot order = image order in SATELLITE_IMAGES. Keep the two in step.
+*/
+const COMPOSITIONS: Record<string, SatSlot[]> = {
+  // Frame 245:291
+  "delirio-tropical": [
+    // The palm keeps Figma's x. It was pulled inward with the toucan, but it
+    // never had the toucan's problem: the project list occupies y 346–554 on
+    // a 1440×900 screen and the palm sits above it, so its left position was
+    // costing nothing. Only its y is nudged (0.02 toward centre) from the
+    // Figma anchor of −0.212.
+    { dx: -0.3744, dy: -0.19, w: 0.0992, ratio: "190 / 241", depth: 0.8 }, // palm tree, textured
+    { dx: -0.24, dy: -0.3038, w: 0.191, ratio: "367 / 390", depth: 0.7 }, // fruit slices
+    { dx: -0.1061, dy: -0.2877, w: 0.2229, ratio: "428 / 267", depth: 0.6 }, // drink illustration
+    { dx: 0.1643, dy: -0.3523, w: 0.0882, ratio: "169 / 127", depth: 0.8 }, // crab
+    { dx: 0.3076, dy: -0.2619, w: 0.1522, ratio: "292 / 406", depth: 0.65 }, // palm tree character
+    // The toucan IS pulled in — 0.08 of the frame width right of its Figma
+    // anchor (−0.304), plus 0.02 up. At Figma's x its left edge landed at
+    // ~109px on a 1440 screen and it ran straight through the project list,
+    // which ends at 208px.
+    { dx: -0.224, dy: 0.14, w: 0.24, ratio: "461 / 598", depth: 0.5 }, // toucan drummer
+    { dx: 0.2261, dy: 0.1894, w: 0.4415, ratio: "848 / 520", depth: 0.4 }, // logo
+  ],
+  // Frame 245:293
+  "delirio-sao-joao": [
+    { dx: -0.2881, dy: -0.2255, w: 0.3159, ratio: "607 / 401", depth: 0.5 }, // banner + tambourine
+    { dx: -0.1291, dy: -0.3262, w: 0.1096, ratio: "211 / 207", depth: 0.8 }, // zabumba drum
+    { dx: 0.1792, dy: -0.2476, w: 0.1046, ratio: "201 / 455", depth: 0.75 }, // casaca character
+    { dx: 0.3194, dy: -0.2255, w: 0.1874, ratio: "360 / 514", depth: 0.6 }, // lineup poster
+    { dx: -0.2847, dy: 0.2181, w: 0.2015, ratio: "387 / 352", depth: 0.55 }, // church
+    { dx: -0.0988, dy: 0.3252, w: 0.2059, ratio: "395 / 233", depth: 0.7 }, // colorful boats
+    { dx: 0.2698, dy: 0.2284, w: 0.3012, ratio: "578 / 325", depth: 0.45 }, // icon grid
+  ],
+  // Frame 245:292 ("30-FCV")
+  fcv: [
+    { dx: -0.3125, dy: -0.1259, w: 0.2196, ratio: "422 / 259", depth: 0.6 }, // FCV logo
+    { dx: -0.121, dy: -0.2802, w: 0.3442, ratio: "661 / 406", depth: 0.45 }, // poster wall mockup
+    { dx: 0.1931, dy: -0.334, w: 0.1953, ratio: "375 / 116", depth: 0.8 }, // eye, red
+    { dx: 0.2902, dy: -0.2393, w: 0.1622, ratio: "1 / 1", depth: 0.65 }, // woman portrait collage
+    { dx: -0.327, dy: 0.0733, w: 0.1326, ratio: "255 / 183", depth: 0.8 }, // eye with lashes
+    { dx: -0.22, dy: 0.2772, w: 0.368, ratio: "707 / 353", depth: 0.4 }, // t-shirt + pattern
+    { dx: 0.0752, dy: 0.4203, w: 0.166, ratio: "319 / 243", depth: 0.75 }, // eye, pink
+    { dx: 0.2757, dy: 0.1671, w: 0.2351, ratio: "451 / 560", depth: 0.5 }, // cameraman collage
+  ],
+};
 
 function compositionFor(slug: string): SatSlot[] {
   return COMPOSITIONS[slug] ?? FIGMA_COMPOSITION;
 }
 
 /*
-  Per-project satellite IMAGES, in slot order — the SPECIFIC complementary
-  images the Figma hover frame places around the hero, transcribed from the
-  design (NOT just the first few gallery images). A project without an entry
-  falls back to `projectImageSet` (its gallery in reading order).
-
-  Delírio Tropical (node 120:385), slot order = FIGMA_COMPOSITION:
-    0 top-left portrait      → 05 (palm)
-    1 top-center landscape   → 02 (Delírio Tropical lettering)
-    2 top-right portrait     → 04 (green/coral squiggle)
-    3 bottom-left landscape  → 03 (icon grid)
-    4 bottom-right landscape → 01 (Tropical lettering detail)
+  The finalized compositions get their own asset folder, one per Figma frame.
+  Filenames are the Figma LAYER names, slugified — so re-exporting a layer
+  lands on the same path and nothing here has to change. All WebP: the PNGs
+  the studio exported at 2× were 36 MB across the three projects and are
+  4.6 MB as WebP, with alpha preserved (most of these are cutouts).
 */
-const dt = (n: string) => `/Images/Delirio-Tropical/${n}.webp`;
+const sat = (folder: string, name: string) =>
+  `/Images/img-satelites/${folder}/${name}.webp`;
 
 /*
-  Main hero image per project (the big center image). Falls back to the
-  project's indexImage / first gallery image when it isn't listed here.
+  Main hero image per project (the big center image) — the 1200×736 rectangle
+  each Figma frame is built around. Falls back to the project's indexImage /
+  first gallery image when it isn't listed here.
 */
 const HERO_IMAGES: Record<string, string> = {
-  "delirio-tropical": dt("01"), // TROP lettering crop
+  "delirio-tropical": sat("delirio-tropical", "tropical-lettering-background"),
+  "delirio-sao-joao": sat("sao-joao", "delirio-tropical-sao-joao-banner"),
+  fcv: sat("30-fcv", "festival-collage-eyes-and-stars"),
 };
 
+/*
+  Satellite images in SLOT ORDER — index i here fills slot i of the same
+  project's entry in COMPOSITIONS, so the two lists must stay the same length
+  and the same order. A project with no entry falls back to its gallery.
+*/
 const SATELLITE_IMAGES: Record<string, string[]> = {
-  // Slot order = FIGMA_COMPOSITION:
-  //   0 TL portrait  → 05 palm
-  //   1 TC landscape → 11 drink
-  //   2 TR portrait  → 04 squiggle
-  //   3 BL landscape → 03 icon grid
-  //   4 BR landscape → 10 green "Delírio Tropical" lettering
-  // Uses the already-optimized webp files — the /parallax index/ PNG
-  // exports the studio added are exact duplicates of these, so they're
-  // safe to delete (see the naming map that confirmed the 1:1 match).
-  "delirio-tropical": [dt("05"), dt("11"), dt("04"), dt("03"), dt("10")],
+  "delirio-tropical": [
+    "palm-tree-textured",
+    "fruit-slices",
+    "delirio-tropical-drink-illustration",
+    "crab-character",
+    "palm-tree-character",
+    "toucan-drummer",
+    "delirio-tropical-logo",
+  ].map((n) => sat("delirio-tropical", n)),
+  "delirio-sao-joao": [
+    "banner-and-tambourine",
+    "zabumba-drum",
+    "casaca-instrument-character",
+    "festival-lineup-poster",
+    "church-with-palm-trees",
+    "colorful-boats",
+    "sao-joao-festival-icon-grid",
+  ].map((n) => sat("sao-joao", n)),
+  fcv: [
+    "festival-de-cinema-de-vitoria-logo",
+    "festival-poster-wall-mockup",
+    "eye-illustration-red",
+    "woman-portrait-collage",
+    "eye-illustration-with-lashes",
+    "t-shirt-and-pattern-mockup",
+    "eye-illustration-pink",
+    "cameraman-collage-character",
+  ].map((n) => sat("30-fcv", n)),
 };
 
 /** Big hero image for a project — prefer its landscape index image, then the
@@ -316,6 +416,32 @@ export default function ParallaxIndex({ background }: Props) {
   const showAllRef = useRef(showAll);
   useEffect(() => {
     showAllRef.current = showAll;
+  }, [showAll]);
+
+  /*
+    The sheet outlives `showAll` by one animation: it has to stay in the DOM
+    long enough to play its exit. So mounting is its own state, and the only
+    thing it tracks is "is the element still needed".
+
+    A keyframe ANIMATION, not a transition, and that choice is what keeps this
+    simple. A transition needs the element to exist at a "from" value for one
+    frame before you change it — which means mount, wait a frame, then open,
+    and the usual way to wait a frame is requestAnimationFrame. But rAF does
+    not fire while the document is hidden, so a toggle flipped in a
+    backgrounded tab would mount a sheet that never opens. An animation runs
+    from its own `from` the moment the element appears; no second render, no
+    frame to wait for, nothing to miss.
+
+    Both updates sit inside timeout callbacks rather than the effect body: a
+    synchronous setState there cascades an extra render before paint.
+  */
+  const [sheetMounted, setSheetMounted] = useState(showAll);
+  useEffect(() => {
+    // Mounting on a 0ms timer rather than immediately keeps the state change
+    // out of the effect body; timers, unlike rAF, still fire when hidden.
+    const delay = showAll ? 0 : SHEET_OUT_MS;
+    const timer = window.setTimeout(() => setSheetMounted(showAll), delay);
+    return () => window.clearTimeout(timer);
   }, [showAll]);
 
   const rootRef = useRef<HTMLDivElement>(null);
@@ -716,17 +842,24 @@ export default function ParallaxIndex({ background }: Props) {
       onMouseMove={showAll || isMobile ? undefined : onMouseMove}
       // Calm everything when the pointer leaves the window entirely.
       onMouseLeave={showAll || isMobile ? undefined : () => setHovering(false)}
-      className={`fixed inset-0 select-none ${showAll ? "overflow-y-auto" : "overflow-hidden"}`}
+      // The root never scrolls now — the sheet owns its own scrolling, so the
+      // stage can stay put underneath it while it slides.
+      className="fixed inset-0 select-none overflow-hidden"
       style={{
         backgroundColor: background,
         // Let the browser own touch only in Show-all (which scrolls
         // natively); on the stage we consume swipes to change project.
+        // touch-action intersects down the ancestor chain, so `none` here
+        // would block the sheet's scrolling too.
         touchAction: showAll ? "auto" : "none",
       }}
     >
-      {showAll ? (
-        <ShowAllList onOpen={open} />
-      ) : (
+      {/* The stage stays MOUNTED while the sheet is open — that's what makes
+          it a sheet rather than a swap. Something has to be underneath for
+          the sheet to slide over; unmounting it would leave the sheet
+          descending over an empty background. Its own handlers already bail
+          on `showAllRef`, so nothing reacts to a pointer it can't see. */}
+      {
         <>
           {/* ─── Hero slide layer (behind everything, non-interactive).
                 On mobile the whole layer lifts so the images sit in the TOP
@@ -885,7 +1018,7 @@ export default function ParallaxIndex({ background }: Props) {
                 Rendered BEFORE the satellites so the satellites paint (and
                 take hover) above it where the big images overlap the hero —
                 otherwise this button swallowed the hover and the overlapping
-                image never lifted past its 90% resting state. Satellites carry
+                image never lifted past its 85% resting state. Satellites carry
                 their own click-to-open (below) so a click on them still opens
                 the project even though they now cover this button. */}
             <button
@@ -964,9 +1097,9 @@ export default function ParallaxIndex({ background }: Props) {
                     <div
                       className="relative h-full w-full overflow-hidden"
                       style={{
-                        // Resting at 90% (canvas bleeds through slightly);
+                        // Resting at 85% (canvas bleeds through slightly);
                         // a direct hover lifts THIS box to full 100%.
-                        opacity: visible ? (isHovered ? 1 : 0.9) : 0,
+                        opacity: visible ? (isHovered ? 1 : 0.85) : 0,
                         // A direct hover lifts to full 100% and grows the box
                         // a hair (1.04) for a subtle "come forward" feel;
                         // resting = none; not-yet-revealed = 0.88.
@@ -1030,10 +1163,39 @@ export default function ParallaxIndex({ background }: Props) {
             </p>
           </div>
         </>
+      }
+
+      {/* ─── Show-all sheet ───────────────────────────────────────────────
+            Slides down from the top edge over the stage and takes the whole
+            screen. `translateY(-100%)` on a fixed inset-0 box is exactly one
+            viewport height, so it starts parked just above the fold.
+
+            It scrolls itself (`overflow-y-auto`) rather than relying on the
+            root, which has to stay put so the stage doesn't move underneath.
+            `overscroll-contain` stops a flick at the end of the list from
+            chaining into the page behind it.
+
+            Direction is read straight off `showAll`, so the moment it flips
+            the element re-renders with the exit animation and the faster
+            duration — while `sheetMounted` holds it in the DOM until that
+            exit has actually played. `both` keeps the final frame instead of
+            snapping back before the unmount. */}
+      {sheetMounted && (
+        <div
+          className="fixed inset-0 z-20 overflow-y-auto overscroll-contain will-change-transform"
+          style={{
+            backgroundColor: background,
+            animation: `${showAll ? "sheet-in" : "sheet-out"} ${
+              showAll ? SHEET_IN_MS : SHEET_OUT_MS
+            }ms var(--ease-out) both`,
+          }}
+        >
+          <ShowAllList onOpen={open} />
+        </div>
       )}
 
       {/* ─── Mobile "Show all" chip — bottom-right. Deliberately OUTSIDE the
-            ternary above so it survives into the open list; otherwise the
+            stage above so it survives into the open list; otherwise the
             only way back would be the hamburger. Mirrors the nav chip's
             styling (which is desktop-only). ─── */}
       <button
@@ -1162,7 +1324,21 @@ function ShowAllList({
             // rhythm, and the lines just added noise. 0.5px hairline in
             // Figma's "Labels/Secondary" grey (node 120:685).
             <li key={p.slug} className="md:border-b-[0.5px] md:border-[#727272]">
-              <div className="flex w-full flex-col gap-5 py-[30px] md:flex-row md:items-start md:justify-between md:gap-8" style={{ color: "#fbfbfb" }}>
+              {/*
+                The row goes horizontal at 1280 — a 13" laptop — and the
+                measurements are what set that number: 200 (name) + 24 + 280
+                (blurb at this width) + 24 + ~613 (four thumbs and the CTA)
+                = 1141, inside the 1192 a 1280 viewport leaves after gutters.
+                From 1500 the blurb opens to its full 366 and the gaps to 32;
+                Figma's 112px gap waits for 1700.
+
+                Below 1280 everything stacks and the strip sits UNDER the
+                text. It used to flip to a row at 768, where the text block
+                was squeezed far past its content width; because nothing
+                clipped, the blurb and the meta simply overflowed their box
+                and the thumbnails rendered straight over them.
+              */}
+              <div className="flex w-full flex-col gap-5 py-[30px] min-[1280px]:flex-row min-[1280px]:items-start min-[1280px]:justify-between min-[1280px]:gap-6 min-[1500px]:gap-8 min-[1700px]:gap-[112px]" style={{ color: "#fbfbfb" }}>
                 {/* Text block. Its own button rather than wrapping the whole
                     row, so the horizontal thumbnail scroller below isn't
                     trapped inside a click target — a swipe there would
@@ -1171,27 +1347,24 @@ function ShowAllList({
                   type="button"
                   onClick={(e) => onOpen(e, p)}
                   data-cursor-ring
-                  // Figma's column gap is 112px, but that's measured on an
-                  // 1832px-wide frame. Held at 112 the row can't fit under
-                  // ~1690px and shoves the thumbnail strip off-screen, so the
-                  // gap steps down on narrower viewports and only reaches the
-                  // design value once there's room for it.
-                  className="flex min-w-0 flex-1 cursor-pointer flex-col gap-1 text-left md:flex-row md:items-start md:gap-8 lg:gap-16 2xl:gap-[112px]"
+                  // Figma's column gap is 112px, measured on an 1832px-wide
+                  // frame, so it only arrives once the viewport can carry it.
+                  className="flex min-w-0 flex-1 cursor-pointer flex-col gap-2 text-left min-[1280px]:flex-row min-[1280px]:items-start min-[1280px]:gap-6 min-[1500px]:gap-8 min-[1700px]:gap-[112px]"
                 >
-                  {/* On mobile the name and the year share one line — name
-                      left, year right — with the category stacked underneath.
-                      On desktop this wrapper dissolves (`contents`) so both
-                      rejoin the parent's 3-column flow and the year returns to
-                      the far right via order-last + ml-auto. */}
-                  <div className="flex items-baseline justify-between gap-4 md:contents">
+                  {/* Name with category – year directly beneath it, on every
+                      breakpoint. The year used to sit in a far-right column of
+                      its own on desktop; pulling it under the name gives the
+                      row one clear left edge and removes the widest column
+                      from the horizontal budget. */}
+                  <div className="flex flex-col gap-1 min-[1280px]:w-[200px] min-[1280px]:shrink-0">
                     {/* Figma "Title 3/Emphasized" — SF Pro Semibold 15/20. */}
-                    <span className="text-[15px] font-semibold leading-5 md:w-[200px] md:shrink-0">
+                    <span className="text-[15px] font-semibold leading-5">
                       {p.title}
                     </span>
                     {/* Figma "Body/Regular" — 13/16, same #fbfbfb as the rest
                         of the group (no dimming in the design). Category and
                         year read as one unit, en-dash separated. */}
-                    <span className="shrink-0 whitespace-nowrap text-[13px] leading-4 md:order-last md:ml-auto md:pr-8">
+                    <span className="text-[13px] leading-4">
                       {`${pick(p.category, lang)} – ${p.year}`}
                     </span>
                   </div>
@@ -1200,7 +1373,11 @@ function ShowAllList({
                       name / category – year and then the imagery, so the whole
                       column is hidden rather than left as an empty flex item
                       eating the parent's gap. */}
-                  <div className="text-[13px] leading-4 max-md:hidden md:w-[366px] md:min-w-0 md:shrink">
+                  {/* 280 at 13", opening to Figma's 366 once there's room —
+                      the blurb is the one column that can give up width
+                      without breaking, so it's what pays for the row fitting
+                      a smaller screen. */}
+                  <div className="text-[13px] leading-4 max-md:hidden md:max-w-[366px] md:min-w-0 min-[1280px]:w-[280px] min-[1280px]:shrink min-[1500px]:w-[366px]">
                     <span className="line-clamp-3">{pick(p.brief, lang)}</span>
                   </div>
                 </button>
@@ -1224,15 +1401,27 @@ function ShowAllList({
                     <Thumb key={i} src={src} onClick={(e) => onOpen(e, p)} />
                   ))}
 
-                  {/* Glass tile closing the strip — states the action the
-                      thumbnails only imply. Square-cornered like them so the
-                      band reads as one run, but in the same material as the
-                      Show-all chip so it reads as a control, not an image. */}
+                  {/*
+                    The tile closing the strip — MOBILE ONLY. A bordered glass
+                    card with "Go to project" spelled out, because there's no
+                    cursor on a phone and nothing else names the action.
+
+                    `md:hidden` rather than a hidden-but-present element: the
+                    strip is a flex row with a gap, so leaving the tile in the
+                    layout would leave its 100px slot AND the gap before it as
+                    dead space at the end of every row. Removing it from flow
+                    lets the images close the band.
+
+                    Desktop loses nothing. The cursor pill already reads "Go
+                    to project" the moment the pointer is near the row, the
+                    whole row is clickable, and the arrow was the only mark in
+                    a band otherwise made of edge-to-edge images.
+                  */}
                   <button
                     type="button"
                     onClick={(e) => onOpen(e, p)}
                     data-cursor-ring
-                    className="flex shrink-0 cursor-pointer flex-col items-start justify-between border-[0.5px] border-white/20 bg-white/[0.07] p-3 text-left text-[13px] font-normal leading-4 shadow-[inset_0_0.5px_0_rgba(255,255,255,0.18),0_8px_24px_rgba(0,0,0,0.28)] backdrop-blur-[20px] backdrop-saturate-150 transition-colors duration-200 hover:bg-white/[0.12]"
+                    className="flex shrink-0 cursor-pointer flex-col items-start justify-between border-[0.5px] border-white/20 bg-white/[0.07] p-3 text-left text-[13px] font-normal leading-4 shadow-[inset_0_0.5px_0_rgba(255,255,255,0.18),0_8px_24px_rgba(0,0,0,0.28)] backdrop-blur-[20px] backdrop-saturate-150 transition-colors duration-200 hover:bg-white/[0.12] md:hidden"
                     style={{ width: CTA_TILE, height: CTA_TILE }}
                   >
                     <svg
@@ -1251,7 +1440,7 @@ function ShowAllList({
                         strokeLinejoin="round"
                       />
                     </svg>
-                    {t("parallax.goToProject")}
+                    <span>{t("parallax.goToProject")}</span>
                   </button>
                 </div>
               </div>
