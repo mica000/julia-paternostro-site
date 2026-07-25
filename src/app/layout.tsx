@@ -8,6 +8,7 @@ import NavFade from "@/components/NavFade";
 import CustomCursor from "@/components/CustomCursor";
 import { TransitionProvider } from "@/components/PageTransition";
 import SmoothScroll from "@/components/SmoothScroll";
+import Preloader from "@/components/Preloader";
 
 /*
   Root layout
@@ -41,6 +42,9 @@ export default function RootLayout({
       className={`${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        {/* First-load overlay — sits above everything, needs no context, so
+            it mounts ahead of the providers to paint as early as possible. */}
+        <Preloader />
         <ConfigProvider>
           <LanguageProvider>
             <PageBackgroundProvider>

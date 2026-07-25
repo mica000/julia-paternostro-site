@@ -106,6 +106,63 @@ nav a, nav button {
   }
 }
 
+/*
+  Preloader intro — assemble → dissipate → reveal, over a ring that spins the
+  whole time. Drives the first-load poster ring in Preloader.tsx. Everything
+  animates `transform`/`opacity` only, so it stays on the GPU. The reduced-
+  motion block below collapses all of it (0.01ms), and the component also skips
+  the intro for those visitors.
+*/
+
+/* Continuous spin. The ring turns forever (forwards); each poster counter-
+   turns (reverse) to cancel it and stay upright while orbiting. This runs
+   concurrently with the assemble/dissipate — it adds no time of its own. */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Assemble — each poster grows from nothing around its own center and fades
+   in. Applied per-image with a staggered delay so they pop in one after
+   another (the mirror of posterOut). */
+@keyframes posterIn {
+  from {
+    opacity: 0;
+    transform: scale(0);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Dissipate — each poster shrinks around its own center and vanishes. Applied
+   per-image with a staggered delay so they pop out one after another. */
+@keyframes posterOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0);
+  }
+}
+
+/* Reveal — the black backdrop fades, uncovering the page beneath. */
+@keyframes overlayOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
 /* Respect users who prefer less motion — accessibility baseline.
    This covers the sheet too: the keyframes still run, but in 0.01ms, so the
    list simply appears rather than travelling. */
