@@ -3,7 +3,6 @@ import { Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ConfigProvider, LanguageProvider, PageBackgroundProvider } from "@/lib/state";
 import TopNav from "@/components/TopNav";
-import BottomChrome from "@/components/BottomChrome";
 import NavFade from "@/components/NavFade";
 import CustomCursor from "@/components/CustomCursor";
 import { TransitionProvider } from "@/components/PageTransition";
@@ -53,7 +52,6 @@ export default function RootLayout({
                   {children}
                   <NavFade />
                   <TopNav />
-                  <BottomChrome />
                   {/* Global — ring appears over any element opted-in via
                       `.tile-hover` or `data-cursor-ring`. */}
                   <CustomCursor />

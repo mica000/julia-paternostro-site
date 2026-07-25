@@ -27,8 +27,10 @@
     within the same session — you see it on arrival, not on every refresh.
 
   Accessibility:
-    Scroll is locked while the overlay is up. `prefers-reduced-motion`
-    visitors skip the intro entirely (no motion, immediate reveal).
+    `prefers-reduced-motion` visitors skip the intro entirely (no motion,
+    immediate reveal). Scroll is intentionally NOT locked — the overlay
+    already covers the page, and locking body overflow would corrupt Lenis's
+    scroll measurement (see the effect below).
 */
 
 import { useEffect, useState } from "react";
@@ -45,6 +47,12 @@ const POSTERS = Array.from(
 );
 
 const SESSION_KEY = "torto:preloaded";
+
+// Safety cap for the poster preload. The intro holds a plain black cover until
+// every poster is decoded so none show as gaps in the ring — but on a very slow
+// or flaky connection we must not sit on black forever, so after this long the
+// choreography starts regardless of what finished loading.
+const PRELOAD_MAX_MS = 5000;
 
 // Timeline (ms). One turn (ROUND) is bracketed by the assemble-in and
 // dissipate-out phases. TOTAL is when the overlay unmounts and the site shows.
@@ -74,6 +82,10 @@ export default function Preloader() {
   // (only used by PREVIEW_LOOP). `done` starts false so the server HTML and
   // first client render both paint the overlay — no hydration mismatch.
   const [done, setDone] = useState(false);
+  // `ready` gates the animated ring: it flips true only once every poster is
+  // decoded (or the safety cap fires), so the choreography never starts while
+  // an image is still blank.
+  const [ready, setReady] = useState(false);
   const [cycle, setCycle] = useState(0);
 
   useEffect(() => {
@@ -97,30 +109,79 @@ export default function Preloader() {
       return () => window.clearTimeout(skip);
     }
 
-    // Lock scroll while the overlay covers the page.
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    // NOTE: we deliberately do NOT lock scroll by touching
+    // `document.body.style.overflow` here. This overlay is a fixed, full-
+    // screen z-100 layer that already hides the page during the intro, so a
+    // stray scroll underneath is invisible and harmless. Crucially, the
+    // Preloader mounts OUTSIDE the Lenis smooth-scroll provider — if we set
+    // body overflow:hidden while Lenis is initialising, Lenis measures a
+    // zero-height scroll area and caches it, and long pages (case studies)
+    // stay unscrollable even after the overlay is gone. Not touching overflow
+    // keeps Lenis's measurement correct.
 
-    let timer: number;
-    if (PREVIEW_LOOP) {
-      // Restart the timeline every TOTAL by bumping `cycle` (remounts the tree).
-      timer = window.setInterval(() => setCycle((c) => c + 1), TOTAL_MS);
-    } else {
-      // Play once, then reveal the page and restore scrolling.
-      timer = window.setTimeout(() => {
-        document.body.style.overflow = prevOverflow;
-        setDone(true);
-      }, TOTAL_MS);
-    }
+    // Preload + DECODE every poster before the ring plays. On a cold first
+    // visit the posters aren't cached, and the CSS timeline used to start the
+    // instant this mounted — so slow images popped in mid-assemble or missed
+    // their window entirely and showed as gaps. We hold a plain black cover
+    // until all posters are drawable, then start with every image guaranteed.
+    let cancelled = false;
+    let started = false;
+    const timers: number[] = [];
+
+    const preload = (src: string) =>
+      new Promise<void>((resolve) => {
+        const img = new Image();
+        const finish = () => resolve();
+        img.onload = () => {
+          // decode() ensures the bitmap is ready to paint on the first frame,
+          // not merely downloaded — avoids a decode hitch as the ring builds.
+          if (img.decode) img.decode().then(finish, finish);
+          else finish();
+        };
+        // A broken/missing poster must not stall the whole intro.
+        img.onerror = finish;
+        img.src = src;
+      });
+
+    const startTimeline = () => {
+      if (cancelled || started) return;
+      started = true;
+      setReady(true);
+      if (PREVIEW_LOOP) {
+        // Restart the timeline every TOTAL by bumping `cycle` (remounts tree).
+        timers.push(window.setInterval(() => setCycle((c) => c + 1), TOTAL_MS));
+      } else {
+        // Play once, then reveal the page.
+        timers.push(window.setTimeout(() => setDone(true), TOTAL_MS));
+      }
+    };
+
+    // Whichever comes first: all posters decoded, or the safety cap.
+    Promise.all(POSTERS.map(preload)).then(startTimeline);
+    timers.push(window.setTimeout(startTimeline, PRELOAD_MAX_MS));
 
     return () => {
-      window.clearTimeout(timer);
-      window.clearInterval(timer);
-      document.body.style.overflow = prevOverflow;
+      cancelled = true;
+      timers.forEach((t) => {
+        window.clearTimeout(t);
+        window.clearInterval(t);
+      });
     };
   }, []);
 
   if (done) return null;
+
+  // Hold a plain black cover until the posters are decoded — no animation, so
+  // nothing flashes and no poster ever appears half-loaded. Once ready, the
+  // animated ring mounts fresh and its CSS timeline starts from a clean frame.
+  if (!ready) {
+    return (
+      <div
+        aria-hidden
+        style={{ position: "fixed", inset: 0, zIndex: 100, background: "#000" }}
+      />
+    );
+  }
 
   return (
     // `key={cycle}` restarts every CSS animation below when the preview loop

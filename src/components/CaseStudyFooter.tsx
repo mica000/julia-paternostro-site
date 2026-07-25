@@ -48,7 +48,7 @@ export default function CaseStudyFooter({ currentSlug }: { currentSlug: string }
     // block; bottom padding clears the fixed bottom nav.
     <section
       aria-label="More projects"
-      className="w-full px-[44px] mt-24 md:mt-[150px] pb-24 md:pb-32"
+      className="w-full px-6 md:px-[44px] mt-24 md:mt-[150px] pb-24 md:pb-32"
     >
       <ul className="w-full">
         {others.map((p) => {
@@ -89,7 +89,7 @@ export default function CaseStudyFooter({ currentSlug }: { currentSlug: string }
                     horizontally. On mobile the negative margin bleeds it to
                     the screen edges while the first thumb stays on the 44px
                     gutter, so the overflow reads as "there's more this way". */}
-                <div className="-mx-[44px] flex gap-2 overflow-x-auto overscroll-x-contain px-[44px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:min-w-0 md:px-0">
+                <div className="-mx-6 flex gap-2 overflow-x-auto overscroll-x-contain px-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:min-w-0 md:px-0">
                   {thumbs.map((src, i) => (
                     <Thumb key={i} src={src} href={href} />
                   ))}

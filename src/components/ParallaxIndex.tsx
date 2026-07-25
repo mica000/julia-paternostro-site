@@ -97,10 +97,6 @@ const REVEAL_GRACE_MS = 500;
 // line-height + 8px gap; the window shows ~9 rows and clips the rest.
 const TIMELINE_PITCH = 24;
 const TIMELINE_HEIGHT = 208;
-// Width of the single marker rule that points at the active row (Figma node
-// 200:811 — the tapering companion rules were dropped, only the long one
-// stays).
-const TIMELINE_MARKER_W = 30;
 // How many images each "Show all" row puts in its scrollable strip. Capped
 // rather than unbounded: Delírio alone has 28 case-study images, and 12 rows
 // of that would mount several hundred <Image>s.
@@ -763,7 +759,7 @@ export default function ParallaxIndex({ background }: Props) {
                 band sits there, masking the moving list so the active name
                 reads as a crisp line in the middle of the selector. ─── */}
           <div
-            className="absolute bottom-[44px] left-[44px] z-10 w-[min(320px,72vw)] overflow-hidden md:bottom-auto md:top-1/2 md:w-[min(260px,34vw)] md:-translate-y-1/2"
+            className="absolute bottom-6 left-6 z-10 w-[min(320px,72vw)] overflow-hidden md:bottom-auto md:left-[44px] md:top-1/2 md:w-[min(260px,34vw)] md:-translate-y-1/2"
             style={{
               height: TIMELINE_HEIGHT,
               color: "#fbfbfb",
@@ -820,13 +816,16 @@ export default function ParallaxIndex({ background }: Props) {
             // window, so its own centre is the timeline's centre — the rule
             // then lines up with the active row on both layouts for free,
             // with no duplicated offset maths to drift out of sync.
-            className="pointer-events-none absolute bottom-[44px] left-0 z-10 md:bottom-auto md:top-1/2 md:-translate-y-1/2"
+            className="pointer-events-none absolute bottom-6 left-0 z-10 md:bottom-auto md:top-1/2 md:-translate-y-1/2"
             style={{ height: TIMELINE_HEIGHT }}
           >
             <span
-              className="absolute left-0 top-1/2 block -translate-y-1/2"
+              // Width is breakpoint-aware so the rule stops short of the
+              // active name at both gutters: 16px inside the 24px mobile
+              // gutter, 30px inside the 44px desktop gutter. A fixed width
+              // would overshoot the mobile gutter and cross into the text.
+              className="absolute left-0 top-1/2 block w-4 -translate-y-1/2 md:w-[30px]"
               style={{
-                width: TIMELINE_MARKER_W,
                 height: 1,
                 backgroundColor: "#fbfbfb",
               }}
@@ -870,7 +869,7 @@ export default function ParallaxIndex({ background }: Props) {
             // satellites AND the centred hit-box stay registered with the
             // artwork up top. (Without this the hit-box sat a fifth of a
             // screen below the image it was meant to open.)
-            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-[calc(50%+14vh)] cursor-none md:-translate-y-1/2"
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-[calc(50%+14vh)] cursor-pointer md:cursor-none md:-translate-y-1/2"
             style={{ width: "88vw", height: "82vh" }}
             // Hover is driven by onMouseMove on the root (position-based), so
             // no enter/leave here — that's what made a stationary/already-
@@ -887,7 +886,7 @@ export default function ParallaxIndex({ background }: Props) {
               type="button"
               aria-label={`Open ${active.title}`}
               onClick={(e) => open(e, active)}
-              className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 cursor-none ${HERO_BOX}`}
+              className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 cursor-pointer md:cursor-none ${HERO_BOX}`}
             />
 
             {/* Satellites — active project's other images, bloom on hover. */}
@@ -935,7 +934,7 @@ export default function ParallaxIndex({ background }: Props) {
                     // its own click-to-open — otherwise a click landing on a
                     // satellite (rather than the bare hero) would do nothing.
                     onClick={(e) => open(e, active)}
-                    className="pointer-events-auto absolute left-1/2 top-1/2 cursor-none will-change-transform"
+                    className="pointer-events-auto absolute left-1/2 top-1/2 cursor-pointer md:cursor-none will-change-transform"
                     style={{
                       // Width is a fraction of the viewport width, exactly
                       // as the box relates to the 1920px Figma frame — but
@@ -1056,7 +1055,7 @@ export default function ParallaxIndex({ background }: Props) {
         // timeline and the project names use, so the whole mobile layout
         // sits inside one square frame. Material comes from the shared
         // CHIP_CLASS, so this and the desktop nav chip can't drift apart.
-        className={`fixed bottom-[44px] right-[44px] z-30 md:hidden ${CHIP_CLASS}`}
+        className={`fixed bottom-6 right-6 z-30 md:hidden ${CHIP_CLASS}`}
         style={{ color: "#fbfbfb" }}
       >
         <ShowAllIcon open={showAll} />
@@ -1165,8 +1164,8 @@ function ShowAllList({
     // frame. The vertical insets clear the fixed chrome: 80px mobile bar and
     // the floating Show-all chip (44 inset + 42 tall), each plus a 44 gap, so
     // the first and last rows aren't parked underneath them.
-    <div className="min-h-full w-full px-[44px] pb-[130px] pt-[124px] md:pb-16 md:pt-36">
-      <ul className="w-full">
+    <div className="min-h-full w-full px-6 md:px-[44px] pb-[130px] pt-[124px] md:pb-16 md:pt-36">
+      <ul className="row-dim-list w-full">
         {projects.map((p) => {
           const thumbs = projectImageSet(p, STRIP_IMAGES);
           return (
@@ -1246,7 +1245,7 @@ function ShowAllList({
                   // internally, so on a narrow viewport it should give up
                   // width and show fewer thumbs at once rather than push
                   // itself off the edge of the page.
-                  className="-mx-[44px] flex gap-2 overflow-x-auto overscroll-x-contain px-[44px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:min-w-0 md:px-0"
+                  className="-mx-6 flex gap-2 overflow-x-auto overscroll-x-contain px-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:min-w-0 md:px-0"
                 >
                   {thumbs.map((src, i) => (
                     <Thumb key={i} src={src} onClick={(e) => onOpen(e, p)} />
