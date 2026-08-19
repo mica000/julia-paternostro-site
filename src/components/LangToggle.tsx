@@ -4,7 +4,7 @@
   LangToggle — the EN / PT switch, styled and behaving like an iOS switch.
 
   Geometry is transcribed from Figma node 268:1491 (the "Toggle" component in
-  the footer frame 197:570): a small grey knob dot and a 13/16 label. The track
+  the footer frame 197:570): a small white knob dot and a 13/16 label. The track
   has NO material — no border, no background, no blur — so it's just the knob
   and the label floating over whatever's behind them.
 
@@ -64,9 +64,9 @@ export default function LangToggle({ className = "" }: { className?: string }) {
       data-cursor-ring
       // No track material — the border and background are intentionally gone.
       // What's left is a transparent hit area (kept at the Figma track size so
-      // the knob and label still have their frame) with just the grey knob dot
+      // the knob and label still have their frame) with just the white knob dot
       // and the EN/PT label floating over whatever's behind.
-      className={`relative shrink-0 cursor-pointer ${className}`}
+      className={`uline relative shrink-0 cursor-pointer ${className}`}
       style={{
         width: TRACK_W,
         height: TRACK_H,
@@ -81,7 +81,7 @@ export default function LangToggle({ className = "" }: { className?: string }) {
           left: 0,
           width: KNOB,
           height: KNOB,
-          backgroundColor: "#bfbfbf",
+          backgroundColor: "#ffffff",
           // A tight drop shadow to lift the dot off the glass. The old knob's
           // 44px-blur glow was made for a 21px knob; on a 6px dot it read as a
           // halo, so it's dropped.

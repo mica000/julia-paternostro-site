@@ -35,7 +35,7 @@
 */
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useConfig, useLang, usePageBg } from "@/lib/state";
 import { getProject } from "@/lib/projects";
@@ -45,13 +45,14 @@ import LangToggle from "@/components/LangToggle";
 // TODO: replace with the real studio email once available.
 const STUDIO_EMAIL = "hello@torto.studio";
 
-// Height of the mobile top bar (pt-[44px] + 16px line-height + pb-4), used to
-// park the menu overlay directly beneath it. Keep in sync with the index's
+// Height of the mobile top bar (pt-6/24px + 16px line-height + pb-4/16px), used
+// to park the menu overlay directly beneath it. Keep in sync with the index's
 // Show-all top padding, which clears the same bar.
-const MOBILE_BAR_H = 76;
+const MOBILE_BAR_H = 56;
 
 export default function TopNav() {
   const pathname = usePathname();
+  const router = useRouter();
   const { t } = useLang();
   const { pageFg, pageBg } = usePageBg();
   const { config, setConfig } = useConfig();
@@ -59,9 +60,20 @@ export default function TopNav() {
 
   const isHome = pathname === "/";
   const showAllOpen = config.parallaxShowAll;
-  const toggleShowAll = (e: React.MouseEvent) => {
+  // The center "Show all" chip lives on the index AND the secondary routes
+  // (/about, /services), so the nav reads the same everywhere except a case
+  // study (which shows the project name instead). On the index it toggles the
+  // detail list in place; from a secondary route there's no list to toggle, so
+  // it opens the list and navigates home to it.
+  const handleShowAll = (e: React.MouseEvent) => {
     e.preventDefault();
-    setConfig({ ...config, parallaxShowAll: !config.parallaxShowAll });
+    if (isHome) {
+      setConfig({ ...config, parallaxShowAll: !config.parallaxShowAll });
+      return;
+    }
+    if (!config.parallaxShowAll) setConfig({ ...config, parallaxShowAll: true });
+    setMenuOpen(false);
+    router.push("/");
   };
 
   // The wordmark is the way back to the index — and "the index" means the
@@ -172,16 +184,15 @@ export default function TopNav() {
           <Link href="/" className={type} onClick={goHome} data-cursor-ring>
             Julia Paternostro
           </Link>
-          <Link href="/about" className={type} data-cursor-ring>
+          <Link href="/about" className={`${type} uline`} data-cursor-ring>
             {t("nav.about")}
           </Link>
-          {/* Language — an iOS-style switch (Figma node 268:1491): the knob
-              slides across and the EN/PT label rides the opposite side. It
-              lives in the footer, not the nav, on the routes that have one:
-              the index (bottom-right, Figma node 197:570) and every case study
-              (in CaseStudyFooter). Secondary routes like /about have no footer,
-              so there it stays in the nav. See LangToggle. */}
-          {!isHome && !caseStudySlug && <LangToggle />}
+          {/* Language does NOT live in the nav. The iOS switch lives bottom-
+              right where a route has a footer — the index (Figma 197:570) and
+              each case study (CaseStudyFooter). Secondary routes (/about,
+              /services) have no footer, so on desktop they carry no on-page
+              switch; on mobile it's still reachable from the MENU overlay
+              below. See LangToggle. */}
         </div>
 
         {/* Center — positioned absolutely rather than as a flex/grid cell so
@@ -189,17 +200,19 @@ export default function TopNav() {
             left and right groups grow. A 3-column grid only centers while
             those two happen to balance; translated labels break that. */}
         <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-          {isHome ? (
-            // Index: a chip (Figma node 197:312) that toggles the detail
-            // list — "Show all" when closed, "Close" when open.
+          {!caseStudySlug ? (
+            // Index + secondary routes: a chip (Figma node 197:312). On the
+            // index it toggles the detail list — "Show all" / "Close". On a
+            // secondary route there's no list here, so it always reads "Show
+            // all" and jumps to the index with the list open.
             <button
               type="button"
-              onClick={toggleShowAll}
+              onClick={handleShowAll}
               className={`pointer-events-auto ${CHIP_CLASS}`}
               data-cursor-ring
             >
-              <ShowAllIcon open={showAllOpen} />
-              {showAllOpen ? t("parallax.close") : t("parallax.showAll")}
+              <ShowAllIcon open={isHome && showAllOpen} />
+              {isHome && showAllOpen ? t("parallax.close") : t("parallax.showAll")}
             </button>
           ) : project ? (
             <span
@@ -224,17 +237,17 @@ export default function TopNav() {
         {/* Right — Copy email, alone. No underline rule anywhere on the bar:
             the Figma spec has no active state up here, and the wordmark is
             the only "you are here" cue. */}
-        <button type="button" onClick={copyEmail} className={type} data-cursor-ring>
+        <button type="button" onClick={copyEmail} className={`${type} uline`} data-cursor-ring>
           {copied ? t("nav.copied") : t("nav.copyEmail")}
         </button>
       </div>
 
       {/* ─── Mobile top bar (<md) — wordmark + MENU button ─── */}
       <div
-        // 44px on every side so the wordmark lines up with the project names
-        // in the timeline below and with the Show-all chip bottom-right —
-        // one frame for the whole mobile layout.
-        className="flex md:hidden items-center justify-between px-[44px] pt-[44px] pb-4"
+        // 24px sides/top so the wordmark lines up with the project names in
+        // the timeline below and with the Show-all chip bottom-right — one
+        // frame for the whole mobile layout.
+        className="flex md:hidden items-center justify-between px-6 pt-6 pb-4"
       >
         <Link href="/" className={type} onClick={goHome} data-cursor-ring>
           Julia Paternostro
@@ -254,7 +267,7 @@ export default function TopNav() {
       {menuOpen && (
         <div
           id="mobile-menu"
-          className="pointer-events-auto md:hidden fixed inset-x-0 bottom-0 z-30 flex flex-col px-[44px] pt-6 pb-10"
+          className="pointer-events-auto md:hidden fixed inset-x-0 bottom-0 z-30 flex flex-col px-6 pt-6 pb-10"
           style={{
             // Sits directly under the mobile bar.
             top: MOBILE_BAR_H,

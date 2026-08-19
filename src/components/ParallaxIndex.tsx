@@ -69,10 +69,16 @@ type Props = {
 // Accumulated |deltaY| (px) needed to fire one step — a small, deliberate
 // scroll. Lower = flickier; higher = more effort per project.
 const WHEEL_STEP_THRESHOLD = 26;
-// After a step fires, ignore further wheel input for this long (ms) so a
-// single mouse-wheel notch or a trackpad flick's momentum tail can't skip
-// several projects at once. Roughly matches the slide's settle time.
-const WHEEL_COOLDOWN_MS = 460;
+// After a step fires, hold input off for this long (ms) so the slide can
+// settle and the immediate momentum tail can't roll straight into a 2nd step.
+const WHEEL_COOLDOWN_MS = 300;
+// While the lock is active, each swallowed inertial event only pushes it
+// forward by THIS much (not a full cooldown). Dense trackpad inertia keeps
+// arriving inside this short window so it stays locked (still no double-jump),
+// but the moment the wheel thins out the lock releases within ~this long
+// instead of waiting for the inertia to fully die — that long wait is what made
+// scrolling from one project to the next feel stuck.
+const WHEEL_REFRESH_MS = 110;
 // Touch equivalent of WHEEL_STEP_THRESHOLD: how far a thumb must travel
 // (px) before it commits one project step. Bigger than the wheel threshold
 // because a finger drag is coarser than a wheel notch.
@@ -88,19 +94,24 @@ const SLIDE_TRAVEL = 0.92;
 // each satellite's depth). Satellites move more than the hero → parallax.
 const HERO_DRIFT = 16;
 const SAT_DRIFT = 70;
+// Hover repel — when a satellite is hovered, every OTHER box glides away from
+// it. STRENGTH = the push (px) on a box sitting right next to the hovered one;
+// RANGE = how far that push reaches before fading (bigger = more boxes move);
+// LERP = per-frame easing so the scatter eases in on hover and eases back on
+// leave. Purely a pointer effect — skipped under reduced motion / on touch.
+const REPEL_STRENGTH = 140;
+const REPEL_RANGE = 460;
+const REPEL_LERP = 0.02;
 // Cursor-follow lerp for the drift (0..1). Lower = softer, laggier drift.
 const MOUSE_SMOOTH = 0.1;
-// Grace period after a project change: the hero stands ALONE for this long
-// before hovering can reveal the complementary images.
-const REVEAL_GRACE_MS = 500;
+// Grace period after a project change before the complementary images may
+// bloom. Set to 0 — the satellites come in right away (they still trickle via
+// the per-image stagger below), instead of the hero standing alone first.
+const REVEAL_GRACE_MS = 0;
 // Timeline (left project list, Figma node 197:592). Row pitch = 16px
 // line-height + 8px gap; the window shows ~9 rows and clips the rest.
 const TIMELINE_PITCH = 24;
 const TIMELINE_HEIGHT = 208;
-// Width of the single marker rule that points at the active row (Figma node
-// 200:811 — the tapering companion rules were dropped, only the long one
-// stays).
-const TIMELINE_MARKER_W = 30;
 // How many images each "Show all" row puts in its scrollable strip. Capped
 // rather than unbounded: Delírio alone has 28 case-study images, and 12 rows
 // of that would mount several hundred <Image>s.
@@ -298,6 +309,20 @@ export default function ParallaxIndex({ background }: Props) {
   // rAF loop reads it every frame to blend the hover lift into the
   // distance-driven opacity — no re-render needed.
   const hoveredRow = useRef<number | null>(null);
+  // Which satellite the pointer is over. A ref (not the `hoveredSat` state)
+  // because the rAF loop reads it every frame to compute the repel — the state
+  // still drives the hovered box's own opacity/scale in render.
+  const hoveredSatRef = useRef<number | null>(null);
+  // Live-tunable repel params — the dev slider panel writes here and the rAF
+  // loop reads the ref every frame, so dragging a slider retunes the effect
+  // instantly. Seeded from the REPEL_* defaults above.
+  const [repel, setRepel] = useState({
+    strength: REPEL_STRENGTH,
+    range: REPEL_RANGE,
+    lerp: REPEL_LERP,
+  });
+  const repelRef = useRef(repel);
+  repelRef.current = repel;
   const satsRef = useRef<HTMLDivElement>(null);
   const viewportH = useRef(0);
   const viewportW = useRef(0);
@@ -427,7 +452,7 @@ export default function ParallaxIndex({ background }: Props) {
       // registers.
       if (now < wheelLockUntil.current) {
         wheelAccum.current = 0;
-        wheelLockUntil.current = now + WHEEL_COOLDOWN_MS;
+        wheelLockUntil.current = now + WHEEL_REFRESH_MS;
         return;
       }
       wheelAccum.current += e.deltaY;
@@ -622,6 +647,23 @@ export default function ParallaxIndex({ background }: Props) {
         // Mobile WITH a portrait override, and desktop, both fall through to
         // frameW = vw / frameH = vh: the override's dx/dy are already viewport
         // fractions, and on desktop the viewport ~IS the 1920×1314 frame.
+        //
+        // Hovered box's resting anchor — the point every OTHER box is pushed
+        // away from. Read from the ref so the loop needs no re-render; skipped
+        // under reduced motion since repel is a pure pointer flourish.
+        const hv = hoveredSatRef.current;
+        let hAnchorX = 0;
+        let hAnchorY = 0;
+        let hasHover = false;
+        if (hv != null && !reduce.current) {
+          const hs = sats.children[hv] as HTMLElement | undefined;
+          if (hs) {
+            hAnchorX = (Number(hs.dataset.dx) || 0) * frameW;
+            hAnchorY = (Number(hs.dataset.dy) || 0) * frameH;
+            hasHover = true;
+          }
+        }
+        const rp = repelRef.current;
         for (let k = 0; k < sats.children.length; k++) {
           const s = sats.children[k] as HTMLElement;
           const dx = Number(s.dataset.dx) || 0;
@@ -649,7 +691,40 @@ export default function ParallaxIndex({ background }: Props) {
           const floatY = reduce.current ? 0 : Math.cos(t * (0.28 + s2 * 0.5) + s2 * 6.283) * (4 + s2 * 9);
           const baseX = dx * frameW;
           const baseY = dy * frameH;
-          s.style.transform = `translate(-50%, -50%) translate(${(baseX + cx + floatX).toFixed(2)}px, ${(baseY + cy + floatY).toFixed(2)}px)`;
+          // Repel — push this box away from the hovered one along the line
+          // between their resting anchors, with a force that fades
+          // exponentially with distance (nearest neighbours move most). The
+          // hovered box itself (k === hv) gets none, so it stays put and only
+          // scales up (see render).
+          let trx = 0;
+          let tryv = 0;
+          if (hasHover && k !== hv) {
+            let vx = baseX - hAnchorX;
+            let vy = baseY - hAnchorY;
+            let dist = Math.hypot(vx, vy);
+            if (dist < 1) {
+              // Anchors overlap — pick a stable per-box direction so the pair
+              // still separates instead of dividing by ~zero.
+              const a = s1 * 6.2832;
+              vx = Math.cos(a);
+              vy = Math.sin(a);
+              dist = 1;
+            }
+            const mag = rp.strength * Math.exp(-dist / rp.range);
+            trx = (vx / dist) * mag;
+            tryv = (vy / dist) * mag;
+          }
+          // Ease the repel offset on the box itself, so the scatter glides in
+          // on hover and glides back to zero on leave.
+          const rx =
+            (Number(s.dataset.rx) || 0) +
+            (trx - (Number(s.dataset.rx) || 0)) * rp.lerp;
+          const ry =
+            (Number(s.dataset.ry) || 0) +
+            (tryv - (Number(s.dataset.ry) || 0)) * rp.lerp;
+          s.dataset.rx = rx.toFixed(3);
+          s.dataset.ry = ry.toFixed(3);
+          s.style.transform = `translate(-50%, -50%) translate(${(baseX + cx + floatX + rx).toFixed(2)}px, ${(baseY + cy + floatY + ry).toFixed(2)}px)`;
         }
       }
 
@@ -763,7 +838,7 @@ export default function ParallaxIndex({ background }: Props) {
                 band sits there, masking the moving list so the active name
                 reads as a crisp line in the middle of the selector. ─── */}
           <div
-            className="absolute bottom-[44px] left-[44px] z-10 w-[min(320px,72vw)] overflow-hidden md:bottom-auto md:top-1/2 md:w-[min(260px,34vw)] md:-translate-y-1/2"
+            className="absolute bottom-6 left-6 z-10 w-[min(320px,72vw)] overflow-hidden md:bottom-auto md:left-[44px] md:top-1/2 md:w-[min(260px,34vw)] md:-translate-y-1/2"
             style={{
               height: TIMELINE_HEIGHT,
               color: "#fbfbfb",
@@ -820,13 +895,16 @@ export default function ParallaxIndex({ background }: Props) {
             // window, so its own centre is the timeline's centre — the rule
             // then lines up with the active row on both layouts for free,
             // with no duplicated offset maths to drift out of sync.
-            className="pointer-events-none absolute bottom-[44px] left-0 z-10 md:bottom-auto md:top-1/2 md:-translate-y-1/2"
+            className="pointer-events-none absolute bottom-6 left-0 z-10 md:bottom-auto md:top-1/2 md:-translate-y-1/2"
             style={{ height: TIMELINE_HEIGHT }}
           >
             <span
-              className="absolute left-0 top-1/2 block -translate-y-1/2"
+              // Width is breakpoint-aware so the rule stops short of the
+              // active name at both gutters: 16px inside the 24px mobile
+              // gutter, 30px inside the 44px desktop gutter. A fixed width
+              // would overshoot the mobile gutter and cross into the text.
+              className="absolute left-0 top-1/2 block w-4 -translate-y-1/2 md:w-[30px]"
               style={{
-                width: TIMELINE_MARKER_W,
                 height: 1,
                 backgroundColor: "#fbfbfb",
               }}
@@ -846,6 +924,24 @@ export default function ParallaxIndex({ background }: Props) {
             <p className="text-[13px] font-normal leading-4">
               {pick(active.category, lang)}
             </p>
+          </div>
+
+          {/* ─── Right marker — mirrors the left timeline rule on the category
+                side: a matching 30px rule at the page's right edge, centred on
+                the same middle line, pointing in toward the category label.
+                Desktop only, same as the category itself. ─── */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute right-0 top-1/2 z-10 hidden -translate-y-1/2 md:block"
+            style={{ height: TIMELINE_HEIGHT }}
+          >
+            <span
+              className="absolute right-0 top-1/2 block w-[30px] -translate-y-1/2"
+              style={{
+                height: 1,
+                backgroundColor: "#fbfbfb",
+              }}
+            />
           </div>
 
           {/* ─── Interaction layer — hover reveals + drifts the satellites,
@@ -870,7 +966,7 @@ export default function ParallaxIndex({ background }: Props) {
             // satellites AND the centred hit-box stay registered with the
             // artwork up top. (Without this the hit-box sat a fifth of a
             // screen below the image it was meant to open.)
-            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-[calc(50%+14vh)] cursor-none md:-translate-y-1/2"
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-[calc(50%+14vh)] cursor-pointer md:cursor-none md:-translate-y-1/2"
             style={{ width: "88vw", height: "82vh" }}
             // Hover is driven by onMouseMove on the root (position-based), so
             // no enter/leave here — that's what made a stationary/already-
@@ -887,7 +983,7 @@ export default function ParallaxIndex({ background }: Props) {
               type="button"
               aria-label={`Open ${active.title}`}
               onClick={(e) => open(e, active)}
-              className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 cursor-none ${HERO_BOX}`}
+              className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 cursor-pointer md:cursor-none ${HERO_BOX}`}
             />
 
             {/* Satellites — active project's other images, bloom on hover. */}
@@ -900,9 +996,10 @@ export default function ParallaxIndex({ background }: Props) {
                 const src = activeSatellites[i % activeSatellites.length];
                 // Randomized-but-stable per-image delay so they don't all
                 // reveal at once — they trickle in, in a scrambled order.
-                // Range ≈ 140–600ms (the base 140 is the "give it a beat"
-                // pause before anything appears).
-                const delay = 140 + Math.round(jitter(`${active.slug}-${i}`) * 460);
+                // Range ≈ 20–260ms: small base so the images start appearing
+                // almost immediately, with just enough spread to still trickle
+                // rather than snap in as one block.
+                const delay = 20 + Math.round(jitter(`${active.slug}-${i}`) * 240);
                 // Two independent per-box seeds — drive the rAF loop's
                 // per-axis easing and idle float, so each box moves on its
                 // own rather than as one rigid grid.
@@ -927,15 +1024,20 @@ export default function ParallaxIndex({ background }: Props) {
                     // so the box can take a direct hover; it has no click of
                     // its own, and the hero's hit-box still paints above it
                     // where the two overlap.
-                    onMouseEnter={() => setHoveredSat(i)}
-                    onMouseLeave={() =>
-                      setHoveredSat((v) => (v === i ? null : v))
-                    }
+                    onMouseEnter={() => {
+                      setHoveredSat(i);
+                      hoveredSatRef.current = i;
+                    }}
+                    onMouseLeave={() => {
+                      if (hoveredSatRef.current === i)
+                        hoveredSatRef.current = null;
+                      setHoveredSat((v) => (v === i ? null : v));
+                    }}
                     // The box now paints above the hero hit-box, so give it
                     // its own click-to-open — otherwise a click landing on a
                     // satellite (rather than the bare hero) would do nothing.
                     onClick={(e) => open(e, active)}
-                    className="pointer-events-auto absolute left-1/2 top-1/2 cursor-none will-change-transform"
+                    className="pointer-events-auto absolute left-1/2 top-1/2 cursor-pointer md:cursor-none will-change-transform"
                     style={{
                       // Width is a fraction of the viewport width, exactly
                       // as the box relates to the 1920px Figma frame — but
@@ -959,9 +1061,9 @@ export default function ParallaxIndex({ background }: Props) {
                     <div
                       className="relative h-full w-full overflow-hidden"
                       style={{
-                        // Resting at 85% (canvas bleeds through slightly);
+                        // Resting at 90% (canvas bleeds through slightly);
                         // a direct hover lifts THIS box to full 100%.
-                        opacity: visible ? (isHovered ? 1 : 0.85) : 0,
+                        opacity: visible ? (isHovered ? 1 : 0.9) : 0,
                         // A direct hover lifts to full 100% and grows the box
                         // a hair (1.04) for a subtle "come forward" feel;
                         // resting = none; not-yet-revealed = 0.88.
@@ -1056,12 +1158,20 @@ export default function ParallaxIndex({ background }: Props) {
         // timeline and the project names use, so the whole mobile layout
         // sits inside one square frame. Material comes from the shared
         // CHIP_CLASS, so this and the desktop nav chip can't drift apart.
-        className={`fixed bottom-[44px] right-[44px] z-30 md:hidden ${CHIP_CLASS}`}
+        className={`fixed bottom-6 right-6 z-30 md:hidden ${CHIP_CLASS}`}
         style={{ color: "#fbfbfb" }}
       >
         <ShowAllIcon open={showAll} />
         {showAll ? t("parallax.close") : t("parallax.showAll")}
       </button>
+
+      {/* Dev-only live tuner for the hover-repel. The sliders write into the
+          repel state (mirrored into `repelRef`, which the rAF loop reads each
+          frame), so dragging retunes the effect in real time. Gated to
+          non-production, so it never appears on the built/deployed site. */}
+      {process.env.NODE_ENV !== "production" && (
+        <RepelControls value={repel} onChange={setRepel} />
+      )}
     </div>
   );
 }
@@ -1165,8 +1275,8 @@ function ShowAllList({
     // frame. The vertical insets clear the fixed chrome: 80px mobile bar and
     // the floating Show-all chip (44 inset + 42 tall), each plus a 44 gap, so
     // the first and last rows aren't parked underneath them.
-    <div className="min-h-full w-full px-[44px] pb-[130px] pt-[124px] md:pb-16 md:pt-36">
-      <ul className="w-full">
+    <div className="min-h-full w-full px-6 md:px-[44px] pb-[130px] pt-[124px] md:pb-16 md:pt-36">
+      <ul className="row-dim-list w-full">
         {projects.map((p) => {
           const thumbs = projectImageSet(p, STRIP_IMAGES);
           return (
@@ -1246,7 +1356,7 @@ function ShowAllList({
                   // internally, so on a narrow viewport it should give up
                   // width and show fewer thumbs at once rather than push
                   // itself off the edge of the page.
-                  className="-mx-[44px] flex gap-2 overflow-x-auto overscroll-x-contain px-[44px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:min-w-0 md:px-0"
+                  className="-mx-6 flex gap-2 overflow-x-auto overscroll-x-contain px-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:min-w-0 md:px-0"
                 >
                   {thumbs.map((src, i) => (
                     <Thumb key={i} src={src} onClick={(e) => onOpen(e, p)} />
@@ -1299,6 +1409,98 @@ function ShowAllList({
           );
         })}
       </ul>
+    </div>
+  );
+}
+
+/*
+  RepelControls — dev-only live tuner for the satellite hover-repel. Three
+  sliders write straight into the parent's repel state (mirrored into the ref
+  the rAF loop reads), so dragging retunes the effect in real time. Rendered
+  only in development (gated at the call site), so it never ships. Use "Copy
+  values" to grab the numbers, then bake them into the REPEL_* defaults.
+*/
+type RepelValue = { strength: number; range: number; lerp: number };
+
+function RepelControls({
+  value,
+  onChange,
+}: {
+  value: RepelValue;
+  onChange: (v: RepelValue) => void;
+}) {
+  // Collapsed by choice — minimises to a small "control" pill so it stays out
+  // of the way, click to expand the sliders again.
+  const [open, setOpen] = useState(true);
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="pointer-events-auto fixed bottom-4 left-4 z-[70] rounded-full border border-white/15 bg-black/70 px-3 py-1 text-[11px] uppercase tracking-wide text-white shadow-xl backdrop-blur-md hover:bg-black/80"
+        style={{ fontFamily: "var(--font-geist-mono, monospace)" }}
+      >
+        control
+      </button>
+    );
+  }
+  const rows: {
+    key: keyof RepelValue;
+    label: string;
+    min: number;
+    max: number;
+    step: number;
+  }[] = [
+    { key: "strength", label: "Strength (px)", min: 0, max: 240, step: 5 },
+    { key: "range", label: "Range (px)", min: 80, max: 1000, step: 10 },
+    { key: "lerp", label: "Ease", min: 0.02, max: 0.4, step: 0.01 },
+  ];
+  return (
+    <div
+      className="pointer-events-auto fixed bottom-4 left-4 z-[70] w-60 rounded-lg border border-white/15 bg-black/70 p-3 text-[11px] text-white shadow-xl backdrop-blur-md"
+      style={{ fontFamily: "var(--font-geist-mono, monospace)" }}
+    >
+      <div className="mb-2 flex items-center justify-between font-semibold uppercase tracking-wide opacity-90">
+        <span>Repel · dev</span>
+        <button
+          type="button"
+          onClick={() => setOpen(false)}
+          aria-label="Minimize"
+          className="ml-2 flex h-5 w-5 items-center justify-center rounded text-sm leading-none hover:bg-white/10"
+        >
+          –
+        </button>
+      </div>
+      {rows.map((r) => (
+        <label key={r.key} className="mb-2 block cursor-pointer">
+          <div className="mb-1 flex justify-between">
+            <span>{r.label}</span>
+            <span className="tabular-nums opacity-70">{value[r.key]}</span>
+          </div>
+          <input
+            type="range"
+            min={r.min}
+            max={r.max}
+            step={r.step}
+            value={value[r.key]}
+            onChange={(e) =>
+              onChange({ ...value, [r.key]: Number(e.target.value) })
+            }
+            className="w-full accent-white"
+          />
+        </label>
+      ))}
+      <button
+        type="button"
+        onClick={() =>
+          navigator.clipboard?.writeText(
+            `const REPEL_STRENGTH = ${value.strength};\nconst REPEL_RANGE = ${value.range};\nconst REPEL_LERP = ${value.lerp};`,
+          )
+        }
+        className="mt-1 w-full rounded border border-white/20 py-1 text-center hover:bg-white/10"
+      >
+        Copy values
+      </button>
     </div>
   );
 }

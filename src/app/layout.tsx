@@ -3,7 +3,6 @@ import { Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ConfigProvider, LanguageProvider, PageBackgroundProvider } from "@/lib/state";
 import TopNav from "@/components/TopNav";
-import BottomChrome from "@/components/BottomChrome";
 import NavFade from "@/components/NavFade";
 import CustomCursor from "@/components/CustomCursor";
 import { TransitionProvider } from "@/components/PageTransition";
@@ -26,9 +25,21 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Torto Studio",
+  metadataBase: new URL("https://julia-paternostro.com"),
+  title: "Julia Paternostro",
   description:
-    "Torto Studio — independent design practice: branding, editorial, packaging, type design.",
+    "Julia Paternostro — independent design practice: branding, editorial, packaging, type design.",
+  alternates: {
+    canonical: "https://julia-paternostro.com",
+  },
+  openGraph: {
+    title: "Julia Paternostro",
+    description:
+      "Julia Paternostro — independent design practice: branding, editorial, packaging, type design.",
+    url: "https://julia-paternostro.com",
+    siteName: "Julia Paternostro",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
@@ -53,7 +64,6 @@ export default function RootLayout({
                   {children}
                   <NavFade />
                   <TopNav />
-                  <BottomChrome />
                   {/* Global — ring appears over any element opted-in via
                       `.tile-hover` or `data-cursor-ring`. */}
                   <CustomCursor />

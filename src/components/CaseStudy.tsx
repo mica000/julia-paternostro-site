@@ -151,7 +151,7 @@ export default function CaseStudy({ project }: { project: Project }) {
         No max-width — content spans full viewport per user request.
         Padding scales down on mobile so tight viewports keep breathing room.
       */}
-      <div className="px-[44px] pt-[120px] md:pt-[225px]">
+      <div className="px-6 md:px-[44px] pt-[120px] md:pt-[225px]">
         {/* ────────────  header  ────────────
             Just the title now. Per Figma (node 12:286) the meta row
             (CATEGORIE / YEAR / CLIENT) and credits row have both moved

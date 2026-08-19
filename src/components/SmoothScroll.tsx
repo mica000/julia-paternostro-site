@@ -34,7 +34,24 @@ function LenisRouteReset() {
   const lenis = useLenis();
   const pathname = usePathname();
   useEffect(() => {
-    lenis?.scrollTo(0, { immediate: true });
+    if (!lenis) return;
+    // Jump to the top so a new page never inherits the previous scroll offset.
+    lenis.scrollTo(0, { immediate: true });
+    // CRITICAL: re-measure the page on every route change.
+    //
+    // Lenis (root mode) caches the scrollable height from a ResizeObserver on
+    // <html>. But our <html> is `h-full` (height: 100%), so its box is pinned
+    // to the viewport and NEVER changes size on navigation — the observer
+    // doesn't fire, and Lenis keeps the previous route's measurement. Coming
+    // from the index (a fixed, non-scrolling parallax → limit ≈ 0), a case
+    // study would then refuse to wheel-scroll at all. `resize()` forces Lenis
+    // to re-read document.documentElement.scrollHeight so the limit is right.
+    lenis.resize();
+    // Belt-and-suspenders: re-measure once more after the new page's layout
+    // has settled (image aspect-ratio boxes, wrapped text) in case the first
+    // measurement ran a frame too early.
+    const id = requestAnimationFrame(() => lenis.resize());
+    return () => cancelAnimationFrame(id);
   }, [lenis, pathname]);
   return null;
 }
