@@ -59,6 +59,10 @@ export type Project = {
   gallery: string[];
   /** Optional credits row shown at the bottom of the case study. */
   credits?: Credits;
+  /** Deliverables list for the case-study meta row (Figma node 403:1062),
+      e.g. "Branding, Illustrations, Creative direction". When absent the meta
+      row falls back to the project's `category`. */
+  deliverables?: Localized;
   /** Case-study background color (hex). Also seeds the click-through
       transition on the Work grid — the tile's bg fills the viewport and
       lands on this exact color. Falls back to the shared `defaultBg`. */
@@ -98,6 +102,14 @@ export type Project = {
    * bottom hero) and don't need to migrate all at once.
    */
   sections?: Section[];
+  /**
+   * Hidden from the listing surfaces (parallax index stage + timeline, the
+   * Show-all list, and case-study "related" footer) without being deleted.
+   * The data and assets stay in place and the /work/[slug] page still resolves
+   * by direct link, so a hidden project can be brought back by flipping this
+   * flag. Used to trim the site to the finished projects for a delivery.
+   */
+  hidden?: boolean;
 };
 
 /**
@@ -235,6 +247,10 @@ export const projects: Project[] = [
     title: "Delírio Tropical",
     category: { en: "Branding", pt: "Branding" },
     year: "2024",
+    deliverables: {
+      en: "Branding, Illustration, Creative direction",
+      pt: "Branding, Ilustração, Direção criativa",
+    },
     tagline: {
       en: "Funky brand for a music festival in Espírito Santo.",
       pt: "Marca funky para um festival de música no Espírito Santo.",
@@ -356,7 +372,15 @@ export const projects: Project[] = [
   // ---------------------------------------------------------------------------
   {
     slug: "vivs",
+    deliverables: {
+      en: "Concept, Illustration, Art direction",
+      pt: "Conceito, Ilustração, Direção de arte",
+    },
     title: "Vivs",
+    tagline: {
+      en: "An illustration series.",
+      pt: "Uma série de ilustrações.",
+    },
     category: { en: "Illustration", pt: "Ilustração" },
     year: "2024",
     brief: {
@@ -367,8 +391,52 @@ export const projects: Project[] = [
       en: "Case study coming soon.",
       pt: "Case study em breve.",
     },
-    tileImage: tile(2),
-    gallery: fallbackGallery(1),
+    tileImage: "/Images/Vivs/1.webp",
+    gallery: [
+      "/Images/Vivs/1.webp",
+      "/Images/Vivs/2.webp",
+      "/Images/Vivs/3.webp",
+      "/Images/Vivs/5.webp",
+      "/Images/Vivs/6.webp",
+      "/Images/Vivs/8.webp",
+      "/Images/Vivs/9.webp",
+      "/Images/Vivs/11.webp",
+      "/Images/Vivs/13.webp",
+      "/Images/Vivs/14.webp",
+      "/Images/Vivs/16.webp",
+      "/Images/Vivs/17.webp",
+    ],
+    // Case-study layout — each image keeps its own aspect (no cropping):
+    // landscape 1800×1105, wide banner 1800×855, portrait 1342×1682.
+    sections: [
+      { kind: "hero", src: "/Images/Vivs/1.webp", ratio: "1800/1105" },
+      {
+        kind: "cols",
+        cols: 2,
+        images: ["/Images/Vivs/11.webp", "/Images/Vivs/13.webp"],
+        ratio: "1342/1682",
+      },
+      { kind: "hero", src: "/Images/Vivs/2.webp", ratio: "1800/855" },
+      {
+        kind: "cols",
+        cols: 3,
+        images: [
+          "/Images/Vivs/16.webp",
+          "/Images/Vivs/5.webp",
+          "/Images/Vivs/8.webp",
+        ],
+        ratio: "1342/1682",
+      },
+      { kind: "hero", src: "/Images/Vivs/14.webp", ratio: "1800/1105" },
+      {
+        kind: "cols",
+        cols: 2,
+        images: ["/Images/Vivs/6.webp", "/Images/Vivs/9.webp"],
+        ratio: "1800/1105",
+      },
+      { kind: "hero", src: "/Images/Vivs/3.webp", ratio: "1800/1105" },
+      { kind: "hero", src: "/Images/Vivs/17.webp", ratio: "1800/1105" },
+    ],
     bg: "#2d7c3b",
   },
   // ---------------------------------------------------------------------------
@@ -376,7 +444,16 @@ export const projects: Project[] = [
   // ---------------------------------------------------------------------------
   {
     slug: "budapest-forro",
+    deliverables: {
+      en: "Branding, Illustration, Creative direction",
+      pt: "Branding, Ilustração, Direção criativa",
+    },
+    hidden: true,
     title: "Budapest Forró Festival",
+    tagline: {
+      en: "Brand for a forró festival in Budapest.",
+      pt: "Marca para um festival de forró em Budapeste.",
+    },
     category: { en: "Branding", pt: "Branding" },
     year: "2024",
     brief: {
@@ -399,7 +476,15 @@ export const projects: Project[] = [
   // ---------------------------------------------------------------------------
   {
     slug: "delirio-sao-joao",
+    deliverables: {
+      en: "Branding, Illustration, Creative direction",
+      pt: "Branding, Ilustração, Direção criativa",
+    },
     title: "Delírio Tropical — São João",
+    tagline: {
+      en: "The São João edition of Delírio Tropical.",
+      pt: "A edição de São João do Delírio Tropical.",
+    },
     category: { en: "Branding", pt: "Branding" },
     year: "2025",
     brief: {
@@ -508,7 +593,16 @@ export const projects: Project[] = [
   // ---------------------------------------------------------------------------
   {
     slug: "premio-inoves",
+    deliverables: {
+      en: "Branding, Illustration, Creative direction",
+      pt: "Branding, Ilustração, Direção criativa",
+    },
+    hidden: true,
     title: "Prêmio Inoves",
+    tagline: {
+      en: "Brand for an innovation award.",
+      pt: "Marca para um prêmio de inovação.",
+    },
     category: { en: "Branding", pt: "Branding" },
     year: "2023",
     brief: {
@@ -528,7 +622,15 @@ export const projects: Project[] = [
   // ---------------------------------------------------------------------------
   {
     slug: "fcv",
+    deliverables: {
+      en: "Branding, Illustration, Creative direction",
+      pt: "Branding, Ilustração, Direção criativa",
+    },
     title: "30º Festival de Cinema de Vitória",
+    tagline: {
+      en: "Identity for the 30th Vitória Film Festival.",
+      pt: "Identidade para o 30º Festival de Cinema de Vitória.",
+    },
     category: { en: "Branding", pt: "Branding" },
     year: "2023",
     brief: {
@@ -618,7 +720,15 @@ export const projects: Project[] = [
   // ---------------------------------------------------------------------------
   {
     slug: "tenda-lab",
+    deliverables: {
+      en: "Branding, Illustration, Creative direction",
+      pt: "Branding, Ilustração, Direção criativa",
+    },
     title: "Tenda Lab",
+    tagline: {
+      en: "Brand for a festival of Brazilian music.",
+      pt: "Marca para um festival de música brasileira.",
+    },
     category: { en: "Branding", pt: "Branding" },
     year: "2023",
     brief: {
@@ -728,7 +838,16 @@ export const projects: Project[] = [
   // ---------------------------------------------------------------------------
   {
     slug: "samba",
+    deliverables: {
+      en: "Concept, Illustration, Art direction",
+      pt: "Conceito, Ilustração, Direção de arte",
+    },
+    hidden: true,
     title: "Samba que eu quero ver",
+    tagline: {
+      en: "Illustration in celebration of samba.",
+      pt: "Ilustração em celebração ao samba.",
+    },
     category: { en: "Illustration", pt: "Ilustração" },
     year: "2024",
     brief: {
@@ -748,8 +867,17 @@ export const projects: Project[] = [
   // ---------------------------------------------------------------------------
   {
     slug: "leather",
+    deliverables: {
+      en: "Concept, Illustration, Art direction",
+      pt: "Conceito, Ilustração, Direção de arte",
+    },
+    hidden: true,
     title: "Leather",
-    category: { en: "Branding", pt: "Branding" },
+    tagline: {
+      en: "An illustration project.",
+      pt: "Um projeto de ilustração.",
+    },
+    category: { en: "Illustration", pt: "Ilustração" },
     year: "2024",
     brief: {
       en: "Case study coming soon.",
@@ -768,7 +896,15 @@ export const projects: Project[] = [
   // ---------------------------------------------------------------------------
   {
     slug: "a-selva",
+    deliverables: {
+      en: "Branding, Illustration, Creative direction",
+      pt: "Branding, Ilustração, Direção criativa",
+    },
     title: "A Selva",
+    tagline: {
+      en: "Brand for a multicultural venue in Vitória.",
+      pt: "Marca para uma casa multicultural em Vitória.",
+    },
     category: { en: "Branding", pt: "Branding" },
     year: "2023",
     brief: {
@@ -791,7 +927,16 @@ export const projects: Project[] = [
   // ---------------------------------------------------------------------------
   {
     slug: "cinemarias",
+    deliverables: {
+      en: "Branding, Illustration, Creative direction",
+      pt: "Branding, Ilustração, Direção criativa",
+    },
+    hidden: true,
     title: "CineMarias",
+    tagline: {
+      en: "Brand for a festival on feminine identities.",
+      pt: "Marca para um festival sobre identidades femininas.",
+    },
     category: { en: "Branding", pt: "Branding" },
     year: "2022",
     brief: {
@@ -815,7 +960,16 @@ export const projects: Project[] = [
   // ---------------------------------------------------------------------------
   {
     slug: "human-or-machine",
+    deliverables: {
+      en: "Concept, Illustration, Art direction",
+      pt: "Conceito, Ilustração, Direção de arte",
+    },
+    hidden: true,
     title: "Human or Machine?",
+    tagline: {
+      en: "Illustration on the human–machine bond.",
+      pt: "Ilustração sobre a relação humano–máquina.",
+    },
     category: { en: "Illustration", pt: "Ilustração" },
     year: "2025",
     brief: {
@@ -831,6 +985,13 @@ export const projects: Project[] = [
     bg: "#1a1a1a",
   },
 ];
+
+/**
+ * The projects shown on the listing surfaces (index stage/timeline, Show-all
+ * list, case-study related footer) — everything not flagged `hidden`. The full
+ * `projects` array is kept for direct /work/[slug] routes and the editor.
+ */
+export const visibleProjects: Project[] = projects.filter((p) => !p.hidden);
 
 /**
  * Look up a project by its URL slug. Returns undefined for unknown slugs

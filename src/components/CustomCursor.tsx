@@ -1,89 +1,140 @@
 "use client";
 
 /*
-  CustomCursor — adaptive stroke ring, tile-only
-  ----------------------------------------------
-  A small hollow ring that appears only when the pointer is over a tile.
-  The ring uses `mix-blend-mode: difference` (same technique as the top nav)
-  so its outline always reads legibly against whatever image or background
-  color sits underneath — you don't need to pick a cursor color.
+  CustomCursor — dot that expands into a ring (Metalab-style)
+  -----------------------------------------------------------
+  Replaces the native cursor on fine-pointer (mouse / trackpad) devices:
 
-  Trail behavior stays the same: rAF-driven translate on the outer element
-  with a soft lerp so the ring visibly follows the pointer with a delay.
-  Show/hide is React-state driven with a CSS opacity + scale transition,
-  giving a k95-style "pop in" feel on tile enter.
+    • At rest        → a small FILLED dot that tracks the pointer exactly.
+    • Over anything  → the dot grows into a larger HOLLOW ring, the way
+      clickable         metalab.com rings interactive elements. The ring
+                        follows with a soft trail so it floats to the pointer.
+
+  "Clickable" = links, buttons, tiles, and anything explicitly opted in with
+  `data-cursor-ring` (nav items, toggles, the index hit-box, gallery images).
+
+  The circle uses `mix-blend-mode: difference` (same trick as the top nav) so
+  white always inverts to a legible contrast against whatever image or color
+  sits beneath it — no need to choose a cursor color per surface.
+
+  The native cursor is hidden site-wide via a `.cursor-hidden` class this
+  component sets on <html> while active (see globals.css), so if JS never runs
+  the real cursor is still there.
 */
 
 import { useEffect, useRef, useState } from "react";
 
-const RING_SIZE = 36;      // px — ring diameter at rest
-const RING_STROKE = 1.5;   // px — stroke width
-const TRAIL_LERP = 0.15;   // lower = slower / more visible trail
+const DOT_SIZE = 8; // px — filled dot at rest
+const RING_SIZE = 40; // px — hollow ring over clickables
+const RING_STROKE = 1.5; // px — ring stroke
+const TRAIL_LERP = 0.18; // ring trail (lower = more float). Dot tracks exactly.
+
+// What counts as "clickable" — the dot rings these.
+const CLICKABLE = "a, button, [role='button'], .tile-hover, [data-cursor-ring]";
 
 export default function CustomCursor() {
   const outerRef = useRef<HTMLDivElement>(null);
   const target = useRef({ x: -100, y: -100 });
   const current = useRef({ x: -100, y: -100 });
-  const [visible, setVisible] = useState(false);
+  // Mirror of `hovering` for the rAF loop, which can't read state directly.
+  const hoveringRef = useRef(false);
+  const [enabled, setEnabled] = useState(false);
+  const [onscreen, setOnscreen] = useState(false);
+  const [hovering, setHovering] = useState(false);
+
+  // Fine-pointer only. Touch devices keep no cursor and never show the dot.
+  useEffect(() => {
+    const mq = window.matchMedia("(hover: hover) and (pointer: fine)");
+    const apply = () => setEnabled(mq.matches);
+    apply();
+    mq.addEventListener("change", apply);
+    return () => mq.removeEventListener("change", apply);
+  }, []);
 
   useEffect(() => {
+    hoveringRef.current = hovering;
+  }, [hovering]);
+
+  useEffect(() => {
+    if (!enabled) return;
     const outer = outerRef.current;
     if (!outer) return;
+
+    // Hide the native cursor while the custom one is live. Scoped to a class
+    // so it only applies once this component has mounted (JS-off = real
+    // cursor stays).
+    const root = document.documentElement;
+    root.classList.add("cursor-hidden");
 
     let raf = 0;
 
     const onMove = (e: PointerEvent) => {
       target.current.x = e.clientX;
       target.current.y = e.clientY;
-
-      // Show over tiles AND any element marked with `data-cursor-ring` —
-      // nav links, view/lang toggles opt in that way. `elementFromPoint`
-      // respects pointer-events:none (so the cursor element itself doesn't
-      // count).
-      const under = document.elementFromPoint(e.clientX, e.clientY) as HTMLElement | null;
-      setVisible(!!under?.closest(".tile-hover, [data-cursor-ring]"));
+      setOnscreen(true);
+      // `elementFromPoint` respects pointer-events:none, so the cursor node
+      // itself never counts. `closest` walks up to catch children of a link.
+      const under = document.elementFromPoint(
+        e.clientX,
+        e.clientY
+      ) as HTMLElement | null;
+      setHovering(!!under?.closest(CLICKABLE));
     };
+    const onLeave = () => setOnscreen(false);
 
     const paint = () => {
-      current.current.x += (target.current.x - current.current.x) * TRAIL_LERP;
-      current.current.y += (target.current.y - current.current.y) * TRAIL_LERP;
-      const half = RING_SIZE / 2;
-      outer.style.transform =
-        `translate3d(${current.current.x - half}px, ${current.current.y - half}px, 0)`;
+      // The dot tracks the pointer exactly; the ring floats in with a trail.
+      const lerp = hoveringRef.current ? TRAIL_LERP : 1;
+      current.current.x += (target.current.x - current.current.x) * lerp;
+      current.current.y += (target.current.y - current.current.y) * lerp;
+      outer.style.transform = `translate3d(${current.current.x}px, ${current.current.y}px, 0)`;
       raf = requestAnimationFrame(paint);
     };
     raf = requestAnimationFrame(paint);
 
     window.addEventListener("pointermove", onMove);
+    document.addEventListener("pointerleave", onLeave);
+    window.addEventListener("blur", onLeave);
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener("pointermove", onMove);
+      document.removeEventListener("pointerleave", onLeave);
+      window.removeEventListener("blur", onLeave);
+      root.classList.remove("cursor-hidden");
     };
-  }, []);
+  }, [enabled]);
 
+  if (!enabled) return null;
+
+  const size = hovering ? RING_SIZE : DOT_SIZE;
   return (
     <div
       ref={outerRef}
-      className="pointer-events-none fixed left-0 top-0 z-[60] transition-opacity duration-200 will-change-transform"
+      className="pointer-events-none fixed left-0 top-0 z-[60] will-change-transform"
       style={{
-        // Adaptive contrast — same trick the top nav uses. White stroke blends
-        // to the complement of whatever is behind it, so it stays legible on
-        // dark canvas, light backgrounds, and colored tiles alike.
         mixBlendMode: "difference",
-        opacity: visible ? 1 : 0,
+        opacity: onscreen ? 1 : 0,
+        transition: "opacity 200ms ease",
       }}
       aria-hidden
     >
+      {/* Centered on the pointer via translate(-50%,-50%) so the circle stays
+          registered on the hotspot as it grows from dot to ring. */}
       <div
         className="rounded-full"
         style={{
-          width: RING_SIZE,
-          height: RING_SIZE,
-          border: `${RING_STROKE}px solid white`,
-          backgroundColor: "transparent",
-          transform: visible ? "scale(1)" : "scale(0.6)",
-          transformOrigin: "center center",
-          transition: "transform 320ms cubic-bezier(0.22, 1, 0.36, 1)",
+          position: "absolute",
+          left: 0,
+          top: 0,
+          width: size,
+          height: size,
+          transform: "translate(-50%, -50%)",
+          backgroundColor: hovering ? "transparent" : "#ffffff",
+          border: hovering
+            ? `${RING_STROKE}px solid #ffffff`
+            : "0px solid transparent",
+          transition:
+            "width 300ms cubic-bezier(0.22,1,0.36,1), height 300ms cubic-bezier(0.22,1,0.36,1), background-color 200ms ease, border-width 200ms ease",
         }}
       />
     </div>

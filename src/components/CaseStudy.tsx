@@ -37,31 +37,17 @@ import { useTransition } from "@/components/PageTransition";
 import CaseStudyFooter from "@/components/CaseStudyFooter";
 import LangToggle from "@/components/LangToggle";
 
-// Column labels — kept local to this component. Extend/edit here if the
-// designer changes the wording.
-const LABEL: Record<
-  | "categorie"
-  | "year"
-  | "creativeDirection"
-  | "illustrations"
-  | "copywriting"
-  | "client",
+// Meta-row labels (Figma node 403:1046) — mixed case, and sit BELOW their
+// value. Kept local to this component; edit here if the designer changes the
+// wording.
+const META_LABEL: Record<
+  "projectType" | "year" | "deliverables",
   Record<Lang, string>
 > = {
-  categorie: { en: "CATEGORIE", pt: "CATEGORIA" },
-  year: { en: "YEAR", pt: "ANO" },
-  creativeDirection: {
-    en: "CREATIVE DIRECTION AND DESIGN",
-    pt: "DIREÇÃO CRIATIVA E DESIGN",
-  },
-  illustrations: { en: "ILLUSTRATIONS", pt: "ILUSTRAÇÕES" },
-  copywriting: { en: "COPYWRITING", pt: "COPYWRITING" },
-  client: { en: "CLIENT", pt: "CLIENTE" },
+  projectType: { en: "Project type", pt: "Tipo de projeto" },
+  year: { en: "Year", pt: "Ano" },
+  deliverables: { en: "Deliverables", pt: "Entregáveis" },
 };
-
-// Placeholder shown when a credit field is missing on a project that
-// otherwise has credits defined. Keeps the 4-column layout intact.
-const CREDIT_PLACEHOLDER = "—";
 
 export default function CaseStudy({ project }: { project: Project }) {
   const { lang } = useLang();
@@ -151,24 +137,47 @@ export default function CaseStudy({ project }: { project: Project }) {
         No max-width — content spans full viewport per user request.
         Padding scales down on mobile so tight viewports keep breathing room.
       */}
-      <div className="px-6 md:px-[44px] pt-[120px] md:pt-[225px]">
+      <div className="px-6 md:px-[44px] pt-[96px] md:pt-[156px]">
         {/* ────────────  header  ────────────
             Just the title now. Per Figma (node 12:286) the meta row
             (CATEGORIE / YEAR / CLIENT) and credits row have both moved
             to the bottom of the case study — see the meta block after
             the sections. */}
-        <header className="mb-16 md:mb-[86px]">
+        <header className="mb-8 md:mb-[62px]">
           {/*
-            Title — Figma "Super Large Title" token: SF Pro Bold, target
-            124/124 on desktop (xl+). Scales down through breakpoints for
-            mobile readability. `leading-[1.05]` keeps proportional line
-            height at any size instead of a fixed 124px value that would
-            over-space a 44px mobile title.
+            Title — Figma "Super Large Title" token: SF Pro Bold, 80/80, 0%
+            tracking on desktop (xl+). Scales down through the breakpoints for
+            mobile readability. `leading-none` matches the 80/80 (line height =
+            font size); tracking is normal (0%) per the style.
           */}
-          <h1 className="text-[44px] sm:text-[64px] md:text-[96px] xl:text-[124px] font-bold leading-[1.05] tracking-[-0.02em] break-words">
+          <h1 className="text-[40px] sm:text-[56px] md:text-[64px] xl:text-[80px] font-bold leading-none tracking-normal break-words md:max-w-[60%]">
             {project.title}
           </h1>
         </header>
+
+        {/* ────────────  meta row  ────────────
+            Figma node 403:1046 — moved UP under the title (it used to sit at
+            the very bottom). Each field is its VALUE with a dimmed LABEL below
+            it, laid across the top: Project type (½) · Year (¼) · Deliverables
+            (¼). Stacks to one column on mobile. */}
+        <Reveal className="mb-12 md:mb-[62px]">
+          <div className="flex flex-col gap-6 md:flex-row md:gap-0">
+            <MetaTop label={META_LABEL.projectType[lang]} className="md:w-1/2">
+              {pick(project.category, lang)}
+            </MetaTop>
+            <MetaTop label={META_LABEL.year[lang]} className="md:w-1/4">
+              {project.year}
+            </MetaTop>
+            <MetaTop
+              label={META_LABEL.deliverables[lang]}
+              className="md:w-1/4"
+            >
+              {project.deliverables
+                ? pick(project.deliverables, lang)
+                : pick(project.category, lang)}
+            </MetaTop>
+          </div>
+        </Reveal>
 
         {/* ────────────  intro hero + context paragraph  ────────────
           Per new Figma: the first gallery image renders on its own as
@@ -185,12 +194,15 @@ export default function CaseStudy({ project }: { project: Project }) {
         {project.sections && project.sections.length > 0 ? (
           <>
             <IntroHero section={project.sections[0]} />
-            <ContextParagraph text={pick(project.context, lang)} />
+            <ContextParagraph
+              context={pick(project.context, lang)}
+              brief={pick(project.brief, lang)}
+            />
             <Sections sections={project.sections.slice(1)} />
           </>
         ) : (
           <>
-            <section className="mb-16 md:mb-[86px]">
+            <section className="mx-auto mb-16 md:mb-[62px] md:max-w-[70%]">
               <Frame
                 src={project.gallery[0]}
                 ratio="1440/484"
@@ -198,7 +210,10 @@ export default function CaseStudy({ project }: { project: Project }) {
                 sizes="100vw"
               />
             </section>
-            <ContextParagraph text={pick(project.context, lang)} />
+            <ContextParagraph
+              context={pick(project.context, lang)}
+              brief={pick(project.brief, lang)}
+            />
             <section className="flex flex-col gap-3 md:gap-5">
               {/* 2×2 grid — each row staggers L (0) → R (80ms). Column
                   index in a 2-col grid is `j % 2`. */}
@@ -222,38 +237,6 @@ export default function CaseStudy({ project }: { project: Project }) {
           </>
         )}
 
-        {/* ────────────  meta + credits  ────────────
-            Per Figma (node 12:286) both meta and credits sit BELOW the
-            image gallery, stacked as two 3-column rows:
-              Row 1: CATEGORIE  |  YEAR                |  CLIENT
-              Row 2: CREATIVE DIRECTION AND DESIGN | ILLUSTRATIONS | COPYWRITING
-            The ~95px top padding matches Figma's empty space above the
-            first row. Rows use equal 3-column split so labels align
-            vertically between rows. Mobile stacks single-column. */}
-        <section className="pt-16 md:pt-[95px] flex flex-col gap-y-10">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 md:gap-x-10 gap-y-6">
-            <MetaField label={LABEL.categorie[lang]}>
-              {pick(project.category, lang)}
-            </MetaField>
-            <MetaField label={LABEL.year[lang]}>{project.year}</MetaField>
-            <MetaField label={LABEL.client[lang]}>
-              {project.credits?.client ?? CREDIT_PLACEHOLDER}
-            </MetaField>
-          </div>
-          {project.credits && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 md:gap-x-10 gap-y-6">
-              <MetaField label={LABEL.creativeDirection[lang]}>
-                {project.credits.creativeDirection ?? CREDIT_PLACEHOLDER}
-              </MetaField>
-              <MetaField label={LABEL.illustrations[lang]}>
-                {project.credits.illustrations ?? CREDIT_PLACEHOLDER}
-              </MetaField>
-              <MetaField label={LABEL.copywriting[lang]}>
-                {project.credits.copywriting ?? CREDIT_PLACEHOLDER}
-              </MetaField>
-            </div>
-          )}
-        </section>
       </div>
 
       {/* Related projects — full-viewport-width footer, sits inside the
@@ -278,23 +261,25 @@ export default function CaseStudy({ project }: { project: Project }) {
 }
 
 /*
-  MetaField — a small stacked label/value used in the header.
-  Label is dimmed uppercase, value below at full opacity. Kept as a local
-  component so any future spacing/type tweak lives in one place.
+  MetaTop — one field in the top meta row (Figma node 403:1046): the VALUE on
+  top at full opacity, a dimmed LABEL directly beneath it. Both SF Regular
+  13/16. The width (½ / ¼ / ¼) is passed in via `className`.
 */
-function MetaField({
+function MetaTop({
   label,
   children,
+  className,
 }: {
   label: string;
   children: React.ReactNode;
+  className?: string;
 }) {
   return (
-    <div>
-      <div className="mb-1 text-xs font-medium uppercase tracking-wider opacity-60">
+    <div className={className}>
+      <div className="text-[13px] font-normal leading-4">{children}</div>
+      <div className="mt-1 text-[13px] font-normal leading-4 opacity-50">
         {label}
       </div>
-      <div className="text-sm">{children}</div>
     </div>
   );
 }
@@ -478,7 +463,10 @@ const COLS3_RATIO_DEFAULT = "292 / 405";
 */
 function IntroHero({ section }: { section: Section }) {
   return (
-    <section className="mb-16 md:mb-[86px]">
+    // The hero (main image) is capped and centered — it doesn't stretch the
+    // full content width on large screens, matching the Figma where it sits
+    // inset. The text blocks around it stay left-aligned / full-width.
+    <section className="mx-auto mb-16 md:mb-[62px] md:max-w-[70%]">
       {section.kind === "hero" ? (
         <Frame
           src={section.src}
@@ -494,17 +482,35 @@ function IntroHero({ section }: { section: Section }) {
 }
 
 /*
-  ContextParagraph — the large-format paragraph that introduces the
-  project below the intro hero. Figma style: SF Pro Bold 26/32,
-  constrained to ~700px so lines wrap short and read like display copy
-  rather than body text.
+  ContextParagraph — the large-format description below the intro hero.
+  It MERGES the project's `brief` and `context` into one description block,
+  rendered as two stacked paragraphs — `brief` first, then `context`.
+  Duplicates and empties are dropped, so projects whose brief and context are
+  the same (or blank) show just one line. Constrained to ~700px so lines wrap
+  short and read like display copy rather than body text.
 */
-function ContextParagraph({ text }: { text: string }) {
+function ContextParagraph({
+  context,
+  brief,
+}: {
+  context: string;
+  brief: string;
+}) {
+  const paras = [brief, context].filter(
+    (t, i, arr) => t && arr.indexOf(t) === i
+  );
   return (
     <Reveal>
-      <p className="mb-16 md:mb-[156px] max-w-[700px] text-[18px] md:text-[26px] font-bold leading-snug md:leading-8 tracking-normal">
-        {text}
-      </p>
+      <div className="mb-16 md:mb-[156px] flex max-w-[700px] flex-col gap-4 md:gap-5">
+        {paras.map((t, i) => (
+          <p
+            key={i}
+            className="text-[16px] font-semibold leading-snug tracking-normal md:text-[18px] md:leading-6"
+          >
+            {t}
+          </p>
+        ))}
+      </div>
     </Reveal>
   );
 }

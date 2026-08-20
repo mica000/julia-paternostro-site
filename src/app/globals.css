@@ -81,6 +81,20 @@ nav a, nav button {
 }
 
 /*
+  Custom-cursor mode — when <html> carries `.cursor-hidden` (set by
+  CustomCursor once it's live on a fine-pointer device), hide the native
+  cursor EVERYWHERE so the dot/ring is the only pointer on screen. Gated
+  behind the class so JS-off or touch visitors keep their real cursor, and
+  behind the fine-pointer media query so it never touches touch devices.
+*/
+@media (hover: hover) and (pointer: fine) {
+  html.cursor-hidden,
+  html.cursor-hidden * {
+    cursor: none !important;
+  }
+}
+
+/*
   Show-all list — hovering one row fades the OTHER rows to 70% so the row the
   pointer is on reads as the focus. The hovered row is pulled back to full
   opacity: both rules have equal specificity, so source order decides — the

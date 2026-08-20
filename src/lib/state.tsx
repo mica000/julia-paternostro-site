@@ -68,10 +68,11 @@ const dicts = {
     "nav.copied": "Copied",
     "parallax.showAll": "Show all",
     "parallax.close": "Close",
+    "parallax.parallaxView": "Parallax view",
     "parallax.goToProject": "Go to project",
     "about.title": "About",
     "about.body":
-      "Torto Studio is an independent design practice working across branding, editorial, packaging, and type design.",
+      "I'm a Brazilian multidisciplinary graphic designer, specialized in creating eye-catching designs that merge novelty and purpose through vibrant and bold visuals. I love exchanging ideas and I'm ready to answer any questions you might have. Feel free to reach out to me via email. Let's create something amazing!",
     "services.title": "Services",
     "services.body":
       "Brand identity, editorial design, packaging, type design, and web design.",
@@ -82,10 +83,11 @@ const dicts = {
     "nav.copied": "Copiado",
     "parallax.showAll": "Ver todos",
     "parallax.close": "Fechar",
+    "parallax.parallaxView": "Ver parallax",
     "parallax.goToProject": "Ir para o projeto",
     "about.title": "Sobre",
     "about.body":
-      "O Torto Studio é um estúdio de design independente que trabalha em branding, editorial, packaging e desenho de tipos.",
+      "Sou uma designer gráfica multidisciplinar brasileira, especializada em criar designs marcantes que unem novidade e propósito através de visuais vibrantes e ousados. Adoro trocar ideias e estou pronta para responder qualquer dúvida. Fique à vontade para me chamar por e-mail. Vamos criar algo incrível!",
     "services.title": "Serviços",
     "services.body":
       "Identidade de marca, design editorial, packaging, desenho de tipos e web design.",

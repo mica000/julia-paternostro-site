@@ -47,7 +47,12 @@ import {
   useRef,
   useState,
 } from "react";
-import { projects, projectBg, projectImageSet, pick } from "@/lib/projects";
+import {
+  visibleProjects as projects,
+  projectBg,
+  projectImageSet,
+  pick,
+} from "@/lib/projects";
 import {
   compositionFor,
   heroSrc,
@@ -56,7 +61,6 @@ import {
 } from "@/lib/compositions";
 import { useTransition } from "@/components/PageTransition";
 import ShowAllIcon, { CHIP_CLASS } from "@/components/ShowAllIcon";
-import LangToggle from "@/components/LangToggle";
 import { useLang, useConfig } from "@/lib/state";
 
 type Props = {
@@ -99,8 +103,8 @@ const SAT_DRIFT = 70;
 // RANGE = how far that push reaches before fading (bigger = more boxes move);
 // LERP = per-frame easing so the scatter eases in on hover and eases back on
 // leave. Purely a pointer effect — skipped under reduced motion / on touch.
-const REPEL_STRENGTH = 140;
-const REPEL_RANGE = 460;
+const REPEL_STRENGTH = 185;
+const REPEL_RANGE = 1000;
 const REPEL_LERP = 0.02;
 // Cursor-follow lerp for the drift (0..1). Lower = softer, laggier drift.
 const MOUSE_SMOOTH = 0.1;
@@ -112,18 +116,6 @@ const REVEAL_GRACE_MS = 0;
 // line-height + 8px gap; the window shows ~9 rows and clips the rest.
 const TIMELINE_PITCH = 24;
 const TIMELINE_HEIGHT = 208;
-// How many images each "Show all" row puts in its scrollable strip. Capped
-// rather than unbounded: Delírio alone has 28 case-study images, and 12 rows
-// of that would mount several hundred <Image>s.
-//
-// FOUR, not five, and the number is a layout decision as much as a budget one:
-// four landscape thumbs plus the CTA tile is what lets the whole row — name,
-// blurb and imagery side by side — fit a 13" laptop. At five the row couldn't
-// close under ~1500px and had to stack.
-const STRIP_IMAGES = 4;
-// Side of the glass "Go to project" tile that closes each strip — square, and
-// the same height as the thumbnails so the row reads as one band.
-const CTA_TILE = 100;
 /*
   Show-all sheet motion.
 
@@ -305,10 +297,23 @@ export default function ParallaxIndex({ background }: Props) {
   const rootRef = useRef<HTMLDivElement>(null);
   const heroRefs = useRef<Array<HTMLDivElement | null>>([]);
   const timelineRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  // Right-side category labels — one per project, scrolling in lock-step with
+  // the left timeline (same wrapped-distance placement in the rAF loop) so the
+  // active project's category always lands on the centre line next to its
+  // marker. A parallel array to the timeline names.
+  const categoryRefs = useRef<Array<HTMLParagraphElement | null>>([]);
   // Which timeline row the pointer is over. A ref (not state) because the
   // rAF loop reads it every frame to blend the hover lift into the
   // distance-driven opacity — no re-render needed.
   const hoveredRow = useRef<number | null>(null);
+  // True while the pointer is anywhere over the project-name list (the
+  // "menu"). The rAF loop reads it to push every satellite away from the
+  // menu's region, so the imagery clears out of the way while you read the
+  // list — the same repel physics as the per-satellite hover, just sourced
+  // from the menu box instead of one image. Paired with `timelineBoxRef`,
+  // whose rect gives the menu's centre each frame.
+  const hoveredMenuRef = useRef(false);
+  const timelineBoxRef = useRef<HTMLDivElement>(null);
   // Which satellite the pointer is over. A ref (not the `hoveredSat` state)
   // because the rAF loop reads it every frame to compute the repel — the state
   // still drives the hovered box's own opacity/scale in render.
@@ -663,6 +668,30 @@ export default function ParallaxIndex({ background }: Props) {
             hasHover = true;
           }
         }
+        // Menu repel anchor — the project-name list's centre, in the SAME
+        // viewport-centred space the satellite baseX/baseY live in (each box
+        // is `left-1/2 top-1/2` inside a viewport-centred layer, so 0,0 is the
+        // viewport centre). While the pointer is over the list, every box is
+        // pushed away from this point. Desktop only: on a phone the list sits
+        // at the bottom and the layer is lifted 14vh, so the spaces don't line
+        // up — and there's no hover there anyway. One rect read per frame,
+        // only while hovering, so it's cheap.
+        let menuAX = 0;
+        let menuAY = 0;
+        let hasMenu = false;
+        if (
+          hoveredMenuRef.current &&
+          !reduce.current &&
+          !isMobileRef.current
+        ) {
+          const box = timelineBoxRef.current;
+          if (box) {
+            const r = box.getBoundingClientRect();
+            menuAX = r.left + r.width / 2 - vw / 2;
+            menuAY = r.top + r.height / 2 - vh / 2;
+            hasMenu = true;
+          }
+        }
         const rp = repelRef.current;
         for (let k = 0; k < sats.children.length; k++) {
           const s = sats.children[k] as HTMLElement;
@@ -713,6 +742,22 @@ export default function ParallaxIndex({ background }: Props) {
             const mag = rp.strength * Math.exp(-dist / rp.range);
             trx = (vx / dist) * mag;
             tryv = (vy / dist) * mag;
+          } else if (hasMenu) {
+            // Hovering the project-name list: push EVERY box away from the
+            // menu's centre, same exponential falloff so the boxes nearest the
+            // list clear out the most and the far ones barely move.
+            let vx = baseX - menuAX;
+            let vy = baseY - menuAY;
+            let dist = Math.hypot(vx, vy);
+            if (dist < 1) {
+              const a = s1 * 6.2832;
+              vx = Math.cos(a);
+              vy = Math.sin(a);
+              dist = 1;
+            }
+            const mag = rp.strength * Math.exp(-dist / rp.range);
+            trx = (vx / dist) * mag;
+            tryv = (vy / dist) * mag;
           }
           // Ease the repel offset on the box itself, so the scatter glides in
           // on hover and glides back to zero on leave.
@@ -744,6 +789,20 @@ export default function ParallaxIndex({ background }: Props) {
         let op = 0.4 + 0.6 * near;
         if (hoveredRow.current === i) op = Math.max(op, 0.7);
         el.style.opacity = op.toFixed(3);
+      }
+
+      // Category labels (right) — the exact same wrapped-distance scroll as the
+      // timeline, mirrored to the right edge. The active project's category
+      // rides to the centre line (d = 0) at full strength while the rest scroll
+      // past dimmed, so the category tracks the project instead of snapping.
+      for (let i = 0; i < N; i++) {
+        const el = categoryRefs.current[i];
+        if (!el) continue;
+        let d = (((i - c) % N) + N) % N;
+        if (d > N / 2) d -= N;
+        el.style.transform = `translate(0, calc(-50% + ${(d * TIMELINE_PITCH).toFixed(2)}px))`;
+        const near = Math.max(0, 1 - Math.abs(d));
+        el.style.opacity = (0.4 + 0.6 * near).toFixed(3);
       }
 
       // Map the unbounded index back into 0…N-1 for the active project.
@@ -838,6 +897,13 @@ export default function ParallaxIndex({ background }: Props) {
                 band sits there, masking the moving list so the active name
                 reads as a crisp line in the middle of the selector. ─── */}
           <div
+            ref={timelineBoxRef}
+            onMouseEnter={() => {
+              hoveredMenuRef.current = true;
+            }}
+            onMouseLeave={() => {
+              hoveredMenuRef.current = false;
+            }}
             className="absolute bottom-6 left-6 z-10 w-[min(320px,72vw)] overflow-hidden md:bottom-auto md:left-[44px] md:top-1/2 md:w-[min(260px,34vw)] md:-translate-y-1/2"
             style={{
               height: TIMELINE_HEIGHT,
@@ -917,13 +983,34 @@ export default function ParallaxIndex({ background }: Props) {
                 used to sit at the bottom was removed. ─── */}
           <div
             // Desktop only — on mobile it collided with the artwork and the
-            // category isn't worth the crowding.
-            className="absolute right-[44px] top-1/2 z-10 hidden -translate-y-1/2 text-right md:block"
-            style={{ width: 160, color: "#fbfbfb" }}
+            // category isn't worth the crowding. Same fixed-height masked
+            // window as the timeline, mirrored right: the categories PASS
+            // THROUGH it, the active one pinned to the centre line, and the
+            // mask fades the rest toward the top and bottom edges.
+            className="absolute right-[44px] top-1/2 z-10 hidden -translate-y-1/2 overflow-hidden text-right md:block"
+            style={{
+              height: TIMELINE_HEIGHT,
+              width: 220,
+              color: "#fbfbfb",
+              maskImage:
+                "linear-gradient(to bottom, transparent 0%, #000 26%, #000 74%, transparent 100%)",
+              WebkitMaskImage:
+                "linear-gradient(to bottom, transparent 0%, #000 26%, #000 74%, transparent 100%)",
+            }}
           >
-            <p className="text-[13px] font-normal leading-4">
-              {pick(active.category, lang)}
-            </p>
+            {projects.map((p, i) => (
+              <p
+                key={p.slug}
+                ref={(el) => {
+                  categoryRefs.current[i] = el;
+                }}
+                // Opacity + Y offset are written per frame by the rAF loop
+                // (distance from the centre line), so they can't live here.
+                className="absolute right-0 top-1/2 whitespace-nowrap text-[13px] font-normal leading-4 will-change-transform"
+              >
+                {p.year}
+              </p>
+            ))}
           </div>
 
           {/* ─── Right marker — mirrors the left timeline rule on the category
@@ -1106,14 +1193,30 @@ export default function ParallaxIndex({ background }: Props) {
             </div>
           </div>
 
-          {/* ─── Footer (Figma node 197:570) — now just the language toggle,
-                pinned bottom-right where the design places it (the tagline that
-                used to share this row was removed). Desktop only: the bottom of
-                a phone belongs to the timeline, and the mobile menu already
-                carries the switch. The wrapper is click-through; only the
-                toggle takes pointer events. Padding: 44 right, 44 bottom. ─── */}
-          <div className="pointer-events-none absolute bottom-[44px] right-[44px] z-10 hidden md:flex">
-            <LangToggle className="pointer-events-auto" />
+          {/* ─── Footer (Figma node 397:550) — a desktop-only bottom bar for
+                the ACTIVE project: its tagline (left) and deliverables (right).
+                Both are bottom-aligned 44px above the page edge and painted in
+                #fbfbfb at 40% opacity (Figma's muted footer tone); the tagline
+                grows upward over two lines. Fully click-through, so it never
+                blocks the satellite hover. ─── */}
+          <div
+            className="pointer-events-none absolute inset-x-0 bottom-[44px] z-10 hidden md:block"
+            style={{ color: "#fbfbfb" }}
+          >
+            {/* Left — the active project's tagline (skipped when it has none). */}
+            {active.tagline && (
+              <p className="absolute bottom-0 left-[44px] max-w-[210px] text-[13px] font-normal leading-4 opacity-40">
+                {pick(active.tagline, lang)}
+              </p>
+            )}
+            {/* Right — the active project's deliverables (Figma 397:550). The
+                language toggle used to sit here; it moved up to the nav, so the
+                footer is now just tagline (left) + deliverables (right). */}
+            {active.deliverables && (
+              <p className="absolute bottom-0 right-[44px] whitespace-nowrap text-right text-[13px] font-normal leading-4 opacity-40">
+                {pick(active.deliverables, lang)}
+              </p>
+            )}
           </div>
         </>
       }
@@ -1162,7 +1265,7 @@ export default function ParallaxIndex({ background }: Props) {
         style={{ color: "#fbfbfb" }}
       >
         <ShowAllIcon open={showAll} />
-        {showAll ? t("parallax.close") : t("parallax.showAll")}
+        {showAll ? t("parallax.parallaxView") : t("parallax.showAll")}
       </button>
 
       {/* Dev-only live tuner for the hover-repel. The sliders write into the
@@ -1177,233 +1280,82 @@ export default function ParallaxIndex({ background }: Props) {
 }
 
 /*
-  Thumb — one image in a "Show all" row's strip.
+  ShowAllList — the Figma "List view" (node 401:916). A full-bleed editorial
+  gallery: one block per project, each a small title label on the gutter above
+  a band of four landscape images that bleed edge-to-edge across the viewport
+  (two-up on mobile). Every image opens that project's case study through the
+  shared colour-morph. Scrolls natively inside the sheet (overflow-y-auto).
 
-  The strip is height-locked at 100px on every breakpoint and each thumb
-  takes whatever WIDTH its own image implies, so a portrait shot stays tall and
-  narrow instead of being cropped into the landscape box the strip used to
-  force on everything.
-
-  The ratio can't be known before the image loads — these come from `projects`
-  as bare URLs with no dimensions — so it's read off `naturalWidth/Height` on
-  load and written to the container's `aspect-ratio`. Until then the box holds
-  Figma's 162.946:100 landscape slot, which keeps the strip from reflowing from
-  zero-width and is already the right answer for most of the set.
+  Replaces the old detail table (name · category · blurb · thumbnail strip):
+  the design drops all the meta and lets the imagery carry the index.
 */
-const DEFAULT_THUMB_RATIO = 162.946 / 100; // Figma's landscape slot
+// Landscape crop each gallery image fills — Figma's 480 × 294.576 slot.
+const GALLERY_RATIO = "480 / 294.576";
+// Images per project band (Figma shows four across on desktop).
+const GALLERY_IMAGES = 4;
 
-function Thumb({
-  src,
-  onClick,
-}: {
-  src: string;
-  onClick: (e: React.MouseEvent<HTMLElement>) => void;
-}) {
-  const boxRef = useRef<HTMLButtonElement>(null);
-  const [ratio, setRatio] = useState(DEFAULT_THUMB_RATIO);
-
-  const readRatio = useCallback(() => {
-    const img = boxRef.current?.querySelector("img");
-    if (img && img.naturalHeight > 0) {
-      setRatio(img.naturalWidth / img.naturalHeight);
-    }
-  }, []);
-
-  // `onLoad` alone is not enough: an image already in the browser cache is
-  // decoded before React attaches the handler, so its load event has already
-  // fired and the box would keep the default landscape ratio forever. (That's
-  // exactly what happened to the portrait shots on a warm reload.) So also
-  // read the size once on mount for anything already `complete`. Deferred via
-  // a timeout so setState never runs synchronously in the effect body.
-  useEffect(() => {
-    const img = boxRef.current?.querySelector("img");
-    if (!img?.complete) return;
-    const id = window.setTimeout(readRatio, 0);
-    return () => window.clearTimeout(id);
-  }, [readRatio]);
-
-  return (
-    <button
-      ref={boxRef}
-      type="button"
-      onClick={onClick}
-      data-cursor-ring
-      className="relative h-[100px] w-auto shrink-0 cursor-pointer overflow-hidden"
-      style={{ aspectRatio: ratio }}
-    >
-      <Image
-        src={src}
-        alt=""
-        fill
-        // Widest a thumb can get is a very wide panorama at 100px tall; 320
-        // covers that without over-fetching for the common landscape case.
-        sizes="320px"
-        draggable={false}
-        unoptimized={src.endsWith(".gif")}
-        // Eager on purpose. Each strip is its own horizontal scroll container
-        // and `loading="lazy"` resolves against THAT container, which in
-        // practice left whole rows as empty 100px boxes with nothing ever
-        // fetched. At five thumbs a row the total is small enough that
-        // loading them outright is the honest trade.
-        loading="eager"
-        onLoad={readRatio}
-        // `contain`, not `cover`: the box now matches the image's own
-        // proportion, so there's nothing to crop. It also keeps the image
-        // whole during the brief window before the real ratio is known.
-        className="object-contain"
-      />
-    </button>
-  );
-}
-
-/*
-  ShowAllList — the Figma "Show all" detail table. One row per project:
-    Name · (category + short blurb) · year · thumbnail strip.
-  Rows route to the case study on click. Scrolls natively inside the root
-  (which is overflow-y-auto in this view).
-*/
 function ShowAllList({
   onOpen,
 }: {
   onOpen: (e: React.MouseEvent<HTMLElement>, p: (typeof projects)[number]) => void;
 }) {
-  // Reads the language context directly rather than taking `lang` as a prop —
-  // it needs `t` for the CTA tile anyway, and one source beats two.
-  const { lang, t } = useLang();
+  const { t } = useLang();
   return (
-    // 44px sides on every breakpoint, matching the nav / timeline / chip
-    // frame. The vertical insets clear the fixed chrome: 80px mobile bar and
-    // the floating Show-all chip (44 inset + 42 tall), each plus a 44 gap, so
-    // the first and last rows aren't parked underneath them.
-    <div className="min-h-full w-full px-6 md:px-[44px] pb-[130px] pt-[124px] md:pb-16 md:pt-36">
-      <ul className="row-dim-list w-full">
+    // Same 24/44px gutter as the rest of the site (nav, timeline, case study),
+    // so the image bands line up with everything else instead of bleeding to
+    // the screen edges. Top/bottom insets clear the fixed chrome (nav up top,
+    // the floating mobile chip at the bottom).
+    <div className="min-h-full w-full px-6 pb-[120px] pt-[76px] md:px-[44px] md:pb-16 md:pt-[100px]">
+      <ul className="w-full">
         {projects.map((p) => {
-          const thumbs = projectImageSet(p, STRIP_IMAGES);
+          const imgs = projectImageSet(p, GALLERY_IMAGES);
           return (
-            // Divider rules are desktop-only: on a phone the rows are already
-            // separated by the thumbnail strips and the generous vertical
-            // rhythm, and the lines just added noise. 0.5px hairline in
-            // Figma's "Labels/Secondary" grey (node 120:685).
-            <li key={p.slug} className="md:border-b-[0.5px] md:border-[#727272]">
-              {/*
-                The row goes horizontal at 1280 — a 13" laptop — and the
-                measurements are what set that number: 200 (name) + 24 + 280
-                (blurb at this width) + 24 + ~613 (four thumbs and the CTA)
-                = 1141, inside the 1192 a 1280 viewport leaves after gutters.
-                From 1500 the blurb opens to its full 366 and the gaps to 32;
-                Figma's 112px gap waits for 1700.
-
-                Below 1280 everything stacks and the strip sits UNDER the
-                text. It used to flip to a row at 768, where the text block
-                was squeezed far past its content width; because nothing
-                clipped, the blurb and the meta simply overflowed their box
-                and the thumbnails rendered straight over them.
-              */}
-              <div className="flex w-full flex-col gap-5 py-[30px] min-[1280px]:flex-row min-[1280px]:items-start min-[1280px]:justify-between min-[1280px]:gap-6 min-[1500px]:gap-8 min-[1700px]:gap-[112px]" style={{ color: "#fbfbfb" }}>
-                {/* Text block. Its own button rather than wrapping the whole
-                    row, so the horizontal thumbnail scroller below isn't
-                    trapped inside a click target — a swipe there would
-                    otherwise register as a tap on the project. */}
-                <button
-                  type="button"
-                  onClick={(e) => onOpen(e, p)}
-                  data-cursor-ring
-                  // Figma's column gap is 112px, measured on an 1832px-wide
-                  // frame, so it only arrives once the viewport can carry it.
-                  className="flex min-w-0 flex-1 cursor-pointer flex-col gap-2 text-left min-[1280px]:flex-row min-[1280px]:items-start min-[1280px]:gap-6 min-[1500px]:gap-8 min-[1700px]:gap-[112px]"
+            <li key={p.slug} className="mb-[30px] last:mb-0">
+              {/* Title label — the project name alone, sitting flush on top of
+                  its image band (Figma's 66px NAV strip: title ~30px down,
+                  ~20px of air below before the images). The gutter comes from
+                  the container now, so the label needs only vertical padding. */}
+              <div className="pb-5 pt-[30px]">
+                <span
+                  className="text-[13px] font-normal leading-4"
+                  style={{ color: "#fbfbfb" }}
                 >
-                  {/* Name with category – year directly beneath it, on every
-                      breakpoint. The year used to sit in a far-right column of
-                      its own on desktop; pulling it under the name gives the
-                      row one clear left edge and removes the widest column
-                      from the horizontal budget. */}
-                  <div className="flex flex-col gap-1 min-[1280px]:w-[200px] min-[1280px]:shrink-0">
-                    {/* Figma "Title 3/Emphasized" — SF Pro Semibold 15/20. */}
-                    <span className="text-[15px] font-semibold leading-5">
-                      {p.title}
-                    </span>
-                    {/* Figma "Body/Regular" — 13/16, same #fbfbfb as the rest
-                        of the group (no dimming in the design). Category and
-                        year read as one unit, en-dash separated. */}
-                    <span className="text-[13px] leading-4">
-                      {`${pick(p.category, lang)} – ${p.year}`}
-                    </span>
-                  </div>
-                  {/* Blurb column — Figma "Body/Regular" 13/16, 366px wide
-                      (node 120:856). Desktop-only: on a phone the row reads as
-                      name / category – year and then the imagery, so the whole
-                      column is hidden rather than left as an empty flex item
-                      eating the parent's gap. */}
-                  {/* 280 at 13", opening to Figma's 366 once there's room —
-                      the blurb is the one column that can give up width
-                      without breaking, so it's what pays for the row fitting
-                      a smaller screen. */}
-                  <div className="text-[13px] leading-4 max-md:hidden md:max-w-[366px] md:min-w-0 min-[1280px]:w-[280px] min-[1280px]:shrink min-[1500px]:w-[366px]">
-                    <span className="line-clamp-3">{pick(p.brief, lang)}</span>
-                  </div>
-                </button>
+                  {p.title}
+                </span>
+              </div>
 
-                {/* Thumbnail strip — the project's images in reading order,
-                    scrolled horizontally so the whole set is reachable
-                    instead of being cut at the row's edge. On mobile the
-                    negative margin lets it bleed to the screen edges while
-                    the first thumb still lines up with the 44px gutter, so
-                    the overflow reads as "there's more this way". */}
-                <div
-                  // 100px tall thumbs, 8px apart, then the CTA tile. No fixed
-                  // width: it sizes to its content and MUST stay shrinkable
-                  // (`min-w-0`, no `shrink-0`) — the strip already scrolls
-                  // internally, so on a narrow viewport it should give up
-                  // width and show fewer thumbs at once rather than push
-                  // itself off the edge of the page.
-                  className="-mx-6 flex gap-2 overflow-x-auto overscroll-x-contain px-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:min-w-0 md:px-0"
-                >
-                  {thumbs.map((src, i) => (
-                    <Thumb key={i} src={src} onClick={(e) => onOpen(e, p)} />
-                  ))}
-
-                  {/*
-                    The tile closing the strip — MOBILE ONLY. A bordered glass
-                    card with "Go to project" spelled out, because there's no
-                    cursor on a phone and nothing else names the action.
-
-                    `md:hidden` rather than a hidden-but-present element: the
-                    strip is a flex row with a gap, so leaving the tile in the
-                    layout would leave its 100px slot AND the gap before it as
-                    dead space at the end of every row. Removing it from flow
-                    lets the images close the band.
-
-                    Desktop loses nothing. The cursor pill already reads "Go
-                    to project" the moment the pointer is near the row, the
-                    whole row is clickable, and the arrow was the only mark in
-                    a band otherwise made of edge-to-edge images.
-                  */}
+              {/* Full-bleed image band — four landscape crops edge-to-edge on
+                  desktop, two-up on mobile, no gaps. Each is its own button so
+                  a click anywhere on the band opens the project. */}
+              <div className="grid grid-cols-2 md:grid-cols-4">
+                {imgs.map((src, i) => (
                   <button
+                    key={i}
                     type="button"
                     onClick={(e) => onOpen(e, p)}
                     data-cursor-ring
-                    className="flex shrink-0 cursor-pointer flex-col items-start justify-between border-[0.5px] border-white/20 bg-white/[0.07] p-3 text-left text-[13px] font-normal leading-4 shadow-[inset_0_0.5px_0_rgba(255,255,255,0.18),0_8px_24px_rgba(0,0,0,0.28)] backdrop-blur-[20px] backdrop-saturate-150 transition-colors duration-200 hover:bg-white/[0.12] md:hidden"
-                    style={{ width: CTA_TILE, height: CTA_TILE }}
+                    data-title={p.title}
+                    data-subtitle={t("parallax.goToProject")}
+                    aria-label={`Open ${p.title}`}
+                    className="relative block w-full cursor-pointer overflow-hidden"
+                    style={{ aspectRatio: GALLERY_RATIO }}
                   >
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 16 16"
-                      fill="none"
-                      aria-hidden
-                      className="shrink-0"
-                    >
-                      <path
-                        d="M4 12L12 4M12 4H5.5M12 4V10.5"
-                        stroke="currentColor"
-                        strokeWidth="1.1"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                    <span>{t("parallax.goToProject")}</span>
+                    <Image
+                      src={src}
+                      alt=""
+                      fill
+                      // Two-up on a phone (~50vw), four-up from md (~25vw).
+                      sizes="(max-width: 767px) 50vw, 25vw"
+                      draggable={false}
+                      unoptimized={src.endsWith(".gif")}
+                      loading="eager"
+                      // `cover`: each slot is a fixed landscape crop, exactly
+                      // like the Figma rectangles — the image fills it and the
+                      // overflow is trimmed.
+                      className="object-cover"
+                    />
                   </button>
-                </div>
+                ))}
               </div>
             </li>
           );
@@ -1412,6 +1364,7 @@ function ShowAllList({
     </div>
   );
 }
+
 
 /*
   RepelControls — dev-only live tuner for the satellite hover-repel. Three

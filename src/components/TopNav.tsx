@@ -42,8 +42,7 @@ import { getProject } from "@/lib/projects";
 import ShowAllIcon, { CHIP_CLASS } from "@/components/ShowAllIcon";
 import LangToggle from "@/components/LangToggle";
 
-// TODO: replace with the real studio email once available.
-const STUDIO_EMAIL = "hello@torto.studio";
+const STUDIO_EMAIL = "julia.paternostro@gmail.com";
 
 // Height of the mobile top bar (pt-6/24px + 16px line-height + pb-4/16px), used
 // to park the menu overlay directly beneath it. Keep in sync with the index's
@@ -212,7 +211,9 @@ export default function TopNav() {
               data-cursor-ring
             >
               <ShowAllIcon open={isHome && showAllOpen} />
-              {isHome && showAllOpen ? t("parallax.close") : t("parallax.showAll")}
+              {isHome && showAllOpen
+                ? t("parallax.parallaxView")
+                : t("parallax.showAll")}
             </button>
           ) : project ? (
             <span
@@ -234,12 +235,15 @@ export default function TopNav() {
           ) : null}
         </div>
 
-        {/* Right — Copy email, alone. No underline rule anywhere on the bar:
-            the Figma spec has no active state up here, and the wordmark is
-            the only "you are here" cue. */}
-        <button type="button" onClick={copyEmail} className={`${type} uline`} data-cursor-ring>
-          {copied ? t("nav.copied") : t("nav.copyEmail")}
-        </button>
+        {/* Right — the language toggle + Copy email (Figma node 397:542).
+            The switch moved up here from the footer, so it's reachable on every
+            route without a footer. Only these two take pointer events. */}
+        <div className="flex items-center gap-[56px]">
+          <LangToggle className="pointer-events-auto" />
+          <button type="button" onClick={copyEmail} className={`${type} uline`} data-cursor-ring>
+            {copied ? t("nav.copied") : t("nav.copyEmail")}
+          </button>
+        </div>
       </div>
 
       {/* ─── Mobile top bar (<md) — wordmark + MENU button ─── */}
