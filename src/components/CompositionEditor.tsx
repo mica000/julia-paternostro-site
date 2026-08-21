@@ -142,6 +142,16 @@ function EditorCanvas({
   const cy = isMobile ? (0.5 - 0.14) * vp.h : vp.h / 2; // mobile rides the −14vh lift
   const K = kFactor(vp.w, vp.h);
 
+  // dx/dy are fractions of a CONTAINED 1920×1314 frame (the same one the hero is
+  // sized against), centred on screen — NOT of the raw viewport. Mapping them to
+  // vw/vh instead let the arrangement stretch away from the hero whenever the
+  // window aspect drifted from 1920:1314. Scaling position by this frame (just
+  // like tile size scales by K) keeps every satellite locked to the hero at any
+  // window size.
+  const frameScale = Math.min(vp.w / 1920, vp.h / 1314);
+  const frameW = 1920 * frameScale;
+  const frameH = 1314 * frameScale;
+
   const boxFor = (s: SatSlot) => {
     const [rw, rh] = s.ratio.split("/").map((n) => parseFloat(n));
     const width = s.w * K;
@@ -149,8 +159,8 @@ function EditorCanvas({
     return {
       width,
       height,
-      left: cx + s.dx * vp.w - width / 2,
-      top: cy + s.dy * vp.h - height / 2,
+      left: cx + s.dx * frameW - width / 2,
+      top: cy + s.dy * frameH - height / 2,
     };
   };
 
@@ -165,12 +175,23 @@ function EditorCanvas({
         const s = next[d.i];
         if (!s) return prev;
         if (d.mode === "move") {
-          s.dx = d.startDx + (e.clientX - d.startClientX) / vp.w;
-          s.dy = d.startDy + (e.clientY - d.startClientY) / vp.h;
+          s.dx = d.startDx + (e.clientX - d.startClientX) / frameW;
+          s.dy = d.startDy + (e.clientY - d.startClientY) / frameH;
         } else {
+          // Resize anchored to the TOP-LEFT corner (the one the handle is
+          // diagonally opposite to), so the tile grows toward the cursor
+          // instead of ballooning symmetrically around its centre. Because the
+          // box is positioned by its centre (dx/dy), holding the top-left
+          // fixed means the centre must shift by half of each size delta.
+          const [rw, rh] = s.ratio.split("/").map((n) => parseFloat(n));
+          const aspect = rh / rw;
           const startWidthPx = d.startW * K;
           const widthPx = Math.max(20, startWidthPx + (e.clientX - d.startClientX));
+          const dW = widthPx - startWidthPx;
+          const dH = dW * aspect;
           s.w = widthPx / K;
+          s.dx = d.startDx + dW / 2 / frameW;
+          s.dy = d.startDy + dH / 2 / frameH;
         }
         return next;
       });
@@ -184,7 +205,7 @@ function EditorCanvas({
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerup", onUp);
     };
-  }, [vp.w, vp.h, K]);
+  }, [vp.w, vp.h, K, frameW, frameH]);
 
   // Delete/Backspace removes the selected tile (ignored while typing in a
   // field, though the editor has none today).

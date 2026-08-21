@@ -383,10 +383,11 @@ export default function ParallaxIndex({ background }: Props) {
       setRevealedSlug(null);
       setCycleHidden(new Set()); // fresh cycle for the new reveal
       setHoveredSat(null); // stale hover index from the previous set
-      // Mobile has no hover to wait for, so it counts as permanently
-      // engaged: the complementary images bloom on their own once the
-      // grace window passes, same soft trickle, no gesture required.
-      if (!hovering && !isMobile) return;
+      // Reveal is NOT hover-gated: the active project's satellites bloom on
+      // their own as soon as it lands on the index — no gesture required, on
+      // desktop and mobile alike. (Hover still lifts an individual box to
+      // 100% + a hair of scale; it just no longer decides whether the set
+      // shows at all.)
       // Wait out whatever remains of the grace window (0 once it has
       // passed — then the reveal arms on the next frame as before).
       const wait = Math.max(0, revealReadyAt.current - performance.now());
@@ -399,7 +400,7 @@ export default function ParallaxIndex({ background }: Props) {
       cancelAnimationFrame(raf2);
       window.clearTimeout(timer);
     };
-  }, [hovering, isMobile, active.slug, revealEpoch]);
+  }, [active.slug, revealEpoch]);
 
   // Ambient cycle: while the satellites are revealed, every beat pick 1–2
   // boxes at random to fade out; everything else stays (or softly returns).
@@ -639,19 +640,23 @@ export default function ParallaxIndex({ background }: Props) {
         // Figma frame INSIDE the viewport (contain) — the arrangement keeps
         // its own proportions and stays registered with the hero, which is
         // sized off vw by the same logic.
-        let frameW = vw;
-        let frameH = vh;
-        if (isMobileRef.current && !mobileCompRef.current) {
-          // Mobile, but this project has NO portrait override: fall back to
-          // fitting the landscape frame inside the viewport (contain), which
-          // keeps the desktop arrangement's proportions.
+        // dx/dy are fractions of a CONTAINED 1920×1314 frame (the same frame the
+        // hero is sized against), centred in the viewport — so the whole scatter
+        // stays locked to the hero at ANY window size or aspect. Mapping them to
+        // raw vw/vh instead let the arrangement stretch away from the hero as the
+        // window aspect drifted from 1920:1314 (the resize/reposition drift).
+        // Only a portrait mobile override opts out: its dx/dy are already tuned
+        // as viewport fractions.
+        let frameW: number;
+        let frameH: number;
+        if (isMobileRef.current && mobileCompRef.current) {
+          frameW = vw;
+          frameH = vh;
+        } else {
           const scale = Math.min(vw / 1920, vh / 1314);
           frameW = 1920 * scale;
           frameH = 1314 * scale;
         }
-        // Mobile WITH a portrait override, and desktop, both fall through to
-        // frameW = vw / frameH = vh: the override's dx/dy are already viewport
-        // fractions, and on desktop the viewport ~IS the 1920×1314 frame.
         //
         // Hovered box's resting anchor — the point every OTHER box is pushed
         // away from. Read from the ref so the loop needs no re-render; skipped
@@ -1083,10 +1088,10 @@ export default function ParallaxIndex({ background }: Props) {
                 const src = activeSatellites[i % activeSatellites.length];
                 // Randomized-but-stable per-image delay so they don't all
                 // reveal at once — they trickle in, in a scrambled order.
-                // Range ≈ 20–260ms: small base so the images start appearing
+                // Range ≈ 12–122ms: small base so the images start appearing
                 // almost immediately, with just enough spread to still trickle
                 // rather than snap in as one block.
-                const delay = 20 + Math.round(jitter(`${active.slug}-${i}`) * 240);
+                const delay = 12 + Math.round(jitter(`${active.slug}-${i}`) * 110);
                 // Two independent per-box seeds — drive the rAF loop's
                 // per-axis easing and idle float, so each box moves on its
                 // own rather than as one rigid grid.
@@ -1168,7 +1173,7 @@ export default function ParallaxIndex({ background }: Props) {
                         // React warns about it.
                         transition: isHovered
                           ? "opacity 240ms cubic-bezier(0.22, 1, 0.36, 1) 0ms, transform 780ms cubic-bezier(0.22, 1, 0.36, 1) 0ms"
-                          : `opacity 780ms cubic-bezier(0.22, 1, 0.36, 1) ${reveal ? delay : 0}ms, transform 780ms cubic-bezier(0.22, 1, 0.36, 1) ${reveal ? delay : 0}ms`,
+                          : `opacity 520ms cubic-bezier(0.22, 1, 0.36, 1) ${reveal ? delay : 0}ms, transform 520ms cubic-bezier(0.22, 1, 0.36, 1) ${reveal ? delay : 0}ms`,
                         willChange: "opacity, transform",
                       }}
                     >

@@ -62,6 +62,12 @@ export const HERO_IMAGES: Record<string, string> = {
   "delirio-tropical": sat("delirio-tropical", "tropical-lettering-background"),
   "delirio-sao-joao": sat("sao-joao", "delirio-tropical-sao-joao-banner"),
   fcv: sat("30-fcv", "festival-collage-eyes-and-stars"),
+  vivs: sat("vivs", "rectangle-81"),
+  "a-selva": sat("selva", "background"),
+  "budapest-forro": sat("budapest", "bff-logo"),
+  // tenda-lab intentionally omitted — its Figma hero is still the delírio
+  // placeholder art, so it falls back to the project's own index image
+  // until a real Tenda Lab hero is designed.
 };
 
 /** Big hero image for a project — its hero override, else index/gallery. */

@@ -43,7 +43,7 @@ const PREVIEW_LOOP = false;
 // the time the index paints, so re-using them here costs no extra download.
 const POSTERS = Array.from(
   { length: 11 },
-  (_, i) => `/Images/${String(i + 1).padStart(2, "0")}-square.png`,
+  (_, i) => `/Images/loading/${String(i + 1).padStart(2, "0")}-square.webp`,
 );
 
 const SESSION_KEY = "torto:preloaded";

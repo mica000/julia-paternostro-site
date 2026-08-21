@@ -2,328 +2,726 @@
   "desktop": {
     "delirio-tropical": [
       {
-        "dx": -0.3319,
-        "dy": -0.1936,
+        "dx": -0.3369,
+        "dy": -0.2624,
         "w": 0.0992,
         "ratio": "190 / 241",
-        "depth": 0.8,
+        "depth": 0.76,
         "src": "/Images/img-satelites/delirio-tropical/palm-tree-textured.webp"
       },
       {
-        "dx": 0.2034,
-        "dy": -0.131,
-        "w": 0.191,
-        "ratio": "367 / 390",
-        "depth": 0.7,
-        "src": "/Images/img-satelites/delirio-tropical/fruit-slices.webp"
+        "dx": 0.2931,
+        "dy": -0.2087,
+        "w": 0.1653,
+        "ratio": "444 / 272",
+        "depth": 0.64,
+        "src": "/Images/img-satelites/delirio-tropical/delirio-tropical-logo.webp"
       },
       {
-        "dx": -0.22,
-        "dy": 0.2064,
-        "w": 0.3051,
-        "ratio": "428 / 267",
-        "depth": 0.6,
-        "src": "/Images/img-satelites/delirio-tropical/delirio-tropical-drink-illustration.webp"
-      },
-      {
-        "dx": 0.1201,
-        "dy": -0.3523,
-        "w": 0.0882,
+        "dx": 0.1662,
+        "dy": -0.3345,
+        "w": 0.0626,
         "ratio": "169 / 127",
-        "depth": 0.8,
+        "depth": 0.77,
         "src": "/Images/img-satelites/delirio-tropical/crab-character.webp"
       },
       {
-        "dx": 0.3221,
-        "dy": -0.282,
-        "w": 0.1522,
-        "ratio": "520 / 728",
-        "depth": 0.65,
-        "src": "/Images/img-satelites/delirio-tropical/08.gif"
-      },
-      {
-        "dx": -0.2208,
-        "dy": -0.2043,
+        "dx": 0.2763,
+        "dy": 0.1661,
         "w": 0.24,
         "ratio": "461 / 598",
-        "depth": 0.5,
+        "depth": 0.63,
         "src": "/Images/img-satelites/delirio-tropical/toucan-drummer.webp"
       },
       {
-        "dx": 0.1752,
-        "dy": 0.2083,
-        "w": 0.4415,
-        "ratio": "848 / 520",
-        "depth": 0.4,
-        "src": "/Images/img-satelites/delirio-tropical/delirio-tropical-logo.webp"
+        "dx": -0.3085,
+        "dy": 0.2047,
+        "w": 0.1351,
+        "ratio": "259 / 363",
+        "depth": 0.73,
+        "src": "/Images/img-satelites/delirio-tropical/08.gif"
       }
     ],
     "delirio-sao-joao": [
       {
-        "dx": -0.2458,
-        "dy": -0.1966,
-        "w": 0.3159,
+        "dx": 0.2961,
+        "dy": -0.2389,
+        "w": 0.1812,
         "ratio": "607 / 401",
-        "depth": 0.5,
+        "depth": 0.57,
         "src": "/Images/img-satelites/sao-joao/banner-and-tambourine.webp"
       },
       {
-        "dx": -0.1291,
-        "dy": -0.3262,
-        "w": 0.1096,
-        "ratio": "211 / 207",
-        "depth": 0.8,
-        "src": "/Images/img-satelites/sao-joao/zabumba-drum.webp"
-      },
-      {
-        "dx": 0.2,
-        "dy": -0.2747,
+        "dx": -0.3249,
+        "dy": -0.222,
         "w": 0.1046,
         "ratio": "201 / 455",
-        "depth": 0.75,
+        "depth": 0.76,
         "src": "/Images/img-satelites/sao-joao/casaca-instrument-character.webp"
       },
       {
-        "dx": 0.3267,
-        "dy": -0.2011,
-        "w": 0.1874,
-        "ratio": "360 / 514",
-        "depth": 0.6,
-        "src": "/Images/img-satelites/sao-joao/festival-lineup-poster.webp"
+        "dx": 0.3212,
+        "dy": -0.1125,
+        "w": 0.0818,
+        "ratio": "211 / 207",
+        "depth": 0.75,
+        "src": "/Images/img-satelites/sao-joao/zabumba-drum.webp"
       },
       {
-        "dx": -0.2435,
-        "dy": 0.208,
-        "w": 0.2015,
+        "dx": 0.3215,
+        "dy": 0.221,
+        "w": 0.1628,
         "ratio": "387 / 352",
-        "depth": 0.55,
+        "depth": 0.67,
         "src": "/Images/img-satelites/sao-joao/church-with-palm-trees.webp"
       },
       {
-        "dx": -0.0673,
-        "dy": 0.3139,
+        "dx": -0.2885,
+        "dy": 0.2763,
         "w": 0.2059,
         "ratio": "395 / 233",
-        "depth": 0.7,
+        "depth": 0.66,
         "src": "/Images/img-satelites/sao-joao/colorful-boats.webp"
-      },
-      {
-        "dx": 0.2541,
-        "dy": 0.2504,
-        "w": 0.3012,
-        "ratio": "578 / 325",
-        "depth": 0.45,
-        "src": "/Images/img-satelites/sao-joao/sao-joao-festival-icon-grid.webp"
       }
     ],
     "fcv": [
       {
-        "dx": -0.3125,
-        "dy": -0.1259,
-        "w": 0.2196,
-        "ratio": "422 / 259",
-        "depth": 0.6,
-        "src": "/Images/img-satelites/30-fcv/festival-de-cinema-de-vitoria-logo.webp"
+        "dx": -0.2716,
+        "dy": -0.2393,
+        "w": 0.2395,
+        "ratio": "460 / 282",
+        "depth": 0.63,
+        "src": "/Images/img-satelites/30-fcv/festival-poster-wall-mockup.webp"
       },
       {
-        "dx": -0.121,
-        "dy": -0.2802,
-        "w": 0.3442,
-        "ratio": "661 / 406",
-        "depth": 0.45,
-        "src": "/Images/img-satelites/30-fcv/festival-poster-wall-mockup.webp"
+        "dx": 0.2902,
+        "dy": -0.2393,
+        "w": 0.1622,
+        "ratio": "311 / 311",
+        "depth": 0.7,
+        "src": "/Images/img-satelites/30-fcv/woman-portrait-collage.webp"
+      },
+      {
+        "dx": 0.2757,
+        "dy": 0.1671,
+        "w": 0.2351,
+        "ratio": "1016 / 1170",
+        "depth": 0.64,
+        "src": "/Images/img-satelites/30-fcv/Capa-FCV.gif"
+      },
+      {
+        "dx": -0.2632,
+        "dy": 0.2473,
+        "w": 0.2284,
+        "ratio": "662 / 406",
+        "depth": 0.54,
+        "src": "/Images/img-satelites/30-fcv/rectangle-75.webp"
       },
       {
         "dx": 0.1931,
         "dy": -0.334,
         "w": 0.1953,
         "ratio": "375 / 116",
-        "depth": 0.8,
+        "depth": 0.67,
         "src": "/Images/img-satelites/30-fcv/eye-illustration-red.webp"
       },
       {
-        "dx": 0.2902,
-        "dy": -0.2393,
-        "w": 0.1622,
-        "ratio": "1 / 1",
-        "depth": 0.65,
-        "src": "/Images/img-satelites/30-fcv/woman-portrait-collage.webp"
-      },
-      {
-        "dx": -0.327,
-        "dy": 0.0733,
-        "w": 0.1326,
-        "ratio": "255 / 183",
-        "depth": 0.8,
-        "src": "/Images/img-satelites/30-fcv/eye-illustration-with-lashes.webp"
-      },
-      {
-        "dx": -0.22,
-        "dy": 0.2772,
-        "w": 0.368,
-        "ratio": "707 / 353",
-        "depth": 0.4,
-        "src": "/Images/img-satelites/30-fcv/t-shirt-and-pattern-mockup.webp"
-      },
-      {
-        "dx": 0.0752,
-        "dy": 0.4203,
+        "dx": -0.1009,
+        "dy": 0.3607,
         "w": 0.166,
         "ratio": "319 / 243",
-        "depth": 0.75,
+        "depth": 0.7,
         "src": "/Images/img-satelites/30-fcv/eye-illustration-pink.webp"
       },
       {
-        "dx": 0.2757,
-        "dy": 0.1671,
-        "w": 0.2351,
-        "ratio": "451 / 560",
+        "dx": 0.3934,
+        "dy": -0.0434,
+        "w": 0.1326,
+        "ratio": "255 / 183",
+        "depth": 0.73,
+        "src": "/Images/img-satelites/30-fcv/eye-illustration-with-lashes.webp"
+      }
+    ],
+    "tenda-lab": [
+      {
+        "dx": -0.2864,
+        "dy": -0.2089,
+        "w": 0.2375,
+        "ratio": "456 / 303",
+        "depth": 0.64,
+        "src": "/Images/img-satelites/tenda-lab/asset-2-2x-3.webp"
+      },
+      {
+        "dx": 0.2689,
+        "dy": -0.2917,
+        "w": 0.1543,
+        "ratio": "296 / 244",
+        "depth": 0.71,
+        "src": "/Images/img-satelites/tenda-lab/asset-4-2x-2.webp"
+      },
+      {
+        "dx": -0.2923,
+        "dy": 0.253,
+        "w": 0.1521,
+        "ratio": "292 / 292",
+        "depth": 0.71,
+        "src": "/Images/img-satelites/tenda-lab/rectangle-80.webp"
+      },
+      {
+        "dx": 0.3239,
+        "dy": 0.1551,
+        "w": 0.1769,
+        "ratio": "340 / 361",
+        "depth": 0.69,
+        "src": "/Images/img-satelites/tenda-lab/02-1.webp"
+      }
+    ],
+    "vivs": [
+      {
+        "dx": -0.2728,
+        "dy": -0.2108,
+        "w": 0.3555,
+        "ratio": "683 / 536",
+        "depth": 0.53,
+        "src": "/Images/img-satelites/vivs/vivstour-backstage-sticker-carro-01-1.webp"
+      },
+      {
+        "dx": 0.3215,
+        "dy": -0.2511,
+        "w": 0.3207,
+        "ratio": "616 / 478",
+        "depth": 0.56,
+        "src": "/Images/img-satelites/vivs/vivstour-backstage-sticker-moinho-02-1.webp"
+      },
+      {
+        "dx": 0.1773,
+        "dy": -0.2841,
+        "w": 0.2318,
+        "ratio": "445 / 360",
+        "depth": 0.64,
+        "src": "/Images/img-satelites/vivs/vivstour-backstage-mono-roxo-sticker-v-1.webp"
+      },
+      {
+        "dx": -0.2961,
+        "dy": 0.1941,
+        "w": 0.162,
+        "ratio": "311 / 390",
+        "depth": 0.7,
+        "src": "/Images/img-satelites/vivs/rectangle-87.webp"
+      },
+      {
+        "dx": -0.1719,
+        "dy": 0.2962,
+        "w": 0.1946,
+        "ratio": "374 / 259",
+        "depth": 0.67,
+        "src": "/Images/img-satelites/vivs/vivstour-sticker-casas-02-1.webp"
+      },
+      {
+        "dx": 0.2886,
+        "dy": 0.1836,
+        "w": 0.389,
+        "ratio": "747 / 788",
         "depth": 0.5,
-        "src": "/Images/img-satelites/30-fcv/cameraman-collage-character.webp"
+        "src": "/Images/img-satelites/vivs/vivstour-backstage-personagem-01-1.webp"
+      }
+    ],
+    "a-selva": [
+      {
+        "dx": -0.3713,
+        "dy": -0.244,
+        "w": 0.0427,
+        "ratio": "82 / 74",
+        "depth": 0.81,
+        "src": "/Images/img-satelites/selva/blossom.webp"
+      },
+      {
+        "dx": -0.2596,
+        "dy": -0.2651,
+        "w": 0.1544,
+        "ratio": "212 / 154",
+        "depth": 0.75,
+        "src": "/Images/img-satelites/selva/leaf-large.webp"
+      },
+      {
+        "dx": 0.2509,
+        "dy": -0.3335,
+        "w": 0.038,
+        "ratio": "73 / 55",
+        "depth": 0.82,
+        "src": "/Images/img-satelites/selva/petal.webp"
+      },
+      {
+        "dx": 0.2813,
+        "dy": -0.2035,
+        "w": 0.1649,
+        "ratio": "190 / 159",
+        "depth": 0.76,
+        "src": "/Images/img-satelites/selva/leaf-curved.webp"
+      },
+      {
+        "dx": 0.1532,
+        "dy": -0.3483,
+        "w": 0.0381,
+        "ratio": "73 / 75",
+        "depth": 0.82,
+        "src": "/Images/img-satelites/selva/leaf-round.webp"
+      },
+      {
+        "dx": -0.3241,
+        "dy": -0.2844,
+        "w": 0.0383,
+        "ratio": "74 / 78",
+        "depth": 0.82,
+        "src": "/Images/img-satelites/selva/flower-pink.webp"
+      },
+      {
+        "dx": 0.3236,
+        "dy": 0.1984,
+        "w": 0.0591,
+        "ratio": "148 / 305",
+        "depth": 0.78,
+        "src": "/Images/img-satelites/selva/grass-light.webp"
+      },
+      {
+        "dx": 0.3487,
+        "dy": 0.2451,
+        "w": 0.0405,
+        "ratio": "251 / 526",
+        "depth": 0.81,
+        "src": "/Images/img-satelites/selva/grass-dark.webp"
+      },
+      {
+        "dx": -0.3173,
+        "dy": 0.2081,
+        "w": 0.0933,
+        "ratio": "143 / 143",
+        "depth": 0.78,
+        "src": "/Images/img-satelites/selva/starburst.webp"
+      },
+      {
+        "dx": -0.3621,
+        "dy": 0.2579,
+        "w": 0.0529,
+        "ratio": "75 / 71",
+        "depth": 0.81,
+        "src": "/Images/img-satelites/selva/leaf-small.webp"
+      },
+      {
+        "dx": -0.2842,
+        "dy": 0.2833,
+        "w": 0.0743,
+        "ratio": "143 / 143",
+        "depth": 0.78,
+        "src": "/Images/img-satelites/selva/starburst-2.webp"
+      },
+      {
+        "dx": 0.2556,
+        "dy": 0.2683,
+        "w": 0.1438,
+        "ratio": "369 / 205",
+        "depth": 0.68,
+        "src": "/Images/img-satelites/selva/lotus-flower.webp"
+      }
+    ],
+    "budapest-forro": [
+      {
+        "dx": -0.2072,
+        "dy": -0.3471,
+        "w": 0.0394,
+        "ratio": "76 / 75",
+        "depth": 0.81,
+        "src": "/Images/img-satelites/budapest/lua.webp"
+      },
+      {
+        "dx": -0.2647,
+        "dy": -0.2493,
+        "w": 0.1412,
+        "ratio": "271 / 210",
+        "depth": 0.72,
+        "src": "/Images/img-satelites/budapest/passaro.webp"
+      },
+      {
+        "dx": 0.2485,
+        "dy": -0.2715,
+        "w": 0.0829,
+        "ratio": "159 / 146",
+        "depth": 0.78,
+        "src": "/Images/img-satelites/budapest/sol.webp"
+      },
+      {
+        "dx": 0.2516,
+        "dy": 0.0639,
+        "w": 0.1569,
+        "ratio": "301 / 635",
+        "depth": 0.71,
+        "src": "/Images/img-satelites/budapest/bff-grafismo-ilustra-bege-danubio-2x-1.webp"
+      },
+      {
+        "dx": 0.3144,
+        "dy": 0.2383,
+        "w": 0.2122,
+        "ratio": "407 / 512",
+        "depth": 0.66,
+        "src": "/Images/img-satelites/budapest/folhagem-01.webp"
+      },
+      {
+        "dx": -0.2935,
+        "dy": 0.1988,
+        "w": 0.059,
+        "ratio": "113 / 337",
+        "depth": 0.8,
+        "src": "/Images/img-satelites/budapest/folhagem-04.webp"
+      },
+      {
+        "dx": -0.3209,
+        "dy": 0.2383,
+        "w": 0.182,
+        "ratio": "349 / 227",
+        "depth": 0.69,
+        "src": "/Images/img-satelites/budapest/folhagem-03.webp"
+      },
+      {
+        "dx": 0.21,
+        "dy": 0.2439,
+        "w": 0.1209,
+        "ratio": "232 / 181",
+        "depth": 0.74,
+        "src": "/Images/img-satelites/budapest/folhagem-02.webp"
       }
     ]
   },
   "mobile": {
     "delirio-tropical": [
       {
-        "dx": -0.4686,
-        "dy": -0.1277,
-        "w": 0.2,
+        "dx": -0.2987,
+        "dy": -0.4906,
+        "w": 0.1836,
         "ratio": "190 / 241",
-        "depth": 0.8,
+        "depth": 0.76,
         "src": "/Images/img-satelites/delirio-tropical/palm-tree-textured.webp"
       },
       {
-        "dx": 0.1475,
-        "dy": -0.2582,
-        "w": 0.15,
+        "dx": 0.389,
+        "dy": -0.3872,
+        "w": 0.32,
+        "ratio": "444 / 272",
+        "depth": 0.64,
+        "src": "/Images/img-satelites/delirio-tropical/delirio-tropical-logo.webp"
+      },
+      {
+        "dx": 0.2788,
+        "dy": -0.7057,
+        "w": 0.1713,
         "ratio": "169 / 127",
-        "depth": 0.8,
+        "depth": 0.77,
         "src": "/Images/img-satelites/delirio-tropical/crab-character.webp"
       },
       {
-        "dx": 0.3976,
-        "dy": -0.1035,
-        "w": 0.2397,
-        "ratio": "520 / 728",
-        "depth": 0.75,
-        "src": "/Images/img-satelites/delirio-tropical/08.gif"
-      },
-      {
-        "dx": -0.3054,
-        "dy": 0.0698,
-        "w": 0.3854,
+        "dx": 0.3118,
+        "dy": 0.5356,
+        "w": 0.3309,
         "ratio": "461 / 598",
-        "depth": 0.5,
+        "depth": 0.63,
         "src": "/Images/img-satelites/delirio-tropical/toucan-drummer.webp"
       },
       {
-        "dx": 0.2426,
-        "dy": 0.2073,
-        "w": 0.46,
-        "ratio": "848 / 520",
-        "depth": 0.4,
-        "src": "/Images/img-satelites/delirio-tropical/delirio-tropical-logo.webp"
-      }
-    ],
-    "delirio-sao-joao": [
-      {
-        "dx": -0.3563,
-        "dy": -0.1263,
-        "w": 0.415,
-        "ratio": "607 / 401",
-        "depth": 0.5,
-        "src": "/Images/img-satelites/sao-joao/banner-and-tambourine.webp"
-      },
-      {
-        "dx": 0.1792,
-        "dy": -0.1648,
-        "w": 0.1538,
-        "ratio": "201 / 455",
-        "depth": 0.75,
-        "src": "/Images/img-satelites/sao-joao/casaca-instrument-character.webp"
-      },
-      {
-        "dx": 0.3868,
-        "dy": -0.0654,
-        "w": 0.1874,
-        "ratio": "360 / 514",
-        "depth": 0.6,
-        "src": "/Images/img-satelites/sao-joao/festival-lineup-poster.webp"
-      },
-      {
-        "dx": -0.226,
-        "dy": 0.1474,
-        "w": 0.2335,
-        "ratio": "387 / 352",
-        "depth": 0.55,
-        "src": "/Images/img-satelites/sao-joao/church-with-palm-trees.webp"
-      },
-      {
-        "dx": 0.2863,
-        "dy": 0.24,
-        "w": 0.3379,
-        "ratio": "395 / 233",
-        "depth": 0.7,
-        "src": "/Images/img-satelites/sao-joao/colorful-boats.webp"
+        "dx": -0.4339,
+        "dy": 0.3651,
+        "w": 0.1475,
+        "ratio": "259 / 363",
+        "depth": 0.73,
+        "src": "/Images/img-satelites/delirio-tropical/08.gif"
       }
     ],
     "fcv": [
       {
-        "dx": -0.3703,
-        "dy": -0.1621,
-        "w": 0.3483,
-        "ratio": "422 / 259",
-        "depth": 0.6,
-        "src": "/Images/img-satelites/30-fcv/festival-de-cinema-de-vitoria-logo.webp"
-      },
-      {
-        "dx": 0.1015,
-        "dy": 0.1441,
-        "w": 0.4789,
-        "ratio": "661 / 406",
-        "depth": 0.45,
+        "dx": -0.4175,
+        "dy": -0.1069,
+        "w": 0.3582,
+        "ratio": "460 / 282",
+        "depth": 0.63,
         "src": "/Images/img-satelites/30-fcv/festival-poster-wall-mockup.webp"
       },
       {
-        "dx": 0.07,
-        "dy": 0.3022,
+        "dx": 0.3069,
+        "dy": -0.1745,
         "w": 0.1953,
         "ratio": "375 / 116",
-        "depth": 0.8,
+        "depth": 0.67,
         "src": "/Images/img-satelites/30-fcv/eye-illustration-red.webp"
       },
       {
-        "dx": 0.3812,
-        "dy": -0.1391,
-        "w": 0.1872,
-        "ratio": "1 / 1",
-        "depth": 0.65,
+        "dx": 0.3719,
+        "dy": -0.1052,
+        "w": 0.2104,
+        "ratio": "311 / 311",
+        "depth": 0.7,
         "src": "/Images/img-satelites/30-fcv/woman-portrait-collage.webp"
       },
       {
-        "dx": -0.427,
-        "dy": -0.0243,
-        "w": 0.1326,
-        "ratio": "255 / 183",
-        "depth": 0.8,
-        "src": "/Images/img-satelites/30-fcv/eye-illustration-with-lashes.webp"
+        "dx": 0.3422,
+        "dy": 0.1107,
+        "w": 0.2753,
+        "ratio": "1016 / 1170",
+        "depth": 0.64,
+        "src": "/Images/img-satelites/30-fcv/Capa-FCV.gif"
       },
       {
-        "dx": 0.1377,
-        "dy": -0.2148,
-        "w": 0.216,
+        "dx": 0.4355,
+        "dy": -0.0053,
+        "w": 0.166,
         "ratio": "319 / 243",
-        "depth": 0.75,
+        "depth": 0.7,
         "src": "/Images/img-satelites/30-fcv/eye-illustration-pink.webp"
       },
       {
-        "dx": 0.334,
-        "dy": 0.252,
-        "w": 0.2351,
-        "ratio": "451 / 560",
+        "dx": -0.1225,
+        "dy": 0.1376,
+        "w": 0.1326,
+        "ratio": "255 / 183",
+        "depth": 0.73,
+        "src": "/Images/img-satelites/30-fcv/eye-illustration-with-lashes.webp"
+      },
+      {
+        "dx": -0.3731,
+        "dy": 0.1262,
+        "w": 0.3446,
+        "ratio": "662 / 406",
+        "depth": 0.54,
+        "src": "/Images/img-satelites/30-fcv/rectangle-75.webp"
+      }
+    ],
+    "a-selva": [
+      {
+        "dx": -0.3426,
+        "dy": -0.6203,
+        "w": 0.1195,
+        "ratio": "82 / 74",
+        "depth": 0.81,
+        "src": "/Images/img-satelites/selva/blossom.webp"
+      },
+      {
+        "dx": -0.3744,
+        "dy": -0.4107,
+        "w": 0.2213,
+        "ratio": "212 / 154",
+        "depth": 0.75,
+        "src": "/Images/img-satelites/selva/leaf-large.webp"
+      },
+      {
+        "dx": 0.2354,
+        "dy": -0.4748,
+        "w": 0.038,
+        "ratio": "73 / 55",
+        "depth": 0.82,
+        "src": "/Images/img-satelites/selva/petal.webp"
+      },
+      {
+        "dx": 0.3652,
+        "dy": -0.3033,
+        "w": 0.2189,
+        "ratio": "190 / 159",
+        "depth": 0.76,
+        "src": "/Images/img-satelites/selva/leaf-curved.webp"
+      },
+      {
+        "dx": 0.2,
+        "dy": -0.3846,
+        "w": 0.0381,
+        "ratio": "73 / 75",
+        "depth": 0.82,
+        "src": "/Images/img-satelites/selva/leaf-round.webp"
+      },
+      {
+        "dx": -0.4766,
+        "dy": -0.4387,
+        "w": 0.0787,
+        "ratio": "74 / 78",
+        "depth": 0.82,
+        "src": "/Images/img-satelites/selva/flower-pink.webp"
+      },
+      {
+        "dx": 0.4583,
+        "dy": 0.1649,
+        "w": 0.1054,
+        "ratio": "148 / 305",
+        "depth": 0.78,
+        "src": "/Images/img-satelites/selva/grass-light.webp"
+      },
+      {
+        "dx": 0.4148,
+        "dy": 0.2904,
+        "w": 0.0905,
+        "ratio": "251 / 526",
+        "depth": 0.81,
+        "src": "/Images/img-satelites/selva/grass-dark.webp"
+      },
+      {
+        "dx": -0.4447,
+        "dy": 0.2257,
+        "w": 0.1336,
+        "ratio": "143 / 143",
+        "depth": 0.78,
+        "src": "/Images/img-satelites/selva/starburst.webp"
+      },
+      {
+        "dx": -0.4796,
+        "dy": 0.3791,
+        "w": 0.0529,
+        "ratio": "75 / 71",
+        "depth": 0.81,
+        "src": "/Images/img-satelites/selva/leaf-small.webp"
+      },
+      {
+        "dx": -0.3968,
+        "dy": 0.3955,
+        "w": 0.169,
+        "ratio": "143 / 143",
+        "depth": 0.78,
+        "src": "/Images/img-satelites/selva/starburst-2.webp"
+      },
+      {
+        "dx": 0.306,
+        "dy": 0.3841,
+        "w": 0.1988,
+        "ratio": "369 / 205",
+        "depth": 0.68,
+        "src": "/Images/img-satelites/selva/lotus-flower.webp"
+      }
+    ],
+    "delirio-sao-joao": [
+      {
+        "dx": -0.4008,
+        "dy": -0.3554,
+        "w": 0.3159,
+        "ratio": "607 / 401",
+        "depth": 0.57,
+        "src": "/Images/img-satelites/sao-joao/banner-and-tambourine.webp"
+      },
+      {
+        "dx": 0.3995,
+        "dy": -0.3715,
+        "w": 0.1351,
+        "ratio": "201 / 455",
+        "depth": 0.76,
+        "src": "/Images/img-satelites/sao-joao/casaca-instrument-character.webp"
+      },
+      {
+        "dx": 0.4203,
+        "dy": -0.1424,
+        "w": 0.1618,
+        "ratio": "211 / 207",
+        "depth": 0.75,
+        "src": "/Images/img-satelites/sao-joao/zabumba-drum.webp"
+      },
+      {
+        "dx": 0.3625,
+        "dy": 0.3169,
+        "w": 0.2917,
+        "ratio": "387 / 352",
+        "depth": 0.67,
+        "src": "/Images/img-satelites/sao-joao/church-with-palm-trees.webp"
+      },
+      {
+        "dx": -0.4224,
+        "dy": 0.3703,
+        "w": 0.2059,
+        "ratio": "395 / 233",
+        "depth": 0.66,
+        "src": "/Images/img-satelites/sao-joao/colorful-boats.webp"
+      }
+    ],
+    "tenda-lab": [
+      {
+        "dx": -0.3872,
+        "dy": -0.3471,
+        "w": 0.2375,
+        "ratio": "456 / 303",
+        "depth": 0.64,
+        "src": "/Images/img-satelites/tenda-lab/asset-2-2x-3.webp"
+      },
+      {
+        "dx": 0.3199,
+        "dy": -0.4403,
+        "w": 0.1543,
+        "ratio": "296 / 244",
+        "depth": 0.71,
+        "src": "/Images/img-satelites/tenda-lab/asset-4-2x-2.webp"
+      },
+      {
+        "dx": -0.4305,
+        "dy": 0.3518,
+        "w": 0.1521,
+        "ratio": "292 / 292",
+        "depth": 0.71,
+        "src": "/Images/img-satelites/tenda-lab/rectangle-80.webp"
+      },
+      {
+        "dx": 0.2353,
+        "dy": 0.4035,
+        "w": 0.3073,
+        "ratio": "590 / 141",
+        "depth": 0.57,
+        "src": "/Images/img-satelites/tenda-lab/asset-3-2x-2.webp"
+      },
+      {
+        "dx": 0.4182,
+        "dy": 0.1126,
+        "w": 0.1769,
+        "ratio": "340 / 361",
+        "depth": 0.69,
+        "src": "/Images/img-satelites/tenda-lab/02-1.webp"
+      }
+    ],
+    "vivs": [
+      {
+        "dx": -0.3853,
+        "dy": -0.3416,
+        "w": 0.3555,
+        "ratio": "683 / 536",
+        "depth": 0.53,
+        "src": "/Images/img-satelites/vivs/vivstour-backstage-sticker-carro-01-1.webp"
+      },
+      {
+        "dx": 0.4104,
+        "dy": -0.3247,
+        "w": 0.3207,
+        "ratio": "616 / 478",
+        "depth": 0.56,
+        "src": "/Images/img-satelites/vivs/vivstour-backstage-sticker-moinho-02-1.webp"
+      },
+      {
+        "dx": 0.2789,
+        "dy": -0.3728,
+        "w": 0.2318,
+        "ratio": "445 / 360",
+        "depth": 0.64,
+        "src": "/Images/img-satelites/vivs/vivstour-backstage-mono-roxo-sticker-v-1.webp"
+      },
+      {
+        "dx": -0.4316,
+        "dy": 0.3072,
+        "w": 0.162,
+        "ratio": "311 / 390",
+        "depth": 0.7,
+        "src": "/Images/img-satelites/vivs/rectangle-87.webp"
+      },
+      {
+        "dx": -0.3261,
+        "dy": 0.4588,
+        "w": 0.1946,
+        "ratio": "374 / 259",
+        "depth": 0.67,
+        "src": "/Images/img-satelites/vivs/vivstour-sticker-casas-02-1.webp"
+      },
+      {
+        "dx": 0.3771,
+        "dy": 0.3664,
+        "w": 0.389,
+        "ratio": "747 / 788",
         "depth": 0.5,
-        "src": "/Images/img-satelites/30-fcv/cameraman-collage-character.webp"
+        "src": "/Images/img-satelites/vivs/vivstour-backstage-personagem-01-1.webp"
       }
     ]
   }

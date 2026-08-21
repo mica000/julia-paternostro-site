@@ -210,11 +210,11 @@ export function pick(v: Localized, lang: Lang): string {
 function fallbackGallery(offset: number): string[] {
   return Array.from({ length: 9 }, (_, i) => {
     const n = ((offset + i) % 11) + 1;
-    return `/Images/${String(n).padStart(2, "0")}-square.png`;
+    return `/Images/loading/${String(n).padStart(2, "0")}-square.webp`;
   });
 }
 
-const tile = (n: number) => `/Images/${String(n).padStart(2, "0")}-square.png`;
+const tile = (n: number) => `/Images/loading/${String(n).padStart(2, "0")}-square.webp`;
 
 /**
  * Case-study asset path helper. Turns a bare filename ("Rectangle 1") into

@@ -3,13 +3,13 @@
 /*
   TopNav — one navigation, every route
   ------------------------------------
-  Layout (Figma node 122:1145):
+  Layout (Figma node 397:542):
 
-    [ Julia Paternostro  About  English ]   [ center ]   [ Copy email ]
+    [ Julia Paternostro ]   [ Show all ]   [ English  About ]
 
-  Everything the reader can act on now sits in ONE group on the left — the
-  wordmark, About, and the language switch — with Copy email alone on the
-  right. The center belongs to the Show-all chip.
+  The wordmark stands alone on the left; the language switch and About sit
+  together on the right; the center belongs to the Show-all chip. The email
+  is no longer in the nav — it lives in the footer CTA.
 
   This treatment used to be scoped to the parallax index while every other
   route got a louder 18/26px uppercase bar with a difference blend. The index
@@ -159,21 +159,12 @@ export default function TopNav() {
     >
       {/* ─── Desktop layout (md+) ─── */}
       <div className="relative hidden md:flex items-center justify-between px-[44px] py-[30px]">
-        {/* Left group — Figma's 56px gap. The wordmark, About and the language
-            switch travel together; nothing else lives on this side. */}
+        {/* Left group — just the wordmark (Figma node 397:542). About moved to
+            the right cell; the language switch never lived up here. */}
         <div className="flex items-center gap-[56px]">
           <Link href="/" className={type} onClick={goHome} data-cursor-ring>
             Julia Paternostro
           </Link>
-          <Link href="/about" className={`${type} uline`} data-cursor-ring>
-            {t("nav.about")}
-          </Link>
-          {/* Language does NOT live in the nav. The iOS switch lives bottom-
-              right where a route has a footer — the index (Figma 197:570) and
-              each case study (CaseStudyFooter). Secondary routes (/about,
-              /services) have no footer, so on desktop they carry no on-page
-              switch; on mobile it's still reachable from the MENU overlay
-              below. See LangToggle. */}
         </div>
 
         {/* Center — positioned absolutely rather than as a flex/grid cell so
@@ -200,14 +191,15 @@ export default function TopNav() {
           </button>
         </div>
 
-        {/* Right — the language toggle + Copy email (Figma node 397:542).
-            The switch moved up here from the footer, so it's reachable on every
-            route without a footer. Only these two take pointer events. */}
+        {/* Right — the language toggle + About (Figma node 397:542). The switch
+            moved up here from the footer so it's reachable on every route; the
+            email now lives only in the footer CTA, not the nav. Only these two
+            take pointer events. */}
         <div className="flex items-center gap-[56px]">
           <LangToggle className="pointer-events-auto" />
-          <button type="button" onClick={copyEmail} className={type} data-cursor-ring>
-            {copied ? t("nav.copied") : t("nav.copyEmail")}
-          </button>
+          <Link href="/about" className={type} data-cursor-ring>
+            {t("nav.about")}
+          </Link>
         </div>
       </div>
 
