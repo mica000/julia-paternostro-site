@@ -36,9 +36,8 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useConfig, useLang, usePageBg } from "@/lib/state";
-import { getProject } from "@/lib/projects";
 import ShowAllIcon, { CHIP_CLASS } from "@/components/ShowAllIcon";
 import LangToggle from "@/components/LangToggle";
 
@@ -59,17 +58,34 @@ export default function TopNav() {
 
   const isHome = pathname === "/";
   const showAllOpen = config.parallaxShowAll;
-  // The center "Show all" chip lives on the index AND the secondary routes
-  // (/about, /services), so the nav reads the same everywhere except a case
-  // study (which shows the project name instead). On the index it toggles the
-  // detail list in place; from a secondary route there's no list to toggle, so
-  // it opens the list and navigates home to it.
+  // Where the Show-all list was opened from. When you open it from a case
+  // study (or any non-index route) we stash that path here, so closing the
+  // list returns you to exactly where you were instead of dropping you on
+  // the bare index stage. Opened on the index itself → stays null, and close
+  // just toggles back to the stage. A ref (not state) because TopNav lives in
+  // the root layout and never remounts across client navigations, so the
+  // value survives the push to "/".
+  const showAllOriginRef = useRef<string | null>(null);
+
+  // The center "Show all" chip lives on EVERY route (Figma 422:1767). On the
+  // index it toggles the detail list in place; from any other route it opens
+  // the list and navigates home to it, remembering the origin so the reader
+  // can be returned there on close.
   const handleShowAll = (e: React.MouseEvent) => {
     e.preventDefault();
     if (isHome) {
-      setConfig({ ...config, parallaxShowAll: !config.parallaxShowAll });
+      if (config.parallaxShowAll) {
+        // Closing — return to the opening route if there was one.
+        const origin = showAllOriginRef.current;
+        showAllOriginRef.current = null;
+        setConfig({ ...config, parallaxShowAll: false });
+        if (origin && origin !== "/") router.push(origin);
+      } else {
+        setConfig({ ...config, parallaxShowAll: true });
+      }
       return;
     }
+    showAllOriginRef.current = pathname;
     if (!config.parallaxShowAll) setConfig({ ...config, parallaxShowAll: true });
     setMenuOpen(false);
     router.push("/");
@@ -82,46 +98,12 @@ export default function TopNav() {
   // look broken. Closing both here covers every route with one handler.
   const goHome = () => {
     setMenuOpen(false);
+    // Explicit trip to the index stage — drop any remembered origin so a
+    // later close doesn't bounce back to a stale route.
+    showAllOriginRef.current = null;
     if (config.parallaxShowAll) setConfig({ ...config, parallaxShowAll: false });
   };
 
-  // Which case study are we on? Slug is the 2nd path segment of /work/[slug].
-  const caseStudySlug = pathname.startsWith("/work/")
-    ? pathname.split("/")[2] ?? null
-    : null;
-  const project = caseStudySlug ? getProject(caseStudySlug) : null;
-
-  // Reveal the project name in the nav center once the case study's <h1>
-  // title has scrolled up behind the fixed nav. A scroll listener
-  // re-measures the title's bottom edge; when it passes the nav band we flip
-  // `nameRevealed`, which drives the fade/slide-in. Scrolling back to the top
-  // hides it again, so the name never shows while the on-page title is still
-  // in its opening position. The check reads a single getBoundingClientRect
-  // and setState no-ops when the boolean is unchanged, so running it on every
-  // scroll event is cheap — same pattern as the gallery Frame reveal.
-  const REVEAL_AT = 76; // px — fixed-nav height (30 + 16 + 30)
-  const [nameRevealed, setNameRevealed] = useState(false);
-  useEffect(() => {
-    // Off a case study there's no title to track and the name span isn't
-    // rendered, so we skip wiring listeners. Returning to a case study
-    // re-runs this effect and check() recomputes from scratch.
-    if (!caseStudySlug) return;
-    const check = () => {
-      const h1 = document.querySelector("main h1");
-      if (!h1) {
-        setNameRevealed(false);
-        return;
-      }
-      setNameRevealed(h1.getBoundingClientRect().bottom <= REVEAL_AT);
-    };
-    check();
-    window.addEventListener("scroll", check, { passive: true });
-    window.addEventListener("resize", check, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", check);
-      window.removeEventListener("resize", check);
-    };
-  }, [caseStudySlug]);
 
   // Copy email — writes the studio address to the clipboard and flashes
   // "Copied" for 1.5s, so the click has a visible result without opening a
@@ -199,40 +181,23 @@ export default function TopNav() {
             left and right groups grow. A 3-column grid only centers while
             those two happen to balance; translated labels break that. */}
         <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-          {!caseStudySlug ? (
-            // Index + secondary routes: a chip (Figma node 197:312). On the
-            // index it toggles the detail list — "Show all" / "Close". On a
-            // secondary route there's no list here, so it always reads "Show
-            // all" and jumps to the index with the list open.
-            <button
-              type="button"
-              onClick={handleShowAll}
-              className={`pointer-events-auto ${CHIP_CLASS}`}
-              data-cursor-ring
-            >
-              <ShowAllIcon open={isHome && showAllOpen} />
-              {isHome && showAllOpen
-                ? t("parallax.parallaxView")
-                : t("parallax.showAll")}
-            </button>
-          ) : project ? (
-            <span
-              className={type}
-              aria-hidden={!nameRevealed}
-              style={{
-                display: "inline-block",
-                // Fade + slight rise-in, echoing the case study's own reveal
-                // language. Non-interactive — it's a label, not a link.
-                opacity: nameRevealed ? 1 : 0,
-                transform: nameRevealed ? "translateY(0)" : "translateY(6px)",
-                transition:
-                  "opacity 500ms cubic-bezier(0.22, 1, 0.36, 1), transform 500ms cubic-bezier(0.22, 1, 0.36, 1)",
-                pointerEvents: "none",
-              }}
-            >
-              {project.title}
-            </span>
-          ) : null}
+          {/* The Show-all chip lives on EVERY route now, case studies
+              included (Figma 422:1767). On the index it toggles the detail
+              list ("Show all" / "Parallax view"); from any other route it
+              opens the list and navigates home to it. The old case-study
+              behaviour — revealing the project name here on scroll — is
+              gone; the chip takes that slot instead. */}
+          <button
+            type="button"
+            onClick={handleShowAll}
+            className={`pointer-events-auto ${CHIP_CLASS}`}
+            data-cursor-ring
+          >
+            <ShowAllIcon open={isHome && showAllOpen} />
+            {isHome && showAllOpen
+              ? t("parallax.parallaxView")
+              : t("parallax.showAll")}
+          </button>
         </div>
 
         {/* Right — the language toggle + Copy email (Figma node 397:542).
@@ -240,7 +205,7 @@ export default function TopNav() {
             route without a footer. Only these two take pointer events. */}
         <div className="flex items-center gap-[56px]">
           <LangToggle className="pointer-events-auto" />
-          <button type="button" onClick={copyEmail} className={`${type} uline`} data-cursor-ring>
+          <button type="button" onClick={copyEmail} className={type} data-cursor-ring>
             {copied ? t("nav.copied") : t("nav.copyEmail")}
           </button>
         </div>

@@ -27,6 +27,7 @@ import { useEffect, useRef, useState } from "react";
 const DOT_SIZE = 8; // px — filled dot at rest
 const RING_SIZE = 40; // px — hollow ring over clickables
 const RING_STROKE = 1.5; // px — ring stroke
+const CENTER_DOT = 3; // px — little dot kept in the ring's center while hovering
 const TRAIL_LERP = 0.18; // ring trail (lower = more float). Dot tracks exactly.
 
 // What counts as "clickable" — the dot rings these.
@@ -135,6 +136,23 @@ export default function CustomCursor() {
             : "0px solid transparent",
           transition:
             "width 300ms cubic-bezier(0.22,1,0.36,1), height 300ms cubic-bezier(0.22,1,0.36,1), background-color 200ms ease, border-width 200ms ease",
+        }}
+      />
+      {/* Little center dot — the resting circle becomes the hollow ring on
+          hover, so this fills the hole back in and keeps the pointer's exact
+          hotspot marked. Hidden at rest (the main circle IS the dot there). */}
+      <div
+        className="rounded-full"
+        style={{
+          position: "absolute",
+          left: 0,
+          top: 0,
+          width: CENTER_DOT,
+          height: CENTER_DOT,
+          transform: "translate(-50%, -50%)",
+          backgroundColor: "#ffffff",
+          opacity: hovering ? 1 : 0,
+          transition: "opacity 200ms ease",
         }}
       />
     </div>

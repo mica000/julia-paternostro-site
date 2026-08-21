@@ -1238,9 +1238,10 @@ export default function ParallaxIndex({ background }: Props) {
             snapping back before the unmount. */}
       {sheetMounted && (
         <div
-          className="fixed inset-0 z-20 overflow-y-auto overscroll-contain will-change-transform"
+          className="fixed inset-0 z-20 overflow-y-auto overscroll-contain"
           style={{
             backgroundColor: background,
+            willChange: "transform, filter",
             animation: `${showAll ? "sheet-in" : "sheet-out"} ${
               showAll ? SHEET_IN_MS : SHEET_OUT_MS
             }ms var(--ease-out) both`,

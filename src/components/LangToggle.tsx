@@ -66,7 +66,7 @@ export default function LangToggle({ className = "" }: { className?: string }) {
       // What's left is a transparent hit area (kept at the Figma track size so
       // the knob and label still have their frame) with just the white knob dot
       // and the EN/PT label floating over whatever's behind.
-      className={`uline relative shrink-0 cursor-pointer ${className}`}
+      className={`relative shrink-0 cursor-pointer ${className}`}
       style={{
         width: TRACK_W,
         height: TRACK_H,

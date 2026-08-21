@@ -151,20 +151,32 @@ nav a, nav button {
   component, which owns the in/out asymmetry.
 */
 @keyframes sheet-in {
-  from {
+  /* Slides down from the top edge AND focuses in from a soft blur: the slab
+     stays gently blurred through the travel, then sharpens as it settles, so
+     the reveal reads as a soft materialization instead of a hard drop. Blur is
+     kept subtle (6px) and clears on a single element, so the cost is a short
+     one-shot, not a sustained filter. */
+  0% {
     transform: translateY(-100%);
+    filter: blur(6px);
   }
-  to {
+  65% {
+    filter: blur(6px);
+  }
+  100% {
     transform: translateY(0);
+    filter: blur(0);
   }
 }
 
 @keyframes sheet-out {
-  from {
+  0% {
     transform: translateY(0);
+    filter: blur(0);
   }
-  to {
+  100% {
     transform: translateY(-100%);
+    filter: blur(6px);
   }
 }
 

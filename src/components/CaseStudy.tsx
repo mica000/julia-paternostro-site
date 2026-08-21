@@ -35,18 +35,19 @@ import { pick, projectBg, type Project, type Section } from "@/lib/projects";
 import { useLang, usePageBg, type Lang } from "@/lib/state";
 import { useTransition } from "@/components/PageTransition";
 import CaseStudyFooter from "@/components/CaseStudyFooter";
-import LangToggle from "@/components/LangToggle";
 
 // Meta-row labels (Figma node 403:1046) — mixed case, and sit BELOW their
 // value. Kept local to this component; edit here if the designer changes the
 // wording.
 const META_LABEL: Record<
-  "projectType" | "year" | "deliverables",
+  "projectType" | "year" | "deliverables" | "copywriter" | "client",
   Record<Lang, string>
 > = {
   projectType: { en: "Project type", pt: "Tipo de projeto" },
   year: { en: "Year", pt: "Ano" },
   deliverables: { en: "Deliverables", pt: "Entregáveis" },
+  copywriter: { en: "Copywriter", pt: "Copywriter" },
+  client: { en: "Client", pt: "Cliente" },
 };
 
 export default function CaseStudy({ project }: { project: Project }) {
@@ -58,6 +59,12 @@ export default function CaseStudy({ project }: { project: Project }) {
   // consistent regardless of which project the reader lands on.
   const bg = "#000000";
   const fg = "#ffffff";
+  // Left-panel description — brief + context merged (deduped), the same
+  // copy the old full-width ContextParagraph showed, now living beside the
+  // gallery. Empty/duplicate entries are dropped.
+  const descParas = [pick(project.brief, lang), pick(project.context, lang)].filter(
+    (t, i, arr) => t && arr.indexOf(t) === i
+  );
   // Nav + fixed chrome pick up this same explicit white so they never
   // fall back to mix-blend-mode (which would compute a colored inverse
   // against the darkened bg).
@@ -80,6 +87,12 @@ export default function CaseStudy({ project }: { project: Project }) {
   // second animation frame so the browser sees the initial styles before
   // the target styles, guaranteeing the CSS transition actually runs.
   const [entered, setEntered] = useState(false);
+  // Once the rise-in finishes we drop the wrapper's transform + will-change.
+  // Keeping `will-change: transform` alive forever is a needless compositing
+  // hint, and a lingering transform establishes a containing block that would
+  // trap any future `position: fixed`/`sticky` descendant — so we clean both
+  // up after the animation settles.
+  const [settled, setSettled] = useState(false);
 
   useEffect(() => {
     // Two rAFs: first frame paints the initial (translated + transparent)
@@ -98,6 +111,14 @@ export default function CaseStudy({ project }: { project: Project }) {
       cancelAnimationFrame(releaseOverlay);
     };
   }, [end]);
+
+  useEffect(() => {
+    if (!entered) return;
+    // After the 480ms transform transition (+ buffer), drop transform/
+    // will-change so sticky positioning is measured against the viewport.
+    const id = window.setTimeout(() => setSettled(true), 600);
+    return () => window.clearTimeout(id);
+  }, [entered]);
 
   return (
     <main
@@ -125,118 +146,112 @@ export default function CaseStudy({ project }: { project: Project }) {
           // Rise-in: content starts 24px lower and transparent, settles as
           // the overlay above is fading out. Same 480ms ease-out feels
           // aligned with the 280ms overlay fade — the reader sees the
-          // content emerging into position rather than snapping.
-          transform: entered ? "translateY(0)" : "translateY(24px)",
+          // content emerging into position rather than snapping. Once
+          // `settled`, transform + will-change are dropped (cleanup — see the
+          // state declaration above).
+          transform: settled
+            ? undefined
+            : entered
+              ? "translateY(0)"
+              : "translateY(24px)",
           opacity: entered ? 1 : 0,
-          transition:
-            "transform 480ms cubic-bezier(0.22, 1, 0.36, 1), opacity 320ms cubic-bezier(0.22, 1, 0.36, 1)",
-          willChange: "transform, opacity",
+          transition: settled
+            ? undefined
+            : "transform 480ms cubic-bezier(0.22, 1, 0.36, 1), opacity 320ms cubic-bezier(0.22, 1, 0.36, 1)",
+          willChange: settled ? undefined : "transform, opacity",
         }}
       >
-      {/*
-        No max-width — content spans full viewport per user request.
-        Padding scales down on mobile so tight viewports keep breathing room.
-      */}
+      {/* Centered content column (Figma 422:1766) — caps at 1200px and
+          centres, with gutter padding on smaller screens. Holds the
+          title/description header and, below it, the full-width gallery. */}
       <div className="px-6 md:px-[44px] pt-[96px] md:pt-[156px]">
-        {/* ────────────  header  ────────────
-            Just the title now. Per Figma (node 12:286) the meta row
-            (CATEGORIE / YEAR / CLIENT) and credits row have both moved
-            to the bottom of the case study — see the meta block after
-            the sections. */}
-        <header className="mb-8 md:mb-[62px]">
-          {/*
-            Title — Figma "Super Large Title" token: SF Pro Bold, 80/80, 0%
-            tracking on desktop (xl+). Scales down through the breakpoints for
-            mobile readability. `leading-none` matches the 80/80 (line height =
-            font size); tracking is normal (0%) per the style.
-          */}
-          <h1 className="text-[40px] sm:text-[56px] md:text-[64px] xl:text-[80px] font-bold leading-none tracking-normal break-words md:max-w-[60%]">
-            {project.title}
-          </h1>
-        </header>
+        <div className="mx-auto w-full max-w-[1200px]">
+          {/* Header (Figma 423:2049): TITLE on the left, the merged
+              DESCRIPTION + meta on the right, with a band of WHITE SPACE
+              between them. `justify-between` opens that gap; each column is
+              ~38.3% of the 1200px width (Figma 460px) so the middle ~23% is
+              empty. Stacks vertically below md. */}
+          <div className="flex flex-col gap-10 md:flex-row md:justify-between md:gap-0">
+            {/* Title — up to 64px. `text-wrap: balance` evens the line
+                lengths so a long title breaks into tidy lines instead of
+                leaving a single orphan word dangling on the last line. */}
+            <h1 className="md:w-[38.3%] text-[clamp(2.5rem,4vw,4rem)] font-bold leading-[1.05] tracking-normal [text-wrap:balance]">
+              {project.title}
+            </h1>
 
-        {/* ────────────  meta row  ────────────
-            Figma node 403:1046 — moved UP under the title (it used to sit at
-            the very bottom). Each field is its VALUE with a dimmed LABEL below
-            it, laid across the top: Project type (½) · Year (¼) · Deliverables
-            (¼). Stacks to one column on mobile. */}
-        <Reveal className="mb-12 md:mb-[62px]">
-          <div className="flex flex-col gap-6 md:flex-row md:gap-0">
-            <MetaTop label={META_LABEL.projectType[lang]} className="md:w-1/2">
-              {pick(project.category, lang)}
-            </MetaTop>
-            <MetaTop label={META_LABEL.year[lang]} className="md:w-1/4">
-              {project.year}
-            </MetaTop>
-            <MetaTop
-              label={META_LABEL.deliverables[lang]}
-              className="md:w-1/4"
-            >
+            {/* Right column — just the description now; the credits row moved
+                below the gallery (Figma 423:2302). */}
+            <div className="md:w-[38.3%]">
+              {/* Description — brief + context merged (deduped). `text-wrap:
+                  pretty` stops the last line from dropping to a lone orphan
+                  word. */}
+              <div className="flex flex-col gap-4">
+                {descParas.map((t, i) => (
+                  <p
+                    key={i}
+                    className="text-[13px] font-normal leading-4 tracking-normal [text-wrap:pretty]"
+                  >
+                    {t}
+                  </p>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Gallery — full width of the centred column, below the header
+              (Figma 422:1886). */}
+          <div className="mt-12 md:mt-[72px]">
+            {project.sections && project.sections.length > 0 ? (
+              <Sections sections={project.sections} />
+            ) : (
+              <section className="flex flex-col gap-3 md:gap-[18px]">
+                <Frame
+                  src={project.gallery[0]}
+                  ratio="1200/700"
+                  priority
+                  sizes="(max-width: 768px) 100vw, 1200px"
+                />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-[18px]">
+                  <Frame src={project.gallery[1]} ratio="590/485" sizes="(max-width: 768px) 100vw, 590px" delay={0} />
+                  <Frame src={project.gallery[2]} ratio="590/485" sizes="(max-width: 768px) 100vw, 590px" delay={80} />
+                  <Frame src={project.gallery[3]} ratio="590/485" sizes="(max-width: 768px) 100vw, 590px" delay={0} />
+                  <Frame src={project.gallery[4]} ratio="590/485" sizes="(max-width: 768px) 100vw, 590px" delay={80} />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-[18px]">
+                  <Frame src={project.gallery[5]} ratio="388/292" sizes="(max-width: 768px) 100vw, 388px" delay={0} />
+                  <Frame src={project.gallery[6]} ratio="388/292" sizes="(max-width: 768px) 100vw, 388px" delay={80} />
+                  <Frame src={project.gallery[7]} ratio="388/292" sizes="(max-width: 768px) 100vw, 388px" delay={160} />
+                </div>
+                <Frame src={project.gallery[8]} ratio="1200/485" sizes="(max-width: 768px) 100vw, 1200px" />
+              </section>
+            )}
+          </div>
+
+          {/* Credits row — below the gallery (Figma 423:2302). A horizontal
+              row of Deliverables · Copywriter · Client · Year spread across
+              the 1200px column via justify-between, with 128px of breathing
+              room above and below on desktop (less on mobile). The gallery
+              carries no bottom spacing, so this padding is the ONLY gap — no
+              doubled white space. Wraps to multiple lines on narrow screens. */}
+          <div className="flex flex-wrap justify-between gap-x-10 gap-y-8 py-16 md:py-[128px]">
+            <MetaTop label={META_LABEL.deliverables[lang]}>
               {project.deliverables
                 ? pick(project.deliverables, lang)
                 : pick(project.category, lang)}
             </MetaTop>
+            {project.credits?.copywriting && (
+              <MetaTop label={META_LABEL.copywriter[lang]}>
+                {project.credits.copywriting}
+              </MetaTop>
+            )}
+            {project.credits?.client && (
+              <MetaTop label={META_LABEL.client[lang]}>
+                {project.credits.client}
+              </MetaTop>
+            )}
+            <MetaTop label={META_LABEL.year[lang]}>{project.year}</MetaTop>
           </div>
-        </Reveal>
-
-        {/* ────────────  intro hero + context paragraph  ────────────
-          Per new Figma: the first gallery image renders on its own as
-          an intro hero, then a large 26px bold paragraph with the
-          project context sits below it. This introduces the project
-          before the fuller gallery grid unfolds.
-
-          Sources:
-          - Sections mode → sections[0] is pulled out as the intro; the
-            remaining sections render after the paragraph.
-          - Legacy gallery mode → gallery[0] is the intro; the remaining
-            8 slots render in the classic 2×2 / 3-col / hero pattern.
-        */}
-        {project.sections && project.sections.length > 0 ? (
-          <>
-            <IntroHero section={project.sections[0]} />
-            <ContextParagraph
-              context={pick(project.context, lang)}
-              brief={pick(project.brief, lang)}
-            />
-            <Sections sections={project.sections.slice(1)} />
-          </>
-        ) : (
-          <>
-            <section className="mx-auto mb-16 md:mb-[62px] md:max-w-[70%]">
-              <Frame
-                src={project.gallery[0]}
-                ratio="1440/484"
-                priority
-                sizes="100vw"
-              />
-            </section>
-            <ContextParagraph
-              context={pick(project.context, lang)}
-              brief={pick(project.brief, lang)}
-            />
-            <section className="flex flex-col gap-3 md:gap-5">
-              {/* 2×2 grid — each row staggers L (0) → R (80ms). Column
-                  index in a 2-col grid is `j % 2`. */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-5">
-                <Frame src={project.gallery[1]} ratio="710/484" sizes="(max-width: 768px) 100vw, (max-width: 1440px) 50vw, 720px" delay={0} />
-                <Frame src={project.gallery[2]} ratio="710/484" sizes="(max-width: 768px) 100vw, (max-width: 1440px) 50vw, 720px" delay={80} />
-                <Frame src={project.gallery[3]} ratio="710/484" sizes="(max-width: 768px) 100vw, (max-width: 1440px) 50vw, 720px" delay={0} />
-                <Frame src={project.gallery[4]} ratio="710/484" sizes="(max-width: 768px) 100vw, (max-width: 1440px) 50vw, 720px" delay={80} />
-              </div>
-
-              {/* 3-col strip — L (0) → M (80) → R (160). */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-5">
-                <Frame src={project.gallery[5]} ratio="468/292" sizes="(max-width: 768px) 100vw, (max-width: 1440px) 33vw, 468px" delay={0} />
-                <Frame src={project.gallery[6]} ratio="468/292" sizes="(max-width: 768px) 100vw, (max-width: 1440px) 33vw, 468px" delay={80} />
-                <Frame src={project.gallery[7]} ratio="468/292" sizes="(max-width: 768px) 100vw, (max-width: 1440px) 33vw, 468px" delay={160} />
-              </div>
-
-              {/* Solo hero — no delay. */}
-              <Frame src={project.gallery[8]} ratio="1440/484" sizes="100vw" />
-            </section>
-          </>
-        )}
-
+        </div>
       </div>
 
       {/* Related projects — full-viewport-width footer, sits inside the
@@ -245,17 +260,9 @@ export default function CaseStudy({ project }: { project: Project }) {
           pb-[194px], keeping the last row clear of the fixed bottom nav. */}
       <CaseStudyFooter currentSlug={project.slug} />
       </div>
-
-      {/* Language toggle — pinned bottom-right, mirroring the index footer
-          (Figma node 197:570). The case study nav matches the index (no
-          switch up there); the switch lives here instead. Desktop only — on
-          mobile it stays in the nav's MENU overlay. The wrapper is
-          click-through so it never blocks the gallery beneath it. Sits
-          OUTSIDE the rise-in wrapper so it's present immediately, like the
-          fixed nav. */}
-      <div className="pointer-events-none fixed bottom-[44px] right-[44px] z-30 hidden md:flex">
-        <LangToggle className="pointer-events-auto" />
-      </div>
+      {/* No on-page language switch here — the toggle now lives in the top nav
+          (Figma 397:542), reachable on every route, so the case study footer
+          no longer carries its own. */}
     </main>
   );
 }
@@ -289,16 +296,17 @@ function MetaTop({
   aspect-ratio box so the source image (any size) crops cleanly to the
   designed slot without hardcoded dimensions.
 
-  Load-in animation (inspired by metalab.com/work/pitch):
+  Load-in animation (mirrors portorocha.com — e.g. /robinhood-market):
     - Slot starts at the project bg color (inherited via the transparent
       wrapper) — reader never sees a blank white flash while the image
       decodes.
-    - Image starts at opacity 0, transitions to 1 over 600ms once
-      next/image's onLoad fires. `priority` images that hydrate already-
-      loaded are caught by the initial `img.complete` check so they don't
-      stay invisible.
-    - `ease-out` (not linear) so the fade decelerates into place, which
-      reads as "landing" rather than a flat fade.
+    - Image starts at opacity 0 and fades to 1 over 500ms once it finishes
+      loading (Porto Rocha's `.preload` → `.loaded`, opacity 0 → 1, 0.5s).
+      There is NO directional wipe/clip-path reveal — just the fade. next/
+      image lazy-loads below-the-fold slots as they approach the viewport,
+      so each tile fades in right as it arrives. `priority`/cached images
+      that hydrate already-loaded are caught by the initial `img.complete`
+      check so they don't stay invisible.
 */
 function Frame({
   src,
@@ -312,11 +320,10 @@ function Frame({
   ratio: string;
   sizes: string;
   priority?: boolean;
-  /** ms delay before the mask reveal starts — used to stagger cols rows. */
+  /** ms delay before the fade-in starts — used to stagger cols rows. */
   delay?: number;
 }) {
   const [loaded, setLoaded] = useState(false);
-  const [revealed, setRevealed] = useState(false);
   const wrapRef = useRef<HTMLDivElement | null>(null);
 
   // next/image's onLoad can miss cached/priority images that finish
@@ -336,91 +343,11 @@ function Frame({
     return () => img.removeEventListener("load", onLoad);
   }, [src]);
 
-  // Bottom-to-top reveal — the Frame acts as a mask with overflow-hidden,
-  // and the image inside starts translated 100% down (fully below the
-  // mask window). When the frame scrolls into view, the image slides up
-  // into place, appearing to be "uncovered" from bottom to top. Matches
-  // the Metalab.com case-study reveal.
-  useEffect(() => {
-    const el = wrapRef.current;
-    if (!el) return;
-    // Reduced-motion readers skip the mask entirely — no scanning eyes
-    // over animated content, image appears immediately.
-    const prefersReduced =
-      typeof window !== "undefined" &&
-      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    if (prefersReduced || typeof IntersectionObserver === "undefined") {
-      setRevealed(true);
-      return;
-    }
-    // Synchronous first-check: if the frame is already in view at
-    // mount, reveal immediately. IntersectionObserver's initial
-    // callback is async, and in some conditions (throttled tabs,
-    // strict-mode double-invoke edge cases) it doesn't fire fast
-    // enough — so above-the-fold frames stayed permanently masked.
-    // Doing a sync rect test first eliminates that race.
-    const rect = el.getBoundingClientRect();
-    const triggerLine = window.innerHeight * 0.9;
-    if (rect.top < triggerLine && rect.bottom > 0) {
-      setRevealed(true);
-      return;
-    }
-    // Below-the-fold frames wait for scroll to bring them in.
-    let done = false;
-    const reveal = () => {
-      if (done) return;
-      done = true;
-      setRevealed(true);
-      io.disconnect();
-      window.removeEventListener("scroll", onScroll);
-    };
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const e of entries) {
-          if (e.isIntersecting) {
-            reveal();
-            break;
-          }
-        }
-      },
-      // -10% at the bottom — fires as the frame enters the top 90% of
-      // the viewport, so the mask starts opening just before the reader
-      // consciously registers the tile.
-      { rootMargin: "0px 0px -10% 0px", threshold: 0.01 }
-    );
-    io.observe(el);
-    // Scroll listener as a belt-and-suspenders backup — some browsers
-    // and dev-mode strict-mode double-invokes miss the IO callback the
-    // first time. Rect check is cheap and only runs until the frame is
-    // revealed, then unsubscribes.
-    const onScroll = () => {
-      const r = el.getBoundingClientRect();
-      if (r.top < window.innerHeight * 0.9 && r.bottom > 0) reveal();
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      io.disconnect();
-      window.removeEventListener("scroll", onScroll);
-    };
-  }, []);
-
   return (
     <div
       ref={wrapRef}
       className="relative overflow-hidden"
-      style={{
-        aspectRatio: ratio.replace("/", " / "),
-        // Top-to-bottom mask reveal — the image stays put; the visible
-        // window opens from the top edge down. `inset(0 0 100% 0)` hides
-        // everything (bottom edge is inset 100% from the bottom); as
-        // that bottom inset relaxes to 0, the window grows downward.
-        // Matches the Metalab.com case-study reveal.
-        clipPath: revealed ? "inset(0 0 0 0)" : "inset(0 0 100% 0)",
-        // 900ms ease-in-out (easeInOutQuart) — slow entry, quick middle,
-        // slow settle. Reads as intentional scan rather than snap.
-        transition: `clip-path 900ms cubic-bezier(0.77, 0, 0.175, 1) ${delay}ms`,
-        willChange: "clip-path",
-      }}
+      style={{ aspectRatio: ratio.replace("/", " / ") }}
     >
       <Image
         src={src}
@@ -434,11 +361,14 @@ function Frame({
         // ternary — the utility rule wasn't emitted and images stayed at
         // computed opacity 0 forever. Inline styles bypass that entirely.
         //
-        // Opacity fade guards against slow-loading images popping into a
-        // partially-open mask window.
+        // Plain fade-in on load, mirroring portorocha.com (their `.preload`
+        // → `.loaded`: opacity 0 → 1 over 0.5s, no directional wipe). The
+        // optional `delay` still lets a cols row stagger its tiles; it's 0
+        // for most images, so they simply fade as they finish loading.
         style={{
           opacity: loaded ? 1 : 0,
-          transition: "opacity 600ms cubic-bezier(0.22, 1, 0.36, 1)",
+          transition: `opacity 500ms ease ${delay}ms`,
+          willChange: "opacity",
         }}
       />
     </div>
@@ -453,148 +383,6 @@ function Frame({
 const HERO_RATIO_DEFAULT = "913 / 560";
 const COLS2_RATIO_DEFAULT = "447 / 560";
 const COLS3_RATIO_DEFAULT = "292 / 405";
-
-/*
-  IntroHero — the first section rendered on its own with priority image
-  loading (LCP-eligible). Sits between the meta row and the context
-  paragraph per the new Figma. Only supports `hero`-kind sections — if
-  the first section happens to be a `cols` row, we still render it here
-  as a multi-column strip to preserve author intent.
-*/
-function IntroHero({ section }: { section: Section }) {
-  return (
-    // The hero (main image) is capped and centered — it doesn't stretch the
-    // full content width on large screens, matching the Figma where it sits
-    // inset. The text blocks around it stay left-aligned / full-width.
-    <section className="mx-auto mb-16 md:mb-[62px] md:max-w-[70%]">
-      {section.kind === "hero" ? (
-        <Frame
-          src={section.src}
-          ratio={section.ratio ?? HERO_RATIO_DEFAULT}
-          priority
-          sizes="(max-width: 1440px) 100vw, 1440px"
-        />
-      ) : (
-        <Sections sections={[section]} />
-      )}
-    </section>
-  );
-}
-
-/*
-  ContextParagraph — the large-format description below the intro hero.
-  It MERGES the project's `brief` and `context` into one description block,
-  rendered as two stacked paragraphs — `brief` first, then `context`.
-  Duplicates and empties are dropped, so projects whose brief and context are
-  the same (or blank) show just one line. Constrained to ~700px so lines wrap
-  short and read like display copy rather than body text.
-*/
-function ContextParagraph({
-  context,
-  brief,
-}: {
-  context: string;
-  brief: string;
-}) {
-  const paras = [brief, context].filter(
-    (t, i, arr) => t && arr.indexOf(t) === i
-  );
-  return (
-    <Reveal>
-      <div className="mb-16 md:mb-[156px] flex max-w-[700px] flex-col gap-4 md:gap-5">
-        {paras.map((t, i) => (
-          <p
-            key={i}
-            className="text-[16px] font-semibold leading-snug tracking-normal md:text-[18px] md:leading-6"
-          >
-            {t}
-          </p>
-        ))}
-      </div>
-    </Reveal>
-  );
-}
-
-/*
-  Reveal — scroll-triggered reveal wrapper (inspired by metalab.com).
-
-  Content starts at opacity 0 + translateY(24px) and settles into place
-  once the wrapper's top edge crosses the viewport. Uses a single shared
-  IntersectionObserver-per-mount with a 15% top-inset root margin so
-  reveals fire slightly before the element hits the bottom of the
-  viewport, not the moment it appears — which reads as "already there
-  when the eye lands" rather than "popping in late".
-
-  - `once: true` (default) — once revealed, stays revealed even on
-    scroll-out. Reveals repeating on every scroll-back feels twitchy.
-  - `delay` (optional) — stagger reveals inside a grid row. Metalab
-    doesn't stagger; keep at 0 unless the design specifically calls for
-    it.
-  - Falls back to visible immediately on browsers without
-    IntersectionObserver (or during SSR hydration) so nothing stays
-    invisible for readers on old engines.
-*/
-function Reveal({
-  children,
-  delay = 0,
-  className,
-}: {
-  children: React.ReactNode;
-  delay?: number;
-  className?: string;
-}) {
-  const [visible, setVisible] = useState(false);
-  const ref = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    if (typeof IntersectionObserver === "undefined") {
-      setVisible(true);
-      return;
-    }
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            setVisible(true);
-            io.disconnect();
-            break;
-          }
-        }
-      },
-      // rootMargin: reveal fires when the element's top is 15% into the
-      // viewport from the bottom — the reader sees the reveal *just* as
-      // it enters, not after it's already fully on screen.
-      { rootMargin: "0px 0px -15% 0px", threshold: 0.01 }
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
-
-  // Metalab-style easing: expo-out over ~1.1s. Motion covers a long
-  // distance quickly at the start then settles very slowly — the "premium"
-  // reveal feel. Distance is larger than the earlier 24px to give the
-  // curve room to breathe.
-  const EASE = "cubic-bezier(0.19, 1, 0.22, 1)";
-  const DURATION = 1100;
-  const DISTANCE = 40;
-
-  return (
-    <div
-      ref={ref}
-      className={className}
-      style={{
-        opacity: visible ? 1 : 0,
-        transform: visible ? "translateY(0)" : `translateY(${DISTANCE}px)`,
-        transition: `opacity ${DURATION}ms ${EASE} ${delay}ms, transform ${DURATION}ms ${EASE} ${delay}ms`,
-        willChange: "opacity, transform",
-      }}
-    >
-      {children}
-    </div>
-  );
-}
 
 /*
   Sections — flexible case-study layout driven by project.sections.
@@ -615,9 +403,8 @@ function Sections({ sections }: { sections: readonly Section[] }) {
     <section className="flex flex-col gap-3 md:gap-[18px]">
       {sections.map((s, i) => {
         if (s.kind === "hero") {
-          // Frame owns its own bottom-to-top mask reveal now, so we
-          // don't wrap it in <Reveal> (that would fade the whole row
-          // in on top of the mask slide and muddy the effect).
+          // Frame owns its own fade-in-on-load now, so we don't wrap it in
+          // <Reveal> (that would double up two fades on the same element).
           return (
             <Frame
               key={i}
@@ -642,10 +429,9 @@ function Sections({ sections }: { sections: readonly Section[] }) {
         return (
           <div key={i} className={`grid ${gridCols} gap-3 md:gap-[18px]`}>
             {s.images.map((src, j) => (
-              // Stagger the mask reveal across cols: left frame opens
-              // first, each subsequent frame 80ms later. Subtle enough
-              // to read as one motion, distinct enough to feel authored.
-              // Solo hero rows get delay=0 (no stagger).
+              // Stagger the fade across cols: left frame fades first, each
+              // subsequent frame 80ms later. Subtle enough to read as one
+              // motion. Solo hero rows get delay=0 (no stagger).
               <Frame
                 key={j}
                 src={src}
