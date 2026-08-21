@@ -1239,8 +1239,7 @@ const projectsSource: Project[] = [
   },
   // ---------------------------------------------------------------------------
   // 13. Xou da Xoxa — personal / course project (Notion slug "xoxa"). EN copy
-  //     translated from the Notion PT description + credits; year is a guess
-  //     (Notion has none) — confirm with Julia.
+  //     translated from the Notion PT description + credits.
   // ---------------------------------------------------------------------------
   {
     slug: "xoxa",
@@ -1270,7 +1269,7 @@ const projectsSource: Project[] = [
       pt: "Capa fictícia que reimagina um ícone pop.",
     },
     category: { en: "Illustration", pt: "Ilustração" },
-    year: "2024",
+    year: "2025",
     brief: {
       en: "Xou da Xoxa is a self-initiated project made as the final work for the Illustration Direction & Production course at Aprender Design. The brief was to take an existing album and reinterpret it in a language of my own. I chose Xou da Xuxa (1986) and turned it into an acid parody — a comic, darker retelling that draws on the urban legends and conspiracy theories that always surrounded the original: subliminal messages, demonic pacts, and the “X” as an occult symbol.",
       pt: "Xou da Xoxa é um projeto autoral desenvolvido como trabalho final do curso Direção e Produção de Ilustrações, da Aprender Design. A premissa foi partir de um álbum existente e reinterpretá-lo através de uma linguagem própria. Escolhi o Xou da Xuxa (1986) e o transformei em uma paródia ácida: uma releitura cômica e sombria que bebe nas lendas urbanas e teorias conspiratórias que sempre cercaram a obra original, como mensagens subliminares, pactos demoníacos e o “X” como símbolo ocultista.",

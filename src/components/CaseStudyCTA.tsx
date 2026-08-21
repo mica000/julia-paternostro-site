@@ -19,7 +19,7 @@
   Left: a Super-Large-Title headline (SF Bold 64/64), two lines. Right: a
   250px stack of four ruled arrow-links (shared ArrowLinks) — mail draft, the
   About route, and the two socials. 1200px centered column; sits below the
-  All-projects footer.
+  All-projects footer. Vertical padding is symmetric (top mirrors bottom).
 */
 
 import { useLang } from "@/lib/state";
@@ -41,7 +41,7 @@ export default function CaseStudyCTA() {
   return (
     <section
       aria-label={t("cta.headline")}
-      className="w-full px-6 md:px-[44px] pt-16 pb-24 md:pt-[60px] md:pb-[160px]"
+      className="w-full px-6 md:px-[44px] pt-24 pb-24 md:pt-[160px] md:pb-[160px]"
     >
       <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-12 md:flex-row md:items-start md:justify-between md:gap-8">
         {/* Headline — Super Large Title (SF Bold 64/64), two lines. */}
