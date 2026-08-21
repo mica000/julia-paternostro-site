@@ -1300,7 +1300,7 @@ function ShowAllList({
 }: {
   onOpen: (e: React.MouseEvent<HTMLElement>, p: (typeof projects)[number]) => void;
 }) {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   return (
     // Same 24/44px gutter as the rest of the site (nav, timeline, case study),
     // so the image bands line up with everything else instead of bleeding to
@@ -1312,16 +1312,22 @@ function ShowAllList({
           const imgs = projectImageSet(p, GALLERY_IMAGES);
           return (
             <li key={p.slug} className="mb-[30px] last:mb-0">
-              {/* Title label — the project name alone, sitting flush on top of
-                  its image band (Figma's 66px NAV strip: title ~30px down,
-                  ~20px of air below before the images). The gutter comes from
-                  the container now, so the label needs only vertical padding. */}
+              {/* Title label — the project name, with a short description
+                  underneath (Figma 401:926), the same treatment as the
+                  case-study footer: name in #fbfbfb, tagline in Material/Medium
+                  gray. Sits flush on top of the image band. */}
               <div className="pb-5 pt-[30px]">
                 <span
-                  className="text-[13px] font-normal leading-4"
+                  className="block text-[13px] font-normal leading-4"
                   style={{ color: "#fbfbfb" }}
                 >
                   {p.title}
+                </span>
+                <span
+                  className="mt-1 block text-[13px] font-normal leading-4"
+                  style={{ color: "#f6f6f699" }}
+                >
+                  {pick(p.tagline ?? p.brief, lang)}
                 </span>
               </div>
 

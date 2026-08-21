@@ -270,7 +270,7 @@ const ROLE = {
   Tile order = the order on the studio's own portfolio grid. Slugs are
   ASCII kebab-case (no diacritics) so they URL-encode cleanly.
 */
-export const projects: Project[] = [
+const projectsSource: Project[] = [
   // ---------------------------------------------------------------------------
   // 1. Delírio Tropical
   // ---------------------------------------------------------------------------
@@ -982,6 +982,7 @@ export const projects: Project[] = [
   // ---------------------------------------------------------------------------
   {
     slug: "leather",
+    hidden: true,
     deliverables: {
       en: "Concept, Illustration, Art direction",
       pt: "Conceito, Ilustração, Direção de arte",
@@ -1210,6 +1211,35 @@ export const projects: Project[] = [
     bg: "#1a1a1a",
   },
 ];
+
+/**
+ * Display order for every listing surface (tile grid, index timeline, Show-all
+ * sheet, case-study footer) — mirrors the manual row order of the shared Notion
+ * database. `projects` is reordered by this list; any slug not present falls to
+ * the end in source order. To reorder the site, reorder here (or reorder the
+ * Notion view and copy the slugs across).
+ */
+const PROJECT_ORDER = [
+  "delirio-tropical",
+  "fcv",
+  "a-selva",
+  "delirio-sao-joao",
+  "tenda-lab",
+  "budapest-forro",
+  "vivs",
+  "cinemarias",
+  "samba",
+  "leather",
+  "premio-inoves",
+  "human-or-machine",
+];
+
+/** All projects, in the canonical PROJECT_ORDER. */
+export const projects: Project[] = [...projectsSource].sort((a, b) => {
+  const ia = PROJECT_ORDER.indexOf(a.slug);
+  const ib = PROJECT_ORDER.indexOf(b.slug);
+  return (ia === -1 ? Infinity : ia) - (ib === -1 ? Infinity : ib);
+});
 
 /**
  * The projects shown on the listing surfaces (index stage/timeline, Show-all
