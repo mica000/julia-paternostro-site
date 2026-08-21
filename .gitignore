@@ -45,3 +45,6 @@ _Settings*.png
 
 # orphaned GIF assets — no code references them; kept locally only
 /public/Images/GIFS/
+
+# Claude Code internal worktrees
+.claude/worktrees/

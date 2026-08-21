@@ -51,6 +51,8 @@ import {
   visibleProjects as projects,
   projectBg,
   projectImageSet,
+  LIST_IMAGES,
+  type SheetImage,
   pick,
 } from "@/lib/projects";
 import {
@@ -1295,8 +1297,6 @@ export default function ParallaxIndex({ background }: Props) {
   Replaces the old detail table (name · category · blurb · thumbnail strip):
   the design drops all the meta and lets the imagery carry the index.
 */
-// Landscape crop each gallery image fills — Figma's 480 × 294.576 slot.
-const GALLERY_RATIO = "480 / 294.576";
 // Images per project band (Figma shows four across on desktop).
 const GALLERY_IMAGES = 4;
 
@@ -1314,7 +1314,12 @@ function ShowAllList({
     <div className="min-h-full w-full px-6 pb-[120px] pt-[76px] md:px-[44px] md:pb-16 md:pt-[100px]">
       <ul className="w-full">
         {projects.map((p) => {
-          const imgs = projectImageSet(p, GALLERY_IMAGES);
+          // Prefer the dedicated all-projects sheet imagery (Figma 459:6397),
+          // in its designed left→right order; fall back to the project's own
+          // gallery (default landscape ratio) for any slug without a sheet set.
+          const imgs: SheetImage[] =
+            LIST_IMAGES[p.slug] ??
+            projectImageSet(p, GALLERY_IMAGES).map((src) => ({ src, ratio: 1.627 }));
           return (
             <li key={p.slug} className="mb-[30px] last:mb-0">
               {/* Title label — the project name, with a short description
@@ -1336,11 +1341,12 @@ function ShowAllList({
                 </span>
               </div>
 
-              {/* Full-bleed image band — four landscape crops edge-to-edge on
-                  desktop, two-up on mobile, no gaps. Each is its own button so
-                  a click anywhere on the band opens the project. */}
-              <div className="grid grid-cols-2 md:grid-cols-4">
-                {imgs.map((src, i) => (
+              {/* Full-bleed image band — a "justified" row: each image keeps
+                  its OWN proportion (width ∝ ratio, one shared height per row),
+                  so nothing is cropped and the row still fills edge-to-edge on
+                  desktop. Two-up on mobile. Each image is its own button. */}
+              <div className="flex flex-wrap md:flex-nowrap">
+                {imgs.map((img, i) => (
                   <button
                     key={i}
                     type="button"
@@ -1349,22 +1355,20 @@ function ShowAllList({
                     data-title={p.title}
                     data-subtitle={t("parallax.goToProject")}
                     aria-label={`Open ${p.title}`}
-                    className="relative block w-full cursor-pointer overflow-hidden"
-                    style={{ aspectRatio: GALLERY_RATIO }}
+                    className="relative block basis-1/2 min-w-0 cursor-pointer overflow-hidden md:basis-0"
+                    style={{ flexGrow: img.ratio }}
                   >
-                    <Image
-                      src={src}
+                    {/* Plain img (w-full + h-auto): the browser lands each on
+                        the row's shared height, so widths hit the real
+                        proportions with zero crop. Already-optimized WebP, so
+                        next/image would add nothing. */}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={img.src}
                       alt=""
-                      fill
-                      // Two-up on a phone (~50vw), four-up from md (~25vw).
-                      sizes="(max-width: 767px) 50vw, 25vw"
                       draggable={false}
-                      unoptimized={src.endsWith(".gif")}
                       loading="eager"
-                      // `cover`: each slot is a fixed landscape crop, exactly
-                      // like the Figma rectangles — the image fills it and the
-                      // overflow is trimmed.
-                      className="object-cover"
+                      className="block h-auto w-full"
                     />
                   </button>
                 ))}

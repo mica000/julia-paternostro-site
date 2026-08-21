@@ -217,6 +217,31 @@ function fallbackGallery(offset: number): string[] {
 const tile = (n: number) => `/Images/loading/${String(n).padStart(2, "0")}-square.webp`;
 
 /**
+ * All-projects sheet imagery (Figma node 459:6397). Four landscape crops per
+ * project, in LEFT→RIGHT display order. The export files number each row
+ * BACKWARDS (…-04 is the leftmost image, …-01 the rightmost), so these lists
+ * run 04→01. Keyed by slug; `ShowAllList` falls back to the project's own
+ * gallery for any slug not listed here.
+ */
+export type SheetImage = { src: string; ratio: number };
+// `ratio` is the image's real w/h — the sheet lays each row out "justified"
+// (widths ∝ ratio, one shared height), so nothing is cropped. Exported files
+// are all 590px tall, so ratio = width / 590.
+const sheet = (name: string, ratio: number): SheetImage => ({
+  src: `/Images/all-projects/${name}.webp`,
+  ratio,
+});
+export const LIST_IMAGES: Record<string, SheetImage[]> = {
+  "delirio-tropical": [sheet("delirio-04", 1.627), sheet("delirio-03", 1.627), sheet("delirio-02", 1.627), sheet("delirio-01", 1.478)],
+  fcv: [sheet("30-fcv-04", 1.627), sheet("30-fcv-03", 1.627), sheet("30-fcv-02", 1.627), sheet("30-fcv-01", 1.478)],
+  "delirio-sao-joao": [sheet("sao-joao-04", 1.627), sheet("sao-joao-03", 1.629), sheet("sao-joao-02", 1.776), sheet("sao-joao-01", 1.339)],
+  "tenda-lab": [sheet("tenda-04", 1.627), sheet("tenda-03", 1.514), sheet("tenda-02", 1.630), sheet("tenda-01", 1.590)],
+  vivs: [sheet("vivs-04", 1.578), sheet("vivs-03", 1.578), sheet("vivs-02", 1.578), sheet("vivs-01", 1.578)],
+  "a-selva": [sheet("selva-04", 1.578), sheet("selva-03", 1.578), sheet("selva-02", 1.578), sheet("selva-01", 1.578)],
+  "budapest-forro": [sheet("buda-04", 1.578), sheet("buda-03", 1.578), sheet("buda-02", 1.578), sheet("buda-01", 1.578)],
+};
+
+/**
  * Case-study asset path helper. Turns a bare filename ("Rectangle 1") into
  * a URL-encoded path under `/Images/<Folder>/`. Handles spaces in the
  * source filenames (Figma exports use them by default) by encoding to %20
@@ -1210,6 +1235,79 @@ const projectsSource: Project[] = [
     gallery: fallbackGallery(0),
     bg: "#1a1a1a",
   },
+  // ---------------------------------------------------------------------------
+  // 13. Xou da Xoxa — personal / course project (Notion slug "xoxa"). EN copy
+  //     translated from the Notion PT description + credits; year is a guess
+  //     (Notion has none) — confirm with Julia.
+  // ---------------------------------------------------------------------------
+  {
+    slug: "xoxa",
+    credits: {
+      items: [
+        {
+          role: {
+            en: "Art Direction, Illustration & Lettering",
+            pt: "Direção de Arte, Ilustração e Lettering",
+          },
+          people: "Julia Paternostro",
+        },
+        {
+          role: { en: "Course", pt: "Curso" },
+          people: "Direção e Produção de Ilustrações — Aprender Design",
+        },
+        { role: { en: "Mentorship", pt: "Orientação" }, people: "Jun Ioneda" },
+      ],
+    },
+    deliverables: {
+      en: "Art Direction and Illustration",
+      pt: "Conceito, Direção de Arte e Ilustração",
+    },
+    title: "Xou da Xoxa",
+    tagline: {
+      en: "Fictional cover reimagining a pop icon.",
+      pt: "Capa fictícia que reimagina um ícone pop.",
+    },
+    category: { en: "Illustration", pt: "Ilustração" },
+    year: "2024",
+    brief: {
+      en: "Xou da Xoxa is a self-initiated project made as the final work for the Illustration Direction & Production course at Aprender Design. The brief was to take an existing album and reinterpret it in a language of my own. I chose Xou da Xuxa (1986) and turned it into an acid parody — a comic, darker retelling that draws on the urban legends and conspiracy theories that always surrounded the original: subliminal messages, demonic pacts, and the “X” as an occult symbol.",
+      pt: "Xou da Xoxa é um projeto autoral desenvolvido como trabalho final do curso Direção e Produção de Ilustrações, da Aprender Design. A premissa foi partir de um álbum existente e reinterpretá-lo através de uma linguagem própria. Escolhi o Xou da Xuxa (1986) e o transformei em uma paródia ácida: uma releitura cômica e sombria que bebe nas lendas urbanas e teorias conspiratórias que sempre cercaram a obra original, como mensagens subliminares, pactos demoníacos e o “X” como símbolo ocultista.",
+    },
+    context: {
+      en: "Out of that imagery comes the “Pop Star from Hell”: an androgynous, demonic figure inspired by Xuxa’s eighties aesthetic, at once nostalgic and unsettling. It is built entirely from illustration in mixed media — flat-color vector art with black outlines, digital collage, and a molten, metallic 3D lettering. Flames, halftone textures, and a warm palette complete the universe, applied across cover, vinyl, and t-shirt. As art director and illustrator, I signed the whole project end to end, from research and concept rationale to the final illustration.",
+      pt: "Desse imaginário nasce a “Pop Star do Inferno”: uma figura andrógina e demoníaca, inspirada na estética oitentista da Xuxa, que provoca nostalgia e estranhamento ao mesmo tempo. A construção é toda ilustrada, em técnica mista: ilustração vetorial de cores chapadas e contorno preto, colagem digital e um lettering 3D metálico e derretido. Chamas, texturas de retícula e uma paleta quente completam o universo, aplicado em capa, vinil e camiseta. Como diretora de arte e ilustradora, assinei o projeto integralmente, da pesquisa e defesa conceitual à ilustração final.",
+    },
+    tileImage: asset("xou-da-xoxa", "01"),
+    indexImage: asset("xou-da-xoxa", "01"),
+    gallery: [
+      asset("xou-da-xoxa", "01"),
+      asset("xou-da-xoxa", "02"),
+      asset("xou-da-xoxa", "03"),
+      asset("xou-da-xoxa", "04"),
+    ],
+    // Case-study layout — 5 landscape frames (2740×1682) + 4 tall portraits
+    // (1342×1682), interleaved.
+    sections: [
+      { kind: "hero", src: asset("xou-da-xoxa", "01"), ratio: "2740/1682" },
+      { kind: "hero", src: asset("xou-da-xoxa", "02"), ratio: "2740/1682" },
+      {
+        kind: "cols",
+        cols: 2,
+        images: [asset("xou-da-xoxa", "06"), asset("xou-da-xoxa", "07")],
+        ratio: "1342/1682",
+      },
+      { kind: "hero", src: asset("xou-da-xoxa", "03"), ratio: "2740/1682" },
+      {
+        kind: "cols",
+        cols: 2,
+        images: [asset("xou-da-xoxa", "08"), asset("xou-da-xoxa", "09")],
+        ratio: "1342/1682",
+      },
+      { kind: "hero", src: asset("xou-da-xoxa", "04"), ratio: "2740/1682" },
+      { kind: "hero", src: asset("xou-da-xoxa", "04-1"), ratio: "2740/1682" },
+    ],
+    bg: "#e0301e",
+  },
 ];
 
 /**
@@ -1227,6 +1325,7 @@ const PROJECT_ORDER = [
   "tenda-lab",
   "budapest-forro",
   "vivs",
+  "xoxa",
   "cinemarias",
   "samba",
   "leather",
