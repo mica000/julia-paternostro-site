@@ -58,11 +58,15 @@ export default function AboutPage() {
           />
         </div>
 
-        {/* Text column — bio (bold) then the contact list. */}
+        {/* Text column — bio (bold, one <p> per paragraph) then contacts. */}
         <div className="flex w-full flex-col md:max-w-[600px]">
-          <p className="text-[18px] font-bold leading-snug tracking-normal md:text-[22px] md:leading-[1.3]">
-            {t("about.body")}
-          </p>
+          <div className="flex flex-col gap-5 text-[18px] font-bold leading-snug tracking-normal md:text-[22px] md:leading-[1.3]">
+            {t("about.body")
+              .split("\n\n")
+              .map((para, i) => (
+                <p key={i}>{para}</p>
+              ))}
+          </div>
 
           <ul className="mt-10 flex flex-col gap-3 md:mt-[62px]">
             {CONTACTS.map((c) => (

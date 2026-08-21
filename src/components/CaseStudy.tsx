@@ -31,22 +31,22 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { pick, projectBg, type Project, type Section } from "@/lib/projects";
+import { pick, type Project, type Section } from "@/lib/projects";
 import { useLang, usePageBg, type Lang } from "@/lib/state";
 import { useTransition } from "@/components/PageTransition";
 import CaseStudyFooter from "@/components/CaseStudyFooter";
+import CaseStudyCTA from "@/components/CaseStudyCTA";
 
 // Meta-row labels (Figma node 403:1046) — mixed case, and sit BELOW their
 // value. Kept local to this component; edit here if the designer changes the
 // wording.
 const META_LABEL: Record<
-  "projectType" | "year" | "deliverables" | "copywriter" | "client",
+  "projectType" | "year" | "deliverables" | "client",
   Record<Lang, string>
 > = {
   projectType: { en: "Project type", pt: "Tipo de projeto" },
   year: { en: "Year", pt: "Ano" },
   deliverables: { en: "Deliverables", pt: "Entregáveis" },
-  copywriter: { en: "Copywriter", pt: "Copywriter" },
   client: { en: "Client", pt: "Cliente" },
 };
 
@@ -227,21 +227,26 @@ export default function CaseStudy({ project }: { project: Project }) {
             )}
           </div>
 
-          {/* Credits row — below the gallery (Figma 423:2302). A horizontal
-              row of Deliverables · Copywriter · Client · Year spread across
-              the 1200px column via justify-between, with 128px of breathing
-              room above and below on desktop (less on mobile). The gallery
-              carries no bottom spacing, so this padding is the ONLY gap — no
-              doubled white space. Wraps to multiple lines on narrow screens. */}
-          <div className="flex flex-wrap justify-between gap-x-10 gap-y-8 py-16 md:py-[128px]">
-            <MetaTop label={META_LABEL.deliverables[lang]}>
-              {project.deliverables
-                ? pick(project.deliverables, lang)
-                : pick(project.category, lang)}
-            </MetaTop>
-            {project.credits?.copywriting && (
-              <MetaTop label={META_LABEL.copywriter[lang]}>
-                {project.credits.copywriting}
+          {/* Credits row — below the gallery (Figma 423:2302). One field per
+              credit (Julia's shared Notion credits): the person on top, the
+              role beneath (MetaTop). Laid out as a column grid so a long role
+              wraps in its own cell and the fields stay aligned. When a project
+              has no detailed credits, the row falls back to its Deliverables.
+              Client + Year always close the row. 128px of breathing room above
+              and below on desktop; the gallery carries no bottom spacing, so
+              this padding is the ONLY gap. */}
+          <div className="grid grid-cols-2 gap-x-8 gap-y-8 py-16 md:grid-cols-4 md:gap-x-10 md:py-[128px]">
+            {project.credits?.items?.length ? (
+              project.credits.items.map((c, i) => (
+                <MetaTop key={i} label={pick(c.role, lang)}>
+                  {c.people}
+                </MetaTop>
+              ))
+            ) : (
+              <MetaTop label={META_LABEL.deliverables[lang]}>
+                {project.deliverables
+                  ? pick(project.deliverables, lang)
+                  : pick(project.category, lang)}
               </MetaTop>
             )}
             {project.credits?.client && (
@@ -259,6 +264,9 @@ export default function CaseStudy({ project }: { project: Project }) {
           Its own vertical padding replaces the max-w block's old
           pb-[194px], keeping the last row clear of the fixed bottom nav. */}
       <CaseStudyFooter currentSlug={project.slug} />
+      {/* Closing CTA — "Have something in mind?" (Figma 423:2440), the last
+          band, sitting directly below the All-projects footer. */}
+      <CaseStudyCTA />
       </div>
       {/* No on-page language switch here — the toggle now lives in the top nav
           (Figma 397:542), reachable on every route, so the case study footer

@@ -71,9 +71,13 @@ const dicts = {
     "parallax.parallaxView": "Close",
     "parallax.goToProject": "Go to project",
     "footer.allProjects": "All projects",
+    "cta.headline": "Have something in mind?",
+    "cta.tellProject": "Tell me about your project",
+    "cta.getToKnow": "Get to know me",
     "about.title": "About",
+    // Paragraphs are split on the blank line (\n\n) by the About page.
     "about.body":
-      "I'm a Brazilian multidisciplinary graphic designer, specialized in creating eye-catching designs that merge novelty and purpose through vibrant and bold visuals. I love exchanging ideas and I'm ready to answer any questions you might have. Feel free to reach out to me via email. Let's create something amazing!",
+      "I'm a Brazilian multidisciplinary designer and art director working across identity, illustration, editorial, and digital design.\n\nMy practice combines bold ideas with expressive visual languages, moving between typography, color, and image-making to create work for brands, artists, and cultural organizations.\n\nBased in Vitória, Brazil, working everywhere.",
     "services.title": "Services",
     "services.body":
       "Brand identity, editorial design, packaging, type design, and web design.",
@@ -87,9 +91,12 @@ const dicts = {
     "parallax.parallaxView": "Fechar",
     "parallax.goToProject": "Ir para o projeto",
     "footer.allProjects": "Todos os projetos",
+    "cta.headline": "Tem algo em mente?",
+    "cta.tellProject": "Me conte sobre seu projeto",
+    "cta.getToKnow": "Me conheça",
     "about.title": "Sobre",
     "about.body":
-      "Sou uma designer gráfica multidisciplinar brasileira, especializada em criar designs marcantes que unem novidade e propósito através de visuais vibrantes e ousados. Adoro trocar ideias e estou pronta para responder qualquer dúvida. Fique à vontade para me chamar por e-mail. Vamos criar algo incrível!",
+      "Sou uma designer e diretora de arte multidisciplinar brasileira, atuando entre identidade, ilustração, editorial e design digital.\n\nMinha prática combina ideias ousadas com linguagens visuais expressivas, transitando entre tipografia, cor e criação de imagens para trabalhos para marcas, artistas e organizações culturais.\n\nBaseada em Vitória, Brasil, trabalhando em qualquer lugar.",
     "services.title": "Serviços",
     "services.body":
       "Identidade de marca, design editorial, packaging, desenho de tipos e web design.",

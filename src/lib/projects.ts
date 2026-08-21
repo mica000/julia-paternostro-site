@@ -18,15 +18,22 @@ import type { Lang } from "./state";
 export type Localized = { en: string; pt?: string };
 
 /**
- * People and studios credited on a project. All fields optional — the
- * case study only renders the credits row when at least one field is set,
- * so projects without credit info yet don't show an empty block.
- * When set, missing individual fields render as an em-dash placeholder.
+ * A single credit: who did what. `role` is localized (EN/PT); `people` is one
+ * string, using "&" for multi-name lists so it reads in either language.
+ */
+export type CreditItem = { role: Localized; people: string };
+
+/**
+ * People and studios credited on a project.
+ *
+ * `items` is the ordered role → people list (Julia's shared Notion credits),
+ * each rendered as one value-over-label field in the case-study credits row.
+ * `client` stays a single string (a proper noun, same in both languages).
+ * Both optional — the row only shows what's set, and falls back to the
+ * project's deliverables when there are no detailed credits.
  */
 export type Credits = {
-  creativeDirection?: string;
-  illustrations?: string;
-  copywriting?: string;
+  items?: CreditItem[];
   client?: string;
 };
 
@@ -218,6 +225,31 @@ const tile = (n: number) => `/Images/${String(n).padStart(2, "0")}-square.png`;
 const asset = (folder: string, name: string, ext = "webp") =>
   `/Images/${folder}/${name.replace(/ /g, "%20")}.${ext}`;
 
+/**
+ * Credit role labels (EN/PT), shared across projects so the same role reads
+ * identically everywhere. Mirrors the "Credits (PT/EN)" columns of the shared
+ * Notion database; people are attached per-project.
+ */
+const ROLE = {
+  creativeLead: {
+    en: "Creative Direction, Visual Identity & Illustration",
+    pt: "Direção Criativa, Identidade Visual e Ilustração",
+  },
+  artLead: {
+    en: "Art Direction, Visual Identity & Illustration",
+    pt: "Direção de Arte, Identidade Visual e Ilustração",
+  },
+  copyConcept: { en: "Copywriting & Concept", pt: "Redação e Defesa" },
+  conceptRationale: { en: "Concept Rationale", pt: "Defesa Conceitual" },
+  creativeConcept: { en: "Creative Concept", pt: "Conceito Criativo" },
+  copywriting: { en: "Copywriting", pt: "Redação" },
+  applicationDesign: { en: "Application Design", pt: "Design de Aplicação" },
+  muralExecution: { en: "Mural Execution", pt: "Execução da Pintura" },
+  setDesign: { en: "Set Design", pt: "Cenografia" },
+  photography: { en: "Photography", pt: "Fotos" },
+  eventPhotography: { en: "Event Photography", pt: "Fotos do Evento" },
+} satisfies Record<string, Localized>;
+
 // -----------------------------------------------------------------------------
 // Projects
 // -----------------------------------------------------------------------------
@@ -267,10 +299,13 @@ export const projects: Project[] = [
     indexImage: "/Images/Index2/delirio-tropical.webp",
     gallery: fallbackGallery(0),
     credits: {
-      creativeDirection: "Julia Paternostro",
-      illustrations: "Julia Paternostro",
-      copywriting: "Yasmin Nariyoshi",
-      client: "Puri Produções",
+      items: [
+        { role: ROLE.creativeLead, people: "Julia Paternostro" },
+        { role: ROLE.copyConcept, people: "Yasmin Nariyoshi" },
+        { role: ROLE.applicationDesign, people: "Geórgia Gomes" },
+        { role: ROLE.eventPhotography, people: "Marcela Bicalho & Melina Furlan" },
+      ],
+      client: "GGZ.ART. & Puri Produções",
     },
     bg: "#ff4e2b",
     // Auto-invert of coral is teal (0, 177, 212) — a complement, so contrast
@@ -372,6 +407,13 @@ export const projects: Project[] = [
   // ---------------------------------------------------------------------------
   {
     slug: "vivs",
+    credits: {
+      items: [
+        { role: ROLE.artLead, people: "Julia Paternostro" },
+        { role: ROLE.conceptRationale, people: "Julia Paternostro" },
+      ],
+      client: "Vivs",
+    },
     deliverables: {
       en: "Branding, Illustration, Creative direction",
       pt: "Branding, Ilustração, Direção criativa",
@@ -444,6 +486,13 @@ export const projects: Project[] = [
   // ---------------------------------------------------------------------------
   {
     slug: "budapest-forro",
+    credits: {
+      items: [
+        { role: ROLE.artLead, people: "Julia Paternostro" },
+        { role: ROLE.conceptRationale, people: "Julia Paternostro" },
+      ],
+      client: "Budapest Forró Festival",
+    },
     deliverables: {
       en: "Branding, Illustration, Creative direction",
       pt: "Branding, Ilustração, Direção criativa",
@@ -515,6 +564,15 @@ export const projects: Project[] = [
   // ---------------------------------------------------------------------------
   {
     slug: "delirio-sao-joao",
+    credits: {
+      items: [
+        { role: ROLE.artLead, people: "Julia Paternostro" },
+        { role: ROLE.conceptRationale, people: "Julia Paternostro" },
+        { role: ROLE.applicationDesign, people: "Geórgia Gomes" },
+        { role: ROLE.eventPhotography, people: "Vagner Resende" },
+      ],
+      client: "GGZ.ART. & Puri Produções",
+    },
     deliverables: {
       en: "Branding, Illustration, Creative direction",
       pt: "Branding, Ilustração, Direção criativa",
@@ -661,6 +719,14 @@ export const projects: Project[] = [
   // ---------------------------------------------------------------------------
   {
     slug: "fcv",
+    credits: {
+      items: [
+        { role: ROLE.artLead, people: "Julia Paternostro" },
+        { role: ROLE.creativeConcept, people: "Gabriel Barcellos & Julia Paternostro" },
+        { role: ROLE.copywriting, people: "Gabriel Barcelos" },
+      ],
+      client: "Galpão Produções & IBCA",
+    },
     deliverables: {
       en: "Branding, Illustration, Creative direction",
       pt: "Branding, Ilustração, Direção criativa",
@@ -759,6 +825,16 @@ export const projects: Project[] = [
   // ---------------------------------------------------------------------------
   {
     slug: "tenda-lab",
+    credits: {
+      items: [
+        { role: ROLE.artLead, people: "Julia Paternostro" },
+        { role: ROLE.creativeConcept, people: "Gabriel Barcellos & Julia Paternostro" },
+        { role: ROLE.copywriting, people: "Gabriel Barcelos" },
+        { role: ROLE.setDesign, people: "Joyce Castello" },
+        { role: ROLE.eventPhotography, people: "Marcela Bicalho & Melina Furlan" },
+      ],
+      client: "Galpão Produções & IBCA",
+    },
     deliverables: {
       en: "Branding, Illustration, Creative direction",
       pt: "Branding, Ilustração, Direção criativa",
@@ -986,6 +1062,16 @@ export const projects: Project[] = [
   // ---------------------------------------------------------------------------
   {
     slug: "a-selva",
+    credits: {
+      items: [
+        { role: ROLE.artLead, people: "Julia Paternostro" },
+        { role: ROLE.copyConcept, people: "Gabriel Barcelos" },
+        { role: ROLE.applicationDesign, people: "Geórgia Gomes" },
+        { role: ROLE.muralExecution, people: "Renato Pontello, Juliana Almeida, Ed Brown & Natã" },
+        { role: ROLE.photography, people: "Vikki Dessauni" },
+      ],
+      client: "GGZ.ART.",
+    },
     deliverables: {
       en: "Branding, Illustration, Creative direction",
       pt: "Branding, Ilustração, Direção criativa",

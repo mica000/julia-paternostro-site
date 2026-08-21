@@ -40,7 +40,9 @@ import { visibleProjects as projects, pick } from "@/lib/projects";
 import { useLang } from "@/lib/state";
 
 const SUB_REST = "#f6f6f699"; // Material/Medium (~60%) — the "All projects" label
-const HAIRLINE = "#f6f6f61a"; // faint row divider (~10%)
+// Row dividers use the Tailwind arbitrary class border-[#f6f6f61a] (faint,
+// ~10%): a top line on every row (so the list opens with a rule and has one
+// between each) plus a bottom line on the <ul> to close it.
 
 export default function CaseStudyFooter({ currentSlug }: { currentSlug: string }) {
   const { t, lang } = useLang();
@@ -63,21 +65,20 @@ export default function CaseStudyFooter({ currentSlug }: { currentSlug: string }
           {t("footer.allProjects")}
         </p>
 
-        <ul className="w-full">
+        {/* `group` on the list drives the peer-dim: every row rests at 100%,
+            and while the list is hovered the non-hovered rows fall to 40% —
+            the hovered row overrides back to 100% (hover wins over
+            group-hover). Bottom border closes the list; each row's top border
+            opens it and separates the rest. */}
+        <ul className="group w-full border-b-[0.5px] border-[#f6f6f61a]">
           {projects.map((p) => {
             const thumb = p.indexImage ?? p.tileImage;
             return (
-              <li
-                key={p.slug}
-                className="border-b-[0.5px] last:border-b-0"
-                style={{ borderColor: HAIRLINE }}
-              >
+              <li key={p.slug} className="border-t-[0.5px] border-[#f6f6f61a]">
                 <Link
                   href={`/work/${p.slug}`}
                   data-cursor-ring
-                  // Whole row dims together and only the hovered row lifts to a
-                  // true 100% — one opacity on the row, all text full #fbfbfb.
-                  className="group flex items-center gap-5 py-4 cursor-pointer text-[#fbfbfb] opacity-40 transition-opacity duration-150 ease-[ease] hover:opacity-100 md:h-[120px] md:gap-10 md:py-0"
+                  className="flex items-center gap-5 py-4 cursor-pointer text-[#fbfbfb] opacity-100 transition-opacity duration-150 ease-[ease] group-hover:opacity-40 hover:opacity-100 md:h-[120px] md:gap-10 md:py-0"
                 >
                   {/* Col 1 — landscape thumbnail. */}
                   <div className="relative aspect-[137/80] w-[112px] shrink-0 overflow-hidden md:w-[137px]">
