@@ -69,7 +69,7 @@ export default function CaseStudyFooter({ currentSlug }: { currentSlug: string }
             return (
               <li
                 key={p.slug}
-                className="border-b-[0.5px]"
+                className="border-b-[0.5px] last:border-b-0"
                 style={{ borderColor: HAIRLINE }}
               >
                 <Link
