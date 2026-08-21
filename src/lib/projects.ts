@@ -239,6 +239,8 @@ export const LIST_IMAGES: Record<string, SheetImage[]> = {
   vivs: [sheet("vivs-04", 1.578), sheet("vivs-03", 1.578), sheet("vivs-02", 1.578), sheet("vivs-01", 1.578)],
   "a-selva": [sheet("selva-04", 1.578), sheet("selva-03", 1.578), sheet("selva-02", 1.578), sheet("selva-01", 1.578)],
   "budapest-forro": [sheet("buda-04", 1.578), sheet("buda-03", 1.578), sheet("buda-02", 1.578), sheet("buda-01", 1.578)],
+  // Figma node 459:6460 — 4 crops at 465.4×294.6 (ratio 1.580).
+  xoxa: [sheet("xuxa-04", 1.578), sheet("xuxa-03", 1.578), sheet("xuxa-02", 1.578), sheet("xuxa-01", 1.578)],
 };
 
 /**
@@ -321,7 +323,7 @@ const projectsSource: Project[] = [
       pt: "Delírio Tropical é um festival de música em Espírito Santo, Brasil, criado para honrar e amplificar a rica cena cultural da região. A primeira edição, realizada em janeiro de 2024, reuniu 76 artistas de gêneros diversos, celebrando a identidade musical do estado.",
     },
     tileImage: tile(1),
-    indexImage: "/Images/Index2/delirio-tropical.webp",
+    indexImage: "/Images/all-projects/delirio-04.webp",
     gallery: fallbackGallery(0),
     credits: {
       items: [
@@ -618,7 +620,7 @@ const projectsSource: Project[] = [
       pt: "Esta foi a segunda vez que desenvolvi a identidade visual para o festival. Mas, nesta edição, o desafio foi outro: a temática de São João trouxe um novo ponto de partida criativo, exigindo um universo visual completamente diferente das edições anteriores. Nessa edição especial de 2025, sanfonas, zabumbas, triângulos, flores e folhagens tropicais foram reinventados em um universo gráfico vibrante e cheio de personalidade. A paleta quente e intensa, combinada a elementos visuais marcantes, traduz o calor das noites tropicais e o espírito festivo do São João. O projeto de identidade visual abrange desde o desenvolvimento do logotipo e das ilustrações autorais à criação de um universo gráfico coeso e versátil. Aplicada em peças online e offline, de cartazes e camisetas a conteúdos para redes sociais e ambientação do evento, a identidade garante uma comunicação consistente, envolvente e fiel à atmosfera do festival.",
     },
     tileImage: tile(4),
-    indexImage: "/Images/Index2/sao-joao.webp",
+    indexImage: "/Images/all-projects/sao-joao-04.webp",
     gallery: fallbackGallery(3),
     bg: "#0f2b1e",
     // Case-study layout — 30 re-exported images under
@@ -772,7 +774,7 @@ const projectsSource: Project[] = [
       pt: "Os personagens representam a transmissão do legado entre gerações e o incentivo ao novo. O movimento para frente simboliza trabalho árduo, evolução constante e um olhar voltado para o futuro. A estética mistura elementos analógicos e digitais — texturas de película, colagens, glitches visuais e cores intensas se unem para criar uma linguagem visual vibrante e emocional.",
     },
     tileImage: tile(6),
-    indexImage: "/Images/Index2/30-festival.webp",
+    indexImage: "/Images/all-projects/30-fcv-04.webp",
     gallery: fallbackGallery(5),
     bg: "#ffd9d9",
     // Case-study layout — 26 re-exported images under
@@ -1278,7 +1280,10 @@ const projectsSource: Project[] = [
       pt: "Desse imaginário nasce a “Pop Star do Inferno”: uma figura andrógina e demoníaca, inspirada na estética oitentista da Xuxa, que provoca nostalgia e estranhamento ao mesmo tempo. A construção é toda ilustrada, em técnica mista: ilustração vetorial de cores chapadas e contorno preto, colagem digital e um lettering 3D metálico e derretido. Chamas, texturas de retícula e uma paleta quente completam o universo, aplicado em capa, vinil e camiseta. Como diretora de arte e ilustradora, assinei o projeto integralmente, da pesquisa e defesa conceitual à ilustração final.",
     },
     tileImage: asset("xou-da-xoxa", "01"),
-    indexImage: asset("xou-da-xoxa", "01"),
+    // Footer "All projects" cover — the pink vinyl mockup. It's the same crop
+    // as the leftmost sheet image (Figma 459:6461), so we reuse that export
+    // rather than shipping a near-duplicate file.
+    indexImage: "/Images/all-projects/xuxa-04.webp",
     gallery: [
       asset("xou-da-xoxa", "01"),
       asset("xou-da-xoxa", "02"),
