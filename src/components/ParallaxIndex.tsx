@@ -48,7 +48,10 @@ import {
   useState,
 } from "react";
 import {
-  visibleProjects as projects,
+  // The stage/timeline cycle through `indexProjects`; the Show-all sheet
+  // lists everything visible, so it keeps the fuller `allProjects`.
+  indexProjects as projects,
+  visibleProjects as allProjects,
   projectBg,
   projectImageSet,
   LIST_IMAGES,
@@ -1313,7 +1316,8 @@ function ShowAllList({
     // the floating mobile chip at the bottom).
     <div className="min-h-full w-full px-6 pb-[120px] pt-[76px] md:px-[44px] md:pb-16 md:pt-[100px]">
       <ul className="w-full">
-        {projects.map((p) => {
+        {/* Every visible project, including any kept off the index stage. */}
+        {allProjects.map((p) => {
           // Prefer the dedicated all-projects sheet imagery (Figma 459:6397),
           // in its designed left→right order; fall back to the project's own
           // gallery (default landscape ratio) for any slug without a sheet set.

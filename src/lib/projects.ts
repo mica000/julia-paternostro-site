@@ -117,6 +117,13 @@ export type Project = {
    * flag. Used to trim the site to the finished projects for a delivery.
    */
   hidden?: boolean;
+  /**
+   * Kept off the index page's parallax stage and timeline only. Unlike
+   * `hidden`, the project still appears in the Show-all sheet, the
+   * case-study footer list and at /work/[slug]. Use for a project that has
+   * no satellite composition built for the index yet.
+   */
+  hiddenFromIndex?: boolean;
 };
 
 /**
@@ -1243,6 +1250,9 @@ const projectsSource: Project[] = [
   // ---------------------------------------------------------------------------
   {
     slug: "xoxa",
+    // No satellite composition built for the index stage yet, so it sits out
+    // the index while still appearing in the Show-all sheet and footer list.
+    hiddenFromIndex: true,
     credits: {
       items: [
         {
@@ -1350,6 +1360,16 @@ export const projects: Project[] = [...projectsSource].sort((a, b) => {
  * `projects` array is kept for direct /work/[slug] routes and the editor.
  */
 export const visibleProjects: Project[] = projects.filter((p) => !p.hidden);
+
+/**
+ * The projects the index page's parallax stage and timeline cycle through —
+ * `visibleProjects` minus anything flagged `hiddenFromIndex`. The Show-all
+ * sheet and the case-study footer keep using `visibleProjects`, so a project
+ * can be listed everywhere else while sitting out the index stage.
+ */
+export const indexProjects: Project[] = visibleProjects.filter(
+  (p) => !p.hiddenFromIndex
+);
 
 /**
  * Look up a project by its URL slug. Returns undefined for unknown slugs

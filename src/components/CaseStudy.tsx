@@ -170,8 +170,11 @@ export default function CaseStudy({ project }: { project: Project }) {
               DESCRIPTION + meta on the right, with a band of WHITE SPACE
               between them. `justify-between` opens that gap; each column is
               ~38.3% of the 1200px width (Figma 460px) so the middle ~23% is
-              empty. Stacks vertically below md. */}
-          <div className="flex flex-col gap-10 md:flex-row md:justify-between md:gap-0">
+              empty. The two columns are centred against each other vertically,
+              so the short description sits at the midpoint of the taller
+              title rather than hanging off its first line. Stacks vertically
+              below md. */}
+          <div className="flex flex-col gap-10 md:flex-row md:items-center md:justify-between md:gap-0">
             {/* Title — up to 64px. `text-wrap: balance` evens the line
                 lengths so a long title breaks into tidy lines instead of
                 leaving a single orphan word dangling on the last line. */}
