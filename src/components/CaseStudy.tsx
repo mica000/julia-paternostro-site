@@ -415,6 +415,9 @@ function Frame({
         fill
         priority={priority}
         sizes={sizes}
+        // The optimizer re-encodes to a still frame, which would freeze an
+        // animated GIF on frame one. These are already small, so serve as-is.
+        unoptimized={/\.gif$/i.test(src)}
         className="object-cover"
         // Inline style (not a Tailwind class) because Tailwind v4's JIT
         // can't reliably detect opacity-0/opacity-100 inside a template

@@ -354,9 +354,9 @@ const projectsSource: Project[] = [
         kind: "cols",
         cols: 3,
         images: [
-          asset("Delirio-Tropical", "04", "mp4"),
-          asset("Delirio-Tropical", "05", "mp4"),
-          asset("Delirio-Tropical", "06", "mp4"),
+          asset("Delirio-Tropical", "04", "gif"),
+          asset("Delirio-Tropical", "05", "gif"),
+          asset("Delirio-Tropical", "06", "gif"),
         ],
       },
       {
@@ -559,7 +559,7 @@ const projectsSource: Project[] = [
       {
         kind: "cols",
         cols: 2,
-        images: [asset("budapest-forro", "7", "mp4"), asset("budapest-forro", "8")],
+        images: [asset("budapest-forro", "7", "gif"), asset("budapest-forro", "8")],
         ratio: "1342/1682",
       },
       { kind: "hero", src: asset("budapest-forro", "2"), ratio: "1800/1105" },
@@ -784,10 +784,10 @@ const projectsSource: Project[] = [
     //   - 22–24               → 3-col portrait row (0.72:1, cols3 default)
     // Explicit ratios prevent object-cover cropping.
     sections: [
-      { kind: "hero", src: asset("30-FCV", "01", "mp4"), ratio: "2740 / 1682" },
+      { kind: "hero", src: asset("30-FCV", "01", "gif"), ratio: "2740 / 1682" },
       { kind: "hero", src: asset("30-FCV", "02"), ratio: "2740 / 1682" },
-      { kind: "hero", src: asset("30-FCV", "03", "mp4"), ratio: "2740 / 1682" },
-      { kind: "hero", src: asset("30-FCV", "04", "mp4"), ratio: "2740 / 1682" },
+      { kind: "hero", src: asset("30-FCV", "03", "gif"), ratio: "2740 / 1682" },
+      { kind: "hero", src: asset("30-FCV", "04", "gif"), ratio: "2740 / 1682" },
       { kind: "hero", src: asset("30-FCV", "05"), ratio: "2740 / 1682" },
       { kind: "hero", src: asset("30-FCV", "06"), ratio: "2740 / 1682" },
       {
@@ -892,7 +892,7 @@ const projectsSource: Project[] = [
     // Explicit ratios prevent object-cover cropping.
     sections: [
       { kind: "hero", src: asset("Tenda-Lab", "01", "mp4"), ratio: "2740 / 1682" },
-      { kind: "hero", src: asset("Tenda-Lab", "02", "mp4"), ratio: "2740 / 1682" },
+      { kind: "hero", src: asset("Tenda-Lab", "02", "gif"), ratio: "2740 / 1682" },
       { kind: "hero", src: asset("Tenda-Lab", "03"), ratio: "2740 / 1542" },
       { kind: "hero", src: asset("Tenda-Lab", "04"), ratio: "2740 / 1542" },
       {
@@ -900,9 +900,9 @@ const projectsSource: Project[] = [
         cols: 3,
         ratio: "1 / 1",
         images: [
-          asset("Tenda-Lab", "05", "mp4"),
-          asset("Tenda-Lab", "06", "mp4"),
-          asset("Tenda-Lab", "07", "mp4"),
+          asset("Tenda-Lab", "05", "gif"),
+          asset("Tenda-Lab", "06", "gif"),
+          asset("Tenda-Lab", "07", "gif"),
         ],
       },
       // Wide banner — 2740×755 (~3.63:1). Full-width strip.
