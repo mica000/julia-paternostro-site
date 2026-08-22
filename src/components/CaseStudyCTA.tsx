@@ -41,7 +41,22 @@ export default function CaseStudyCTA() {
   return (
     <section
       aria-label={t("cta.headline")}
-      className="w-full px-6 md:px-[44px] pt-24 pb-24 md:pt-[160px] md:pb-[160px]"
+      /*
+        Full screen, and the content rides the middle of it. This is the last
+        thing on a case study — after the gallery and the All-projects shelf,
+        the reader arrives here with nothing left to scroll to, and a band
+        that only fills part of the screen leaves the previous section still
+        showing above it, so the closing line has to share the frame with a
+        list it has already finished with. Given the whole screen it lands on
+        its own.
+
+        `dvh`, not `vh`: on a phone `vh` is the tallest the viewport ever gets
+        (address bar retracted), so the band would run a bar's height past the
+        fold at rest. `min-h`, so the padding still wins on a screen too short
+        to hold the headline and the four links comfortably — the section
+        grows rather than cramping them.
+      */
+      className="flex w-full min-h-dvh items-center px-6 md:px-[44px] py-24 md:py-[160px]"
     >
       <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-12 md:flex-row md:items-start md:justify-between md:gap-8">
         {/* Headline — Super Large Title (SF Bold 64/64), two lines. */}

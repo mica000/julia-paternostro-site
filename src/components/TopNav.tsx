@@ -76,34 +76,44 @@ export default function TopNav() {
   */
   const [shelfInView, setShelfInView] = useState(false);
   useEffect(() => {
-    let io: IntersectionObserver | null = null;
     let raf = 0;
     let tries = 0;
+    let shelf: Element | null = null;
+
+    // "Has the shelf reached the screen?" — true from the moment its top edge
+    // crosses the bottom of the viewport, and true for everything below it
+    // (the shelf itself, then the closing CTA). Being a plain comparison
+    // against the live rect rather than remembered state, it is correct at
+    // ANY scroll position, including one arrived at by a jump.
+    const measure = () => {
+      if (!shelf) return;
+      setShelfInView(shelf.getBoundingClientRect().top < window.innerHeight);
+    };
+    // One rect read per frame at most, and only while scrolling.
+    const onScroll = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(measure);
+    };
+
     // TopNav lives in the root layout and never remounts, so on a client
     // navigation this effect can run a frame or two before the new route's
     // shelf is in the DOM. Look again for a few frames before giving up.
     const attach = () => {
-      const el = document.querySelector("[data-all-projects-shelf]");
-      if (!el) {
+      shelf = document.querySelector("[data-all-projects-shelf]");
+      if (!shelf) {
         if (tries++ < 30) raf = requestAnimationFrame(attach);
         return;
       }
-      io = new IntersectionObserver(
-        ([entry]) =>
-          // `isIntersecting` covers the shelf coming up from below;
-          // `top < 0` keeps it hidden once the shelf has grown taller than
-          // the viewport and its edges are both off screen.
-          setShelfInView(
-            entry.isIntersecting || entry.boundingClientRect.top < 0
-          ),
-        { threshold: 0 }
-      );
-      io.observe(el);
+      measure();
+      window.addEventListener("scroll", onScroll, { passive: true });
+      window.addEventListener("resize", onScroll);
     };
-    attach();
+    raf = requestAnimationFrame(attach);
+
     return () => {
       cancelAnimationFrame(raf);
-      io?.disconnect();
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
       // Clear on the way OUT rather than on the way in: the next route may
       // have no shelf at all (the index, About), and nothing would then be
       // left to report the chip back into view.
