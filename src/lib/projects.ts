@@ -232,15 +232,15 @@ const sheet = (name: string, ratio: number): SheetImage => ({
   ratio,
 });
 export const LIST_IMAGES: Record<string, SheetImage[]> = {
-  "delirio-tropical": [sheet("delirio-04", 1.627), sheet("delirio-03", 1.627), sheet("delirio-02", 1.627), sheet("delirio-01", 1.478)],
-  fcv: [sheet("30-fcv-04", 1.627), sheet("30-fcv-03", 1.627), sheet("30-fcv-02", 1.627), sheet("30-fcv-01", 1.478)],
-  "delirio-sao-joao": [sheet("sao-joao-04", 1.627), sheet("sao-joao-03", 1.629), sheet("sao-joao-02", 1.776), sheet("sao-joao-01", 1.339)],
-  "tenda-lab": [sheet("tenda-04", 1.627), sheet("tenda-03", 1.514), sheet("tenda-02", 1.630), sheet("tenda-01", 1.590)],
-  vivs: [sheet("vivs-04", 1.578), sheet("vivs-03", 1.578), sheet("vivs-02", 1.578), sheet("vivs-01", 1.578)],
-  "a-selva": [sheet("selva-04", 1.578), sheet("selva-03", 1.578), sheet("selva-02", 1.578), sheet("selva-01", 1.578)],
-  "budapest-forro": [sheet("buda-04", 1.578), sheet("buda-03", 1.578), sheet("buda-02", 1.578), sheet("buda-01", 1.578)],
+  "delirio-tropical": [sheet("delirio-04", 1.553), sheet("delirio-03", 1.553), sheet("delirio-02", 1.553), sheet("delirio-01", 1.553)],
+  fcv: [sheet("30-fcv-04", 1.553), sheet("30-fcv-03", 1.553), sheet("30-fcv-02", 1.553), sheet("30-fcv-01", 1.553)],
+  "delirio-sao-joao": [sheet("sao-joao-04", 1.553), sheet("sao-joao-03", 1.559), sheet("sao-joao-02", 1.553), sheet("sao-joao-01", 1.553)],
+  "tenda-lab": [sheet("tenda-04", 1.553), sheet("tenda-03", 1.553), sheet("tenda-02", 1.553), sheet("tenda-01", 1.553)],
+  vivs: [sheet("vivs-04", 1.58), sheet("vivs-03", 1.58), sheet("vivs-02", 1.58), sheet("vivs-01", 1.58)],
+  "a-selva": [sheet("selva-04", 1.58), sheet("selva-03", 1.58), sheet("selva-02", 1.58), sheet("selva-01", 1.58)],
+  "budapest-forro": [sheet("buda-04", 1.58), sheet("buda-03", 1.58), sheet("buda-02", 1.58), sheet("buda-01", 1.58)],
   // Figma node 459:6460 — 4 crops at 465.4×294.6 (ratio 1.580).
-  xoxa: [sheet("xuxa-04", 1.578), sheet("xuxa-03", 1.578), sheet("xuxa-02", 1.578), sheet("xuxa-01", 1.578)],
+  xoxa: [sheet("xuxa-04", 1.58), sheet("xuxa-03", 1.58), sheet("xuxa-02", 1.58), sheet("xuxa-01", 1.58)],
 };
 
 /**
