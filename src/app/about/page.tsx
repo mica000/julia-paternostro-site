@@ -100,6 +100,17 @@ export default function AboutPage() {
                 ))}
             </div>
             <ArrowLinks links={links} className="mt-12" />
+
+            {/* Who made the site, as opposed to who made the work on it.
+                Sits under the contact links in Material/Medium gray, the same
+                tone the taglines use, so it reads as a footnote to the page
+                rather than another thing to click. */}
+            <p
+              className={`mt-8 ${body}`}
+              style={{ color: "#f6f6f699" }}
+            >
+              {t("about.credit")}
+            </p>
           </div>
 
           {/* RIGHT — portrait (4:5), drifts with the cursor. */}

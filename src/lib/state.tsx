@@ -75,6 +75,7 @@ const dicts = {
     "cta.tellProject": "Tell me about your project",
     "cta.getToKnow": "Get to know me",
     "about.title": "About",
+    "about.credit": "Site design and build by Michelly Sugui",
     // Paragraphs are split on the blank line (\n\n); single \n is a line break
     // within a paragraph (the location sign-off). Figma node 459:6392.
     "about.body":
@@ -96,6 +97,7 @@ const dicts = {
     "cta.tellProject": "Me conte sobre seu projeto",
     "cta.getToKnow": "Me conheça",
     "about.title": "Sobre",
+    "about.credit": "Design e implementação do site por Michelly Sugui",
     "about.body":
       "Sou uma designer e diretora de arte multidisciplinar brasileira, atuando entre identidade, ilustração, editorial e design digital.\n\nMinha prática combina ideias ousadas com linguagens visuais expressivas, transitando entre tipografia, cor e criação de imagens para trabalhos para marcas, artistas e organizações culturais.\n\nBaseada em Vila Velha, Brasil.\nTrabalhando em qualquer lugar.",
     "services.title": "Serviços",
