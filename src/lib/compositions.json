@@ -444,32 +444,32 @@
         "src": "/Images/img-satelites/30-fcv/festival-poster-wall-mockup.webp"
       },
       {
-        "dx": 0.1985,
-        "dy": -0.5684,
+        "dx": 0.177,
+        "dy": -0.5241,
         "w": 0.1953,
         "ratio": "375 / 116",
         "depth": 0.67,
         "src": "/Images/img-satelites/30-fcv/eye-illustration-red.webp"
       },
       {
-        "dx": 0.3796,
-        "dy": -0.6099,
+        "dx": 0.3589,
+        "dy": -0.5992,
         "w": 0.2104,
         "ratio": "311 / 311",
         "depth": 0.7,
         "src": "/Images/img-satelites/30-fcv/woman-portrait-collage.webp"
       },
       {
-        "dx": 0.3779,
-        "dy": 0.3848,
+        "dx": 0.376,
+        "dy": 0.4793,
         "w": 0.2753,
         "ratio": "1016 / 1170",
         "depth": 0.64,
         "src": "/Images/img-satelites/30-fcv/Capa-FCV.gif"
       },
       {
-        "dx": 0.2557,
-        "dy": 0.7044,
+        "dx": 0.2733,
+        "dy": 0.7957,
         "w": 0.166,
         "ratio": "319 / 243",
         "depth": 0.7,
@@ -650,24 +650,24 @@
         "src": "/Images/img-satelites/tenda-lab/asset-4-2x-2.webp"
       },
       {
-        "dx": -0.4305,
-        "dy": 0.3518,
+        "dx": -0.4046,
+        "dy": 0.1897,
         "w": 0.1521,
         "ratio": "292 / 292",
         "depth": 0.71,
         "src": "/Images/img-satelites/tenda-lab/rectangle-80.webp"
       },
       {
-        "dx": 0.2353,
-        "dy": 0.4035,
+        "dx": 0.2379,
+        "dy": 0.2817,
         "w": 0.3073,
         "ratio": "590 / 141",
         "depth": 0.57,
         "src": "/Images/img-satelites/tenda-lab/asset-3-2x-2.webp"
       },
       {
-        "dx": 0.4182,
-        "dy": 0.1126,
+        "dx": 0.4009,
+        "dy": 0.096,
         "w": 0.1769,
         "ratio": "340 / 361",
         "depth": 0.69,
@@ -722,6 +722,72 @@
         "ratio": "747 / 788",
         "depth": 0.5,
         "src": "/Images/img-satelites/vivs/vivstour-backstage-personagem-01-1.webp"
+      }
+    ],
+    "budapest-forro": [
+      {
+        "dx": -0.3029,
+        "dy": -0.4433,
+        "w": 0.0394,
+        "ratio": "76 / 75",
+        "depth": 0.81,
+        "src": "/Images/img-satelites/budapest/lua.webp"
+      },
+      {
+        "dx": -0.4101,
+        "dy": -0.3195,
+        "w": 0.1412,
+        "ratio": "271 / 210",
+        "depth": 0.72,
+        "src": "/Images/img-satelites/budapest/passaro.webp"
+      },
+      {
+        "dx": 0.3562,
+        "dy": -0.3742,
+        "w": 0.0829,
+        "ratio": "159 / 146",
+        "depth": 0.78,
+        "src": "/Images/img-satelites/budapest/sol.webp"
+      },
+      {
+        "dx": 0.3772,
+        "dy": 0.1698,
+        "w": 0.1569,
+        "ratio": "301 / 635",
+        "depth": 0.71,
+        "src": "/Images/img-satelites/budapest/bff-grafismo-ilustra-bege-danubio-2x-1.webp"
+      },
+      {
+        "dx": 0.4319,
+        "dy": 0.2406,
+        "w": 0.2122,
+        "ratio": "407 / 512",
+        "depth": 0.66,
+        "src": "/Images/img-satelites/budapest/folhagem-01.webp"
+      },
+      {
+        "dx": -0.4026,
+        "dy": 0.2774,
+        "w": 0.059,
+        "ratio": "113 / 337",
+        "depth": 0.8,
+        "src": "/Images/img-satelites/budapest/folhagem-04.webp"
+      },
+      {
+        "dx": -0.4349,
+        "dy": 0.3318,
+        "w": 0.182,
+        "ratio": "349 / 227",
+        "depth": 0.69,
+        "src": "/Images/img-satelites/budapest/folhagem-03.webp"
+      },
+      {
+        "dx": 0.325,
+        "dy": 0.3621,
+        "w": 0.1209,
+        "ratio": "232 / 181",
+        "depth": 0.74,
+        "src": "/Images/img-satelites/budapest/folhagem-02.webp"
       }
     ]
   }

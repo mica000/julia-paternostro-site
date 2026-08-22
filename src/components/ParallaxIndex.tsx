@@ -62,7 +62,6 @@ import {
   compositionFor,
   heroSrc,
   satelliteImagesFor,
-  COMPOSITIONS_MOBILE,
 } from "@/lib/compositions";
 import { useTransition } from "@/components/PageTransition";
 import ShowAllIcon, { CHIP_CLASS } from "@/components/ShowAllIcon";
@@ -378,14 +377,6 @@ export default function ParallaxIndex({ background }: Props) {
     () => compositionFor(active.slug, isMobile),
     [active.slug, isMobile]
   );
-  // Whether the ACTIVE arrangement is a mobile (viewport-relative) one — the
-  // rAF loop reads this to map dx/dy against the raw viewport instead of the
-  // contained landscape frame. A ref so the frame-by-frame loop needn't re-run.
-  const mobileCompActive = isMobile && !!COMPOSITIONS_MOBILE[active.slug];
-  const mobileCompRef = useRef(mobileCompActive);
-  useEffect(() => {
-    mobileCompRef.current = mobileCompActive;
-  }, [mobileCompActive]);
   const activeSatellites = useMemo(
     () => satelliteImagesFor(active, composition),
     [active, composition]
@@ -694,18 +685,21 @@ export default function ParallaxIndex({ background }: Props) {
         // stays locked to the hero at ANY window size or aspect. Mapping them to
         // raw vw/vh instead let the arrangement stretch away from the hero as the
         // window aspect drifted from 1920:1314 (the resize/reposition drift).
-        // Only a portrait mobile override opts out: its dx/dy are already tuned
-        // as viewport fractions.
-        let frameW: number;
-        let frameH: number;
-        if (isMobileRef.current && mobileCompRef.current) {
-          frameW = vw;
-          frameH = vh;
-        } else {
-          const scale = Math.min(vw / 1920, vh / 1314);
-          frameW = 1920 * scale;
-          frameH = 1314 * scale;
-        }
+        //
+        // EVERY breakpoint, portrait overrides included. A mobile override used
+        // to opt out and read its dx/dy as raw viewport fractions, which was a
+        // leftover from when the desktop path did the same: the switch to a
+        // contained frame moved desktop and the editor together and left this
+        // one branch behind. Nothing ever authored viewport fractions —
+        // compositions come from the ?edit=1 editor, which has always measured
+        // against the contained frame — so the override was being read in a
+        // basis it was never written in. On a 390×844 phone the frame is 267px
+        // tall against the viewport's 844, so every dy landed a bit over three
+        // times too far and the arrangement flew off the top and bottom of the
+        // screen while the editor showed it hugging the hero.
+        const scale = Math.min(vw / 1920, vh / 1314);
+        const frameW = 1920 * scale;
+        const frameH = 1314 * scale;
         //
         // Hovered box's resting anchor — the point every OTHER box is pushed
         // away from. Read from the ref so the loop needs no re-render; skipped
