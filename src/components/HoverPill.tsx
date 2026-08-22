@@ -49,6 +49,15 @@ export default function HoverPill() {
   const current = useRef({ x: -9999, y: -9999 });
 
   useEffect(() => {
+    /*
+      Fine pointers only. A touch tap fires `pointermove` too, so on a phone
+      the pill flashed up under the finger — pointing at a project the tap was
+      already opening, from a cursor that isn't there. There is no hover state
+      to describe on touch, so the whole effect (listener, rAF loop, and all)
+      simply never starts; `visible` stays false and the pill never paints.
+    */
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+
     let raf = 0;
 
     const onMove = (e: PointerEvent) => {

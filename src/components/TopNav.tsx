@@ -38,7 +38,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useConfig, useLang, usePageBg } from "@/lib/state";
 import ShowAllIcon, { CHIP_CLASS } from "@/components/ShowAllIcon";
 import LangToggle from "@/components/LangToggle";
@@ -60,6 +60,56 @@ export default function TopNav() {
   // the root layout and never remounts across client navigations, so the
   // value survives the push to "/".
   const showAllOriginRef = useRef<string | null>(null);
+
+  /*
+    A case study ends on the All-projects shelf, which carries its own
+    "All projects" heading — so as soon as that shelf scrolls up, the label
+    was on screen twice: once in the nav chip, once at the top of the shelf.
+    The chip steps aside for the real thing.
+
+    It hides from the moment the shelf's top edge enters the viewport and
+    stays hidden for everything below (the shelf itself, then the closing
+    CTA). Deliberately one-way per scroll position rather than keyed to the
+    heading alone: the heading leaves through the top of the screen long
+    before the shelf does, and popping the chip back over the middle of the
+    list would read as a glitch.
+  */
+  const [shelfInView, setShelfInView] = useState(false);
+  useEffect(() => {
+    let io: IntersectionObserver | null = null;
+    let raf = 0;
+    let tries = 0;
+    // TopNav lives in the root layout and never remounts, so on a client
+    // navigation this effect can run a frame or two before the new route's
+    // shelf is in the DOM. Look again for a few frames before giving up.
+    const attach = () => {
+      const el = document.querySelector("[data-all-projects-shelf]");
+      if (!el) {
+        if (tries++ < 30) raf = requestAnimationFrame(attach);
+        return;
+      }
+      io = new IntersectionObserver(
+        ([entry]) =>
+          // `isIntersecting` covers the shelf coming up from below;
+          // `top < 0` keeps it hidden once the shelf has grown taller than
+          // the viewport and its edges are both off screen.
+          setShelfInView(
+            entry.isIntersecting || entry.boundingClientRect.top < 0
+          ),
+        { threshold: 0 }
+      );
+      io.observe(el);
+    };
+    attach();
+    return () => {
+      cancelAnimationFrame(raf);
+      io?.disconnect();
+      // Clear on the way OUT rather than on the way in: the next route may
+      // have no shelf at all (the index, About), and nothing would then be
+      // left to report the chip back into view.
+      setShelfInView(false);
+    };
+  }, [pathname]);
 
   // The center "Show all" chip lives on EVERY route (Figma 422:1767). On the
   // index it toggles the detail list in place; from any other route it opens
@@ -125,7 +175,20 @@ export default function TopNav() {
             it is pinned to the middle of the VIEWPORT no matter how wide the
             left and right groups grow. A 3-column grid only centers while
             those two happen to balance; translated labels break that. */}
-        <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+        <div
+          className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+          // Fades rather than vanishing — the chip is glass over moving
+          // artwork, and a hard cut reads as a rendering fault. 200ms
+          // ease-out, the same curve as the rest of the site's chrome.
+          style={{
+            opacity: shelfInView ? 0 : 1,
+            visibility: shelfInView ? "hidden" : "visible",
+            transition:
+              "opacity 200ms ease-out, visibility 0ms linear " +
+              (shelfInView ? "200ms" : "0ms"),
+          }}
+          aria-hidden={shelfInView}
+        >
           {/* The Show-all chip lives on EVERY route now, case studies
               included (Figma 422:1767). On the index it toggles the detail
               list ("Show all" / "Parallax view"); from any other route it

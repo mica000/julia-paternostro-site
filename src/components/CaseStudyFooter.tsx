@@ -54,6 +54,10 @@ export default function CaseStudyFooter({ currentSlug }: { currentSlug: string }
     // from the gallery; the panel's own padding is the Figma 60px band.
     <section
       aria-label={t("footer.allProjects")}
+      // The nav's "All projects" chip watches for this and steps aside once
+      // the shelf appears — see TopNav. A data attribute rather than an id
+      // because it is a hook for behaviour, not an anchor target.
+      data-all-projects-shelf
       className="w-full bg-white/10 mt-24 md:mt-[120px] px-6 md:px-[44px] pt-14 pb-24 md:pt-[60px] md:pb-[80px]"
     >
       <div className="mx-auto w-full max-w-[1200px]">

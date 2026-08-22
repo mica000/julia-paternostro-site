@@ -64,7 +64,11 @@ export const HERO_IMAGES: Record<string, string> = {
   fcv: sat("30-fcv", "festival-collage-eyes-and-stars"),
   vivs: sat("vivs", "rectangle-81"),
   "a-selva": sat("selva", "background"),
-  "budapest-forro": sat("budapest", "bff-logo"),
+  // Animated, not a still: the logo + grafismos build themselves on the red
+  // ground (6 frames, 1920x1080). Flat saturated colour, so it stays a GIF —
+  // H.264's 4:2:0 chroma smears exactly these edges. The index renders it
+  // through next/image with `unoptimized`, which is what keeps it moving.
+  "budapest-forro": "/Images/img-satelites/budapest/bff-logo.gif",
   // Tenda Lab's hero is the animated cover, not a still. It's the one hero
   // that is video — the source GIF was 8.5MB, so it ships as H.264 and the
   // index renders it in a <video> instead of an <img>.

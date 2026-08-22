@@ -29,6 +29,10 @@ import ArrowLinks, { type ArrowLink } from "@/components/ArrowLinks";
 const STUDIO_EMAIL = "julia.paternostro@gmail.com";
 const INSTAGRAM = "https://instagram.com/juliapaternostro";
 const LINKEDIN = "https://www.linkedin.com/in/jupaternostro";
+// Bare profile URL — the link Julia shared carried Behance's own
+// `tracking_source` / `isProfilePanel` search params, which describe the panel
+// she copied it from and mean nothing to a visitor arriving from here.
+const BEHANCE = "https://www.behance.net/juliapaternostro";
 
 export default function AboutPage() {
   const { t } = useLang();
@@ -37,6 +41,7 @@ export default function AboutPage() {
     { label: t("cta.tellProject"), href: `mailto:${STUDIO_EMAIL}`, external: true },
     { label: "Instagram", href: INSTAGRAM, external: true },
     { label: "Linkedin", href: LINKEDIN, external: true },
+    { label: "Behance", href: BEHANCE, external: true },
   ];
 
   // Body/Regular — SF Regular 13/16 (Figma node 459:6392).

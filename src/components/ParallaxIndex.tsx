@@ -78,16 +78,36 @@ type Props = {
 // Accumulated |deltaY| (px) needed to fire one step — a small, deliberate
 // scroll. Lower = flickier; higher = more effort per project.
 const WHEEL_STEP_THRESHOLD = 26;
-// After a step fires, hold input off for this long (ms) so the slide can
-// settle and the immediate momentum tail can't roll straight into a 2nd step.
-const WHEEL_COOLDOWN_MS = 300;
-// While the lock is active, each swallowed inertial event only pushes it
-// forward by THIS much (not a full cooldown). Dense trackpad inertia keeps
-// arriving inside this short window so it stays locked (still no double-jump),
-// but the moment the wheel thins out the lock releases within ~this long
-// instead of waiting for the inertia to fully die — that long wait is what made
-// scrolling from one project to the next feel stuck.
-const WHEEL_REFRESH_MS = 110;
+/*
+  Telling a momentum tail apart from a hand
+  -----------------------------------------
+  One flick of a trackpad emits wheel events for well over a second: a short
+  ramp, a peak, then a long decaying tail. Only the ramp is the user; the tail
+  is physics, and letting it through advances several projects per flick.
+
+  The previous guard blocked ALL input for 300ms after a step and then kept
+  pushing that block forward by 110ms for as long as any event kept arriving.
+  That does stop the tail — but it also swallows the user's NEXT real scroll,
+  because a fresh gesture arriving while the old tail is still alive looks
+  exactly like more tail. Two symptoms, both reported: scrolling again straight
+  away did nothing, and a steadily-turned mouse wheel only advanced on every
+  other notch, since its notches land inside the 300ms block.
+
+  So the tail is now identified by its SHAPE rather than by the clock.
+  Inertia has three properties a hand does not: it only ever gets weaker, it
+  never turns around, and by the time it matters it is feeble. An event that
+  holds its strength, grows, or reverses is a hand, and goes through
+  immediately — no waiting for the tail to die.
+*/
+// Hard floor after a step: no input at all. Covers the one stretch the shape
+// test cannot, namely the flick's own PEAK, which lands just after the ramp
+// that fired the step and is by definition strong and growing. Kept below a
+// steady mouse wheel's notch interval (~150ms+) so real notches clear it.
+const WHEEL_SETTLE_MS = 140;
+// Past the floor, an event is only weighed against its predecessor if one
+// arrived within this long. A real pause ends the stream outright and the
+// next event starts clean.
+const WHEEL_TAIL_GAP_MS = 110;
 // Touch equivalent of WHEEL_STEP_THRESHOLD: how far a thumb must travel
 // (px) before it commits one project step. Bigger than the wheel threshold
 // because a finger drag is coarser than a wheel notch.
@@ -199,7 +219,14 @@ export default function ParallaxIndex({ background }: Props) {
   // step threshold, then commit exactly one whole-project step and lock out
   // further input for a short cooldown.
   const wheelAccum = useRef(0);
-  const wheelLockUntil = useRef(0);
+  // Hard floor after a step (see WHEEL_SETTLE_MS) — also what a touch drag
+  // uses, since a finger has no momentum tail to sort out.
+  const wheelSettleUntil = useRef(0);
+  // Extends for as long as events keep looking like a decaying tail.
+  const wheelTailUntil = useRef(0);
+  // Previous event's shape, which is what the tail test compares against.
+  const wheelPrevAbs = useRef(0);
+  const wheelPrevDir = useRef(0);
 
   // Cursor drift — normalized [-1,1] from viewport center, lerped for softness.
   const mouseTarget = useRef({ x: 0, y: 0 });
@@ -449,23 +476,37 @@ export default function ParallaxIndex({ background }: Props) {
       if (showAllRef.current) return; // let the list scroll natively
       e.preventDefault();
       const now = performance.now();
-      // During the post-step cooldown, swallow input (and its accumulation)
-      // so a wheel notch's momentum tail can't roll into a second step.
-      //
-      // The lock is REFRESHED on every swallowed event, not just held for a
-      // fixed window. A trackpad flick keeps emitting inertial events for well
-      // over a second, far longer than the cooldown; without the refresh the
-      // lock expired mid-inertia and the very next tail event — over a 26px
-      // threshold — fired a second step, so one flick advanced two projects.
-      // Pushing the lock forward on each event means it only releases once the
-      // wheel has actually gone quiet for a full cooldown, i.e. the inertia has
-      // died. A deliberate second scroll comes after a real pause, so it still
-      // registers.
-      if (now < wheelLockUntil.current) {
+      const abs = Math.abs(e.deltaY);
+      const dir = e.deltaY > 0 ? 1 : -1;
+
+      // 1. Settle floor — the flick that fired the last step is still at full
+      //    strength. Nothing gets through, and the tail window opens.
+      if (now < wheelSettleUntil.current) {
         wheelAccum.current = 0;
-        wheelLockUntil.current = now + WHEEL_REFRESH_MS;
+        wheelPrevAbs.current = abs;
+        wheelPrevDir.current = dir;
+        wheelTailUntil.current = now + WHEEL_TAIL_GAP_MS;
         return;
       }
+
+      // 2. Past the floor and events are still arriving: tail, or a hand?
+      //    Momentum is strictly downhill — every event weaker than the one
+      //    before it, never turning around. That is the whole test. A steady
+      //    mouse wheel repeats the SAME delta and a gesture ramps UP, so both
+      //    fail it and go straight through; only a genuine decay is swallowed.
+      //    Each swallowed event also clears the accumulator, so a tail that
+      //    briefly plateaus can't quietly add up to a phantom step.
+      const streaming = now < wheelTailUntil.current;
+      const inertia =
+        streaming && dir === wheelPrevDir.current && abs < wheelPrevAbs.current;
+      wheelPrevAbs.current = abs;
+      wheelPrevDir.current = dir;
+      wheelTailUntil.current = now + WHEEL_TAIL_GAP_MS;
+      if (inertia) {
+        wheelAccum.current = 0;
+        return;
+      }
+
       wheelAccum.current += e.deltaY;
       if (Math.abs(wheelAccum.current) < WHEEL_STEP_THRESHOLD) return;
       // Commit exactly one step from the current *target* (snapped to a whole
@@ -473,10 +514,11 @@ export default function ParallaxIndex({ background }: Props) {
       // UNBOUNDED (no 0…N-1 clamp) — the hero loop below maps it back with a
       // wrapped modulo, so scrolling past the last project loops seamlessly
       // into the first, and up from the first into the last.
-      const dir = wheelAccum.current > 0 ? 1 : -1;
+      const stepDir = wheelAccum.current > 0 ? 1 : -1;
       wheelAccum.current = 0;
-      wheelLockUntil.current = now + WHEEL_COOLDOWN_MS;
-      target.current = Math.round(target.current) + dir;
+      wheelSettleUntil.current = now + WHEEL_SETTLE_MS;
+      wheelTailUntil.current = now + WHEEL_TAIL_GAP_MS;
+      target.current = Math.round(target.current) + stepDir;
     };
     // Touch equivalent — a thumb drag advances projects the same way a wheel
     // does, reusing the same cooldown lock so one swipe = one project.
@@ -490,12 +532,14 @@ export default function ParallaxIndex({ background }: Props) {
       if (showAllRef.current) return; // let the list scroll natively
       e.preventDefault();
       const now = performance.now();
-      if (now < wheelLockUntil.current) return;
+      // A finger stops when it is lifted — there is no inertia to sort out, so
+      // the settle floor is the whole guard here.
+      if (now < wheelSettleUntil.current) return;
       const y = e.touches[0]?.clientY ?? touchY;
       const dy = touchY - y;
       if (Math.abs(dy) < TOUCH_STEP_THRESHOLD) return;
       touchY = y;
-      wheelLockUntil.current = now + WHEEL_COOLDOWN_MS;
+      wheelSettleUntil.current = now + WHEEL_SETTLE_MS;
       target.current = Math.round(target.current) + (dy > 0 ? 1 : -1);
     };
 
@@ -1340,7 +1384,13 @@ function ShowAllList({
           // gallery (default landscape ratio) for any slug without a sheet set.
           const imgs: SheetImage[] =
             LIST_IMAGES[p.slug] ??
-            projectImageSet(p, GALLERY_IMAGES).map((src) => ({ src, ratio: 1.627 }));
+            projectImageSet(p, GALLERY_IMAGES).map((src) => ({
+              src,
+              ratio: 1.627,
+              // No measured colour for a fallback crop — a neutral near-black
+              // reads as "not loaded yet" against the sheet's black ground.
+              color: "#1a1a1a",
+            }));
           return (
             <li key={p.slug} className="mb-[30px] last:mb-0">
               {/* Title label — the project name, with a short description
@@ -1377,19 +1427,53 @@ function ShowAllList({
                     data-subtitle={t("parallax.goToProject")}
                     aria-label={`Open ${p.title}`}
                     className="relative block basis-1/2 min-w-0 cursor-pointer overflow-hidden md:basis-0"
-                    style={{ flexGrow: img.ratio }}
+                    // `aspectRatio` is the crop's REAL proportion, so the box
+                    // is the exact size the image will be — reserving it costs
+                    // nothing in accuracy and buys a stable layout. The colour
+                    // is the crop's own average, so the empty box already
+                    // looks like the picture that is coming.
+                    style={{
+                      flexGrow: img.ratio,
+                      aspectRatio: String(img.ratio),
+                      backgroundColor: img.color,
+                    }}
                   >
-                    {/* Plain img (w-full + h-auto): the browser lands each on
-                        the row's shared height, so widths hit the real
-                        proportions with zero crop. Already-optimized WebP, so
-                        next/image would add nothing. */}
+                    {/* Absolutely filling a box that already has the image's
+                        proportion, so `object-cover` has nothing to crop. It
+                        used to be a plain in-flow `h-auto` img, which meant
+                        the row had NO height until the files arrived and the
+                        whole sheet reflowed as they did. Already-optimized
+                        WebP, so next/image would add nothing.
+
+                        Still eager, deliberately. `loading="lazy"` looked like
+                        the obvious partner for a placeholder, but the sheet
+                        slides in from ABOVE the viewport, so a lazy row would
+                        not begin fetching until the entrance finished — and
+                        the whole set is 32 crops at ~78KB, 2.5MB total, which
+                        is the sheet's entire content. Requesting them all at
+                        once and letting each appear as it lands beats holding
+                        rows back; the placeholder is what makes that arrival
+                        read as progress instead of as a page assembling
+                        itself. Fading in rather than snapping — 300ms ease-out
+                        reads as the colour resolving into the photograph. */}
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={img.src}
                       alt=""
                       draggable={false}
                       loading="eager"
-                      className="block h-auto w-full"
+                      decoding="async"
+                      onLoad={(e) => {
+                        e.currentTarget.style.opacity = "1";
+                      }}
+                      // Already-cached files decode before React can attach
+                      // onLoad, and a missed event would leave the image
+                      // invisible forever. `ref` runs after the element is in
+                      // the DOM and can ask `complete` directly.
+                      ref={(el) => {
+                        if (el?.complete) el.style.opacity = "1";
+                      }}
+                      className="absolute inset-0 block h-full w-full object-cover opacity-0 transition-opacity duration-300 ease-out motion-reduce:transition-none"
                     />
                   </button>
                 ))}

@@ -230,13 +230,37 @@ const tile = (n: number) => `/Images/loading/${String(n).padStart(2, "0")}-squar
  * run 04→01. Keyed by slug; `ShowAllList` falls back to the project's own
  * gallery for any slug not listed here.
  */
-export type SheetImage = { src: string; ratio: number };
+export type SheetImage = { src: string; ratio: number; color: string };
+
+/*
+  Average colour of every sheet crop, measured off the exported file. It
+  paints the image's box while the file is still downloading, so the sheet
+  scrolls as a finished grid of colour that sharpens into photographs rather
+  than a column of holes that shove the page around as they fill in. Picked
+  the MEAN rather than the dominant colour: dominant lands on whichever flat
+  area is largest and can be a bright outlier (buda-03's sky blue over a
+  mostly-grey crop), while the mean is what the crop reads as from a distance
+  — which is exactly what a placeholder is standing in for.
+*/
+const SHEET_COLORS: Record<string, string> = {
+  "30-fcv-01": "#d68581", "30-fcv-02": "#9a8089", "30-fcv-03": "#e3c5c3", "30-fcv-04": "#f5231c",
+  "buda-01": "#684848", "buda-02": "#cb1a39", "buda-03": "#6e756f", "buda-04": "#282524",
+  "delirio-01": "#93955f", "delirio-02": "#d5924a", "delirio-03": "#8f726f", "delirio-04": "#596e5c",
+  "sao-joao-01": "#5b6597", "sao-joao-02": "#866d5e", "sao-joao-03": "#855747", "sao-joao-04": "#4a4a48",
+  "selva-01": "#534e29", "selva-02": "#e27296", "selva-03": "#14222c", "selva-04": "#d66052",
+  "tenda-01": "#9b614f", "tenda-02": "#bcdc03", "tenda-03": "#cdadbb", "tenda-04": "#bb96ca",
+  "vivs-01": "#9b883a", "vivs-02": "#a4847c", "vivs-03": "#8a769c", "vivs-04": "#a8898a",
+  "xuxa-01": "#a18e6d", "xuxa-02": "#7b736c", "xuxa-03": "#ab7b64", "xuxa-04": "#c49fa2",
+};
+
 // `ratio` is the image's real w/h — the sheet lays each row out "justified"
 // (widths ∝ ratio, one shared height), so nothing is cropped. Exported files
-// are all 590px tall, so ratio = width / 590.
+// are all 590px tall, so ratio = width / 590. Knowing the ratio up front is
+// also what lets the placeholder reserve the exact box before the file lands.
 const sheet = (name: string, ratio: number): SheetImage => ({
   src: `/Images/all-projects/${name}.webp`,
   ratio,
+  color: SHEET_COLORS[name] ?? "#1a1a1a",
 });
 export const LIST_IMAGES: Record<string, SheetImage[]> = {
   "delirio-tropical": [sheet("delirio-04", 1.553), sheet("delirio-03", 1.553), sheet("delirio-02", 1.553), sheet("delirio-01", 1.553)],
