@@ -40,7 +40,9 @@ export default function CaseStudyCTA() {
 
   return (
     <section
-      aria-label={t("cta.headline")}
+      // The headline is two sentences on two lines; flatten the break for the
+      // label so a screen reader announces one continuous sentence.
+      aria-label={t("cta.headline").replace(/\n/g, " ")}
       /*
         Full screen, and the content rides the middle of it. This is the last
         thing on a case study — after the gallery and the All-projects shelf,
@@ -58,10 +60,21 @@ export default function CaseStudyCTA() {
       */
       className="flex w-full min-h-dvh items-center px-6 md:px-[44px] py-24 md:py-[160px]"
     >
-      <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-12 md:flex-row md:items-start md:justify-between md:gap-8">
+      <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-12 md:flex-row md:items-center md:justify-between md:gap-8">
         {/* Headline — Super Large Title (SF Bold 64/64), two lines. */}
         <h2 className="text-[#fbfbfb] font-bold tracking-normal leading-[1.02] text-[clamp(2.5rem,5vw,4rem)] md:max-w-[473px] [text-wrap:balance]">
-          {t("cta.headline")}
+          {/* Two sentences, one per line — the question, then the answer. The
+              break is authored in the copy rather than left to the wrap,
+              because which words land together is the whole rhythm of it.
+              Each line is still its own block, so it re-wraps on its own on a
+              narrow screen instead of overflowing. */}
+          {t("cta.headline")
+            .split("\n")
+            .map((line, i) => (
+              <span key={i} className="block">
+                {line}
+              </span>
+            ))}
         </h2>
 
         {/* Links — 250px stack of ruled arrow-links. */}
