@@ -48,3 +48,6 @@ _Settings*.png
 
 # Claude Code internal worktrees
 .claude/worktrees/
+
+# Staging area for files pending deletion — never shipped.
+delete/
