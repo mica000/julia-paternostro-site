@@ -16,10 +16,12 @@
                                   Linkedin                    ↗
                                   ──────────────────────────
 
-  Left: a Super-Large-Title headline (SF Bold 64/64), two lines. Right: a
-  250px stack of four ruled arrow-links (shared ArrowLinks) — mail draft, the
-  About route, and the two socials. 1200px centered column; sits below the
-  All-projects footer. Vertical padding is symmetric (top mirrors bottom).
+  Left: a Super-Large-Title headline (SF Bold 64/64) in a 630px block — wide
+  enough that each of the two sentences holds its own line. Right: a 324px
+  stack of four ruled arrow-links (shared ArrowLinks) — mail draft, the About
+  route, and the two socials. 1200px centered column; sits below the
+  All-projects footer. Vertical rhythm is 250px, symmetric, and the band is
+  given the whole screen with the row centred in it.
 */
 
 import { useLang } from "@/lib/state";
@@ -58,11 +60,11 @@ export default function CaseStudyCTA() {
         to hold the headline and the four links comfortably — the section
         grows rather than cramping them.
       */
-      className="flex w-full min-h-dvh items-center px-6 md:px-[44px] py-24 md:py-[160px]"
+      className="flex w-full min-h-dvh items-center px-6 md:px-[44px] py-24 md:py-[250px]"
     >
       <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-12 md:flex-row md:items-center md:justify-between md:gap-8">
         {/* Headline — Super Large Title (SF Bold 64/64), two lines. */}
-        <h2 className="text-[#fbfbfb] font-bold tracking-normal leading-[1.02] text-[clamp(2.5rem,5vw,4rem)] md:max-w-[473px] [text-wrap:balance]">
+        <h2 className="text-[#fbfbfb] font-bold tracking-normal leading-[1] text-[clamp(2.5rem,5vw,4rem)] md:max-w-[630px] [text-wrap:balance]">
           {/* Two sentences, one per line — the question, then the answer. The
               break is authored in the copy rather than left to the wrap,
               because which words land together is the whole rhythm of it.
@@ -78,7 +80,7 @@ export default function CaseStudyCTA() {
         </h2>
 
         {/* Links — 250px stack of ruled arrow-links. */}
-        <ArrowLinks links={links} className="w-full md:w-[250px] md:shrink-0" />
+        <ArrowLinks links={links} className="w-full md:w-[324px] md:shrink-0" />
       </div>
     </section>
   );
