@@ -1394,8 +1394,11 @@ export function projectPreviewImages(
   if (!project.sections) return [];
   const urls: string[] = [];
   for (const s of project.sections) {
-    if (s.kind === "hero") urls.push(s.src);
-    else urls.push(...s.images);
+    const next = s.kind === "hero" ? [s.src] : s.images;
+    // Some case-study slots are video. Every consumer of this list renders an
+    // <img> (index hero, satellites, show-all thumbnails), so an .mp4 here
+    // would surface as a broken image. Animated GIFs are fine in an <img>.
+    urls.push(...next.filter((u) => !/\.mp4$/i.test(u)));
     if (urls.length >= count) break;
   }
   return urls.slice(0, count);

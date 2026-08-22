@@ -436,56 +436,56 @@
     ],
     "fcv": [
       {
-        "dx": -0.4175,
-        "dy": -0.1069,
+        "dx": -0.3939,
+        "dy": -0.3815,
         "w": 0.3582,
         "ratio": "460 / 282",
         "depth": 0.63,
         "src": "/Images/img-satelites/30-fcv/festival-poster-wall-mockup.webp"
       },
       {
-        "dx": 0.3069,
-        "dy": -0.1745,
+        "dx": 0.1985,
+        "dy": -0.5684,
         "w": 0.1953,
         "ratio": "375 / 116",
         "depth": 0.67,
         "src": "/Images/img-satelites/30-fcv/eye-illustration-red.webp"
       },
       {
-        "dx": 0.3719,
-        "dy": -0.1052,
+        "dx": 0.3796,
+        "dy": -0.6099,
         "w": 0.2104,
         "ratio": "311 / 311",
         "depth": 0.7,
         "src": "/Images/img-satelites/30-fcv/woman-portrait-collage.webp"
       },
       {
-        "dx": 0.3422,
-        "dy": 0.1107,
+        "dx": 0.3779,
+        "dy": 0.3848,
         "w": 0.2753,
         "ratio": "1016 / 1170",
         "depth": 0.64,
         "src": "/Images/img-satelites/30-fcv/Capa-FCV.gif"
       },
       {
-        "dx": 0.4355,
-        "dy": -0.0053,
+        "dx": 0.2557,
+        "dy": 0.7044,
         "w": 0.166,
         "ratio": "319 / 243",
         "depth": 0.7,
         "src": "/Images/img-satelites/30-fcv/eye-illustration-pink.webp"
       },
       {
-        "dx": -0.1225,
-        "dy": 0.1376,
+        "dx": -0.0822,
+        "dy": 0.4846,
         "w": 0.1326,
         "ratio": "255 / 183",
         "depth": 0.73,
         "src": "/Images/img-satelites/30-fcv/eye-illustration-with-lashes.webp"
       },
       {
-        "dx": -0.3731,
-        "dy": 0.1262,
+        "dx": -0.3496,
+        "dy": 0.3908,
         "w": 0.3446,
         "ratio": "662 / 406",
         "depth": 0.54,

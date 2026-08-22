@@ -884,16 +884,33 @@ export default function ParallaxIndex({ background }: Props) {
                 className="absolute inset-0 flex items-center justify-center will-change-transform"
               >
                 <div className={`relative overflow-hidden ${HERO_BOX}`}>
-                  <Image
-                    src={heroSrc(p)}
-                    alt={p.title}
-                    fill
-                    sizes="74vw"
-                    priority={i === 0}
-                    draggable={false}
-                    unoptimized={heroSrc(p).endsWith(".gif")}
-                    className="object-cover"
-                  />
+                  {/* A hero can be an animation. Tenda Lab's is video (the
+                      GIF was 8.5MB); everything else is a still or a GIF,
+                      which an <img> handles as-is. */}
+                  {/\.mp4$/i.test(heroSrc(p)) ? (
+                    <video
+                      src={heroSrc(p)}
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                      preload={i === 0 ? "auto" : "metadata"}
+                      aria-label={p.title}
+                      tabIndex={-1}
+                      className="absolute inset-0 h-full w-full object-cover"
+                    />
+                  ) : (
+                    <Image
+                      src={heroSrc(p)}
+                      alt={p.title}
+                      fill
+                      sizes="74vw"
+                      priority={i === 0}
+                      draggable={false}
+                      unoptimized={heroSrc(p).endsWith(".gif")}
+                      className="object-cover"
+                    />
+                  )}
                 </div>
               </div>
             ))}

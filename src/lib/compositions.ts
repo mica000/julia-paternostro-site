@@ -65,9 +65,10 @@ export const HERO_IMAGES: Record<string, string> = {
   vivs: sat("vivs", "rectangle-81"),
   "a-selva": sat("selva", "background"),
   "budapest-forro": sat("budapest", "bff-logo"),
-  // tenda-lab intentionally omitted — its Figma hero is still the delírio
-  // placeholder art, so it falls back to the project's own index image
-  // until a real Tenda Lab hero is designed.
+  // Tenda Lab's hero is the animated cover, not a still. It's the one hero
+  // that is video — the source GIF was 8.5MB, so it ships as H.264 and the
+  // index renders it in a <video> instead of an <img>.
+  "tenda-lab": "/Images/Tenda-Lab/01.mp4",
 };
 
 /** Big hero image for a project — its hero override, else index/gallery. */
