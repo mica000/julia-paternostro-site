@@ -84,7 +84,11 @@ export default function AboutPage() {
       <div className="mx-auto w-full max-w-[928px] px-6 pb-24 pt-[120px] md:px-[44px] md:pb-32 md:pt-[180px]">
         <div className="flex flex-col gap-12 md:flex-row md:items-start md:justify-between md:gap-8">
           {/* LEFT — bio (its last block is the location) + contact links. */}
-          <div className="flex flex-col md:w-[291px] md:shrink-0">
+          {/* 392 wide (Figma 458:6351) — the bio block and the link rows are
+              both that width in the design, and ArrowLinks fills the column,
+              so the rules run the full 392 with the arrow sitting flush at
+              the end of each. */}
+          <div className="flex flex-col md:w-[392px] md:shrink-0">
             <div className={`flex flex-col gap-4 ${body}`}>
               {t("about.body")
                 .split("\n\n")
@@ -101,16 +105,6 @@ export default function AboutPage() {
             </div>
             <ArrowLinks links={links} className="mt-12" />
 
-            {/* Who made the site, as opposed to who made the work on it.
-                Sits under the contact links in Material/Medium gray, the same
-                tone the taglines use, so it reads as a footnote to the page
-                rather than another thing to click. */}
-            <p
-              className={`mt-8 ${body}`}
-              style={{ color: "#f6f6f699" }}
-            >
-              {t("about.credit")}
-            </p>
           </div>
 
           {/* RIGHT — portrait (4:5), drifts with the cursor. */}
