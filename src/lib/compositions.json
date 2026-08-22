@@ -174,6 +174,14 @@
         "ratio": "340 / 361",
         "depth": 0.69,
         "src": "/Images/img-satelites/tenda-lab/02-1.webp"
+      },
+      {
+        "dx": 0,
+        "dy": -0.29,
+        "w": 0.18,
+        "ratio": "623 / 498",
+        "depth": 0.7,
+        "src": "/Images/img-satelites/tenda-lab/gaby-amarantos.webp"
       }
     ],
     "vivs": [
@@ -494,8 +502,8 @@
     ],
     "a-selva": [
       {
-        "dx": -0.3426,
-        "dy": -0.6203,
+        "dx": -0.2675,
+        "dy": -0.5208,
         "w": 0.1195,
         "ratio": "82 / 74",
         "depth": 0.81,
@@ -534,8 +542,8 @@
         "src": "/Images/img-satelites/selva/leaf-round.webp"
       },
       {
-        "dx": -0.4766,
-        "dy": -0.4387,
+        "dx": -0.4626,
+        "dy": -0.2619,
         "w": 0.0787,
         "ratio": "74 / 78",
         "depth": 0.82,
@@ -634,36 +642,20 @@
     ],
     "tenda-lab": [
       {
-        "dx": -0.3872,
-        "dy": -0.3471,
-        "w": 0.2375,
-        "ratio": "456 / 303",
-        "depth": 0.64,
-        "src": "/Images/img-satelites/tenda-lab/asset-2-2x-3.webp"
-      },
-      {
-        "dx": 0.3199,
-        "dy": -0.4403,
+        "dx": -0.2858,
+        "dy": -0.4203,
         "w": 0.1543,
         "ratio": "296 / 244",
         "depth": 0.71,
         "src": "/Images/img-satelites/tenda-lab/asset-4-2x-2.webp"
       },
       {
-        "dx": -0.4046,
-        "dy": 0.1897,
+        "dx": -0.4045,
+        "dy": 0.1393,
         "w": 0.1521,
         "ratio": "292 / 292",
         "depth": 0.71,
         "src": "/Images/img-satelites/tenda-lab/rectangle-80.webp"
-      },
-      {
-        "dx": 0.2379,
-        "dy": 0.2817,
-        "w": 0.3073,
-        "ratio": "590 / 141",
-        "depth": 0.57,
-        "src": "/Images/img-satelites/tenda-lab/asset-3-2x-2.webp"
       },
       {
         "dx": 0.4009,
@@ -672,6 +664,14 @@
         "ratio": "340 / 361",
         "depth": 0.69,
         "src": "/Images/img-satelites/tenda-lab/02-1.webp"
+      },
+      {
+        "dx": 0.3047,
+        "dy": 0.4087,
+        "w": 0.22,
+        "ratio": "623 / 498",
+        "depth": 0.7,
+        "src": "/Images/img-satelites/tenda-lab/gaby-amarantos.webp"
       }
     ],
     "vivs": [
