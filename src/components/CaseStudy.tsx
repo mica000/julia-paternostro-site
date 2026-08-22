@@ -334,13 +334,34 @@ function Frame({
   const [loaded, setLoaded] = useState(false);
   const wrapRef = useRef<HTMLDivElement | null>(null);
 
+  // Some slots are animations. They were authored as GIFs and transcoded to
+  // H.264 (a 8.5MB GIF lands around 0.5MB), so a slot is a video purely by
+  // extension — everything else about the frame is identical.
+  const isVideo = /\.mp4$/i.test(src);
+
   // next/image's onLoad can miss cached/priority images that finish
   // decoding before React attaches the handler. Belt-and-braces: query
-  // the underlying <img> on mount and either flip loaded immediately
-  // (if already complete) or attach a native `load` listener so we
-  // catch the event no matter when it fires.
+  // the underlying media node on mount and either flip loaded immediately
+  // (if already ready) or attach a native listener so we catch the event
+  // no matter when it fires.
   useEffect(() => {
-    const img = wrapRef.current?.querySelector("img");
+    const wrap = wrapRef.current;
+    if (!wrap) return;
+
+    if (isVideo) {
+      const video = wrap.querySelector("video");
+      if (!video) return;
+      // readyState >= 2 (HAVE_CURRENT_DATA) means the first frame is painted.
+      if (video.readyState >= 2) {
+        setLoaded(true);
+        return;
+      }
+      const onData = () => setLoaded(true);
+      video.addEventListener("loadeddata", onData);
+      return () => video.removeEventListener("loadeddata", onData);
+    }
+
+    const img = wrap.querySelector("img");
     if (!img) return;
     if (img.complete && img.naturalWidth > 0) {
       setLoaded(true);
@@ -349,7 +370,17 @@ function Frame({
     const onLoad = () => setLoaded(true);
     img.addEventListener("load", onLoad);
     return () => img.removeEventListener("load", onLoad);
-  }, [src]);
+  }, [src, isVideo]);
+
+  // Honour reduced-motion by holding the video on its first frame. Done
+  // after mount rather than via the autoPlay attribute so the server and
+  // client render identical markup.
+  useEffect(() => {
+    if (!isVideo) return;
+    if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const video = wrapRef.current?.querySelector("video");
+    video?.pause();
+  }, [src, isVideo]);
 
   return (
     <div
@@ -357,6 +388,27 @@ function Frame({
       className="relative overflow-hidden"
       style={{ aspectRatio: ratio.replace("/", " / ") }}
     >
+      {isVideo ? (
+        /* Decorative animation: muted + playsInline so iOS plays it inline
+           rather than going fullscreen, and aria-hidden because it carries
+           no information the surrounding copy doesn't already give. */
+        <video
+          src={src}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          aria-hidden="true"
+          tabIndex={-1}
+          className="absolute inset-0 h-full w-full object-cover"
+          style={{
+            opacity: loaded ? 1 : 0,
+            transition: `opacity 500ms ease ${delay}ms`,
+            willChange: "opacity",
+          }}
+        />
+      ) : (
       <Image
         src={src}
         alt=""
@@ -379,6 +431,7 @@ function Frame({
           willChange: "opacity",
         }}
       />
+      )}
     </div>
   );
 }

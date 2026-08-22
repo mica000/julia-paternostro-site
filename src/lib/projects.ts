@@ -348,15 +348,15 @@ const projectsSource: Project[] = [
     //   - 07, 08, 09                   → cols=3 (1:1 square icon row)
     sections: [
       { kind: "hero", src: asset("Delirio-Tropical", "01") },
-      { kind: "hero", src: asset("Delirio-Tropical", "02") },
+      { kind: "hero", src: asset("Delirio-Tropical", "02", "mp4") },
       { kind: "hero", src: asset("Delirio-Tropical", "03") },
       {
         kind: "cols",
         cols: 3,
         images: [
-          asset("Delirio-Tropical", "04"),
-          asset("Delirio-Tropical", "05"),
-          asset("Delirio-Tropical", "06"),
+          asset("Delirio-Tropical", "04", "mp4"),
+          asset("Delirio-Tropical", "05", "mp4"),
+          asset("Delirio-Tropical", "06", "mp4"),
         ],
       },
       {
@@ -373,7 +373,7 @@ const projectsSource: Project[] = [
       },
       { kind: "hero", src: asset("Delirio-Tropical", "10") },
       { kind: "hero", src: asset("Delirio-Tropical", "11") },
-      { kind: "hero", src: asset("Delirio-Tropical", "12") },
+      { kind: "hero", src: asset("Delirio-Tropical", "12", "mp4") },
       {
         kind: "cols",
         cols: 3,
@@ -478,7 +478,7 @@ const projectsSource: Project[] = [
     // Case-study layout — each image keeps its own aspect (no cropping):
     // landscape 1800×1105, wide banner 1800×855, portrait 1342×1682.
     sections: [
-      { kind: "hero", src: "/Images/Vivs/1.webp", ratio: "1800/1105" },
+      { kind: "hero", src: "/Images/Vivs/1.mp4", ratio: "1800/1105" },
       {
         kind: "cols",
         cols: 2,
@@ -491,8 +491,8 @@ const projectsSource: Project[] = [
         cols: 3,
         images: [
           "/Images/Vivs/16.webp",
-          "/Images/Vivs/5.webp",
-          "/Images/Vivs/8.webp",
+          "/Images/Vivs/5.mp4",
+          "/Images/Vivs/8.mp4",
         ],
         ratio: "1342/1682",
       },
@@ -500,10 +500,10 @@ const projectsSource: Project[] = [
       {
         kind: "cols",
         cols: 2,
-        images: ["/Images/Vivs/6.webp", "/Images/Vivs/9.webp"],
+        images: ["/Images/Vivs/6.mp4", "/Images/Vivs/9.webp"],
         ratio: "1800/1105",
       },
-      { kind: "hero", src: "/Images/Vivs/3.webp", ratio: "1800/1105" },
+      { kind: "hero", src: "/Images/Vivs/3.mp4", ratio: "1800/1105" },
       { kind: "hero", src: "/Images/Vivs/17.webp", ratio: "1800/1105" },
     ],
     bg: "#2d7c3b",
@@ -559,7 +559,7 @@ const projectsSource: Project[] = [
       {
         kind: "cols",
         cols: 2,
-        images: [asset("budapest-forro", "7"), asset("budapest-forro", "8")],
+        images: [asset("budapest-forro", "7", "mp4"), asset("budapest-forro", "8")],
         ratio: "1342/1682",
       },
       { kind: "hero", src: asset("budapest-forro", "2"), ratio: "1800/1105" },
@@ -633,7 +633,7 @@ const projectsSource: Project[] = [
     // Explicit ratios prevent object-cover cropping.
     sections: [
       { kind: "hero", src: asset("Delirio-Sao-Joao", "01"), ratio: "2739 / 1542" },
-      { kind: "hero", src: asset("Delirio-Sao-Joao", "02"), ratio: "2740 / 1599" },
+      { kind: "hero", src: asset("Delirio-Sao-Joao", "02", "mp4"), ratio: "2740 / 1599" },
       { kind: "hero", src: asset("Delirio-Sao-Joao", "03"), ratio: "2740 / 1542" },
       {
         kind: "cols",
@@ -647,7 +647,7 @@ const projectsSource: Project[] = [
       },
       { kind: "hero", src: asset("Delirio-Sao-Joao", "07"), ratio: "2740 / 1542" },
       { kind: "hero", src: asset("Delirio-Sao-Joao", "08"), ratio: "2740 / 1542" },
-      { kind: "hero", src: asset("Delirio-Sao-Joao", "09"), ratio: "2740 / 1542" },
+      { kind: "hero", src: asset("Delirio-Sao-Joao", "09", "mp4"), ratio: "2740 / 1542" },
       { kind: "hero", src: asset("Delirio-Sao-Joao", "10"), ratio: "2740 / 1542" },
       {
         // Portrait pair — 1342×1682 (~0.80:1) matches the cols2 default.
@@ -784,10 +784,10 @@ const projectsSource: Project[] = [
     //   - 22–24               → 3-col portrait row (0.72:1, cols3 default)
     // Explicit ratios prevent object-cover cropping.
     sections: [
-      { kind: "hero", src: asset("30-FCV", "01"), ratio: "2740 / 1682" },
+      { kind: "hero", src: asset("30-FCV", "01", "mp4"), ratio: "2740 / 1682" },
       { kind: "hero", src: asset("30-FCV", "02"), ratio: "2740 / 1682" },
-      { kind: "hero", src: asset("30-FCV", "03"), ratio: "2740 / 1682" },
-      { kind: "hero", src: asset("30-FCV", "04"), ratio: "2740 / 1682" },
+      { kind: "hero", src: asset("30-FCV", "03", "mp4"), ratio: "2740 / 1682" },
+      { kind: "hero", src: asset("30-FCV", "04", "mp4"), ratio: "2740 / 1682" },
       { kind: "hero", src: asset("30-FCV", "05"), ratio: "2740 / 1682" },
       { kind: "hero", src: asset("30-FCV", "06"), ratio: "2740 / 1682" },
       {
@@ -891,8 +891,8 @@ const projectsSource: Project[] = [
     //   - 05–07, 12–17, 21–32  → 3-col square rows (1:1)
     // Explicit ratios prevent object-cover cropping.
     sections: [
-      { kind: "hero", src: asset("Tenda-Lab", "01"), ratio: "2740 / 1682" },
-      { kind: "hero", src: asset("Tenda-Lab", "02"), ratio: "2740 / 1682" },
+      { kind: "hero", src: asset("Tenda-Lab", "01", "mp4"), ratio: "2740 / 1682" },
+      { kind: "hero", src: asset("Tenda-Lab", "02", "mp4"), ratio: "2740 / 1682" },
       { kind: "hero", src: asset("Tenda-Lab", "03"), ratio: "2740 / 1542" },
       { kind: "hero", src: asset("Tenda-Lab", "04"), ratio: "2740 / 1542" },
       {
@@ -900,16 +900,16 @@ const projectsSource: Project[] = [
         cols: 3,
         ratio: "1 / 1",
         images: [
-          asset("Tenda-Lab", "05"),
-          asset("Tenda-Lab", "06"),
-          asset("Tenda-Lab", "07"),
+          asset("Tenda-Lab", "05", "mp4"),
+          asset("Tenda-Lab", "06", "mp4"),
+          asset("Tenda-Lab", "07", "mp4"),
         ],
       },
       // Wide banner — 2740×755 (~3.63:1). Full-width strip.
       { kind: "hero", src: asset("Tenda-Lab", "08"), ratio: "2740 / 755" },
       { kind: "hero", src: asset("Tenda-Lab", "09"), ratio: "2740 / 1542" },
       { kind: "hero", src: asset("Tenda-Lab", "10"), ratio: "2740 / 1542" },
-      { kind: "hero", src: asset("Tenda-Lab", "11"), ratio: "2740 / 1456" },
+      { kind: "hero", src: asset("Tenda-Lab", "11", "mp4"), ratio: "2740 / 1456" },
       {
         kind: "cols",
         cols: 3,
@@ -1139,7 +1139,7 @@ const projectsSource: Project[] = [
         images: [asset("selva", "3"), asset("selva", "4"), asset("selva", "5")],
         ratio: "877/877",
       },
-      { kind: "hero", src: asset("selva", "2"), ratio: "1800/870" },
+      { kind: "hero", src: asset("selva", "2", "mp4"), ratio: "1800/870" },
       {
         kind: "cols",
         cols: 3,
