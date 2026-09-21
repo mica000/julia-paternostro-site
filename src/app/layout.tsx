@@ -61,9 +61,13 @@ export default function RootLayout({
             <PageBackgroundProvider>
               <TransitionProvider>
                 <SmoothScroll>
+                  {/* TopNav first so keyboard focus starts in the nav, then
+                      moves into the page. It's fixed with its own z-index,
+                      so rendering it before the page doesn't change what
+                      paints on top. */}
+                  <TopNav />
                   {children}
                   <NavFade />
-                  <TopNav />
                   {/* Global — ring appears over any element opted-in via
                       `.tile-hover` or `data-cursor-ring`. */}
                   <CustomCursor />

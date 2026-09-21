@@ -599,6 +599,18 @@ export default function ParallaxIndex({ background }: Props) {
     };
   }, [N]);
 
+  // Go to project `i`. The index is unbounded (a wrapping strip), so jump to
+  // the nearest copy of `i` relative to where we are — the short way round.
+  const jumpTo = useCallback(
+    (i: number) => {
+      const base = Math.round(current.current);
+      let delta = (((i - base) % N) + N) % N;
+      if (delta > N / 2) delta -= N;
+      target.current = base + delta;
+    },
+    [N]
+  );
+
   // Cursor tracking — feeds the drift, the follow-pill position, and the
   // shake detector (a strong back-and-forth shake dismisses the images).
   const onMouseMove = useCallback((e: React.MouseEvent) => {
@@ -931,6 +943,63 @@ export default function ParallaxIndex({ background }: Props) {
     [begin]
   );
 
+  // ── Keyboard walk through the project list ──────────────────────────────
+  // Tab enters the list on the project that's on screen, then goes round the
+  // whole ring (all N, wrapping) before leaving it; Shift+Tab the same way
+  // back. DOM order alone would leave the list at the last row, skipping
+  // every project before the one you started on. Enter opens the project.
+  const heroOpenRef = useRef<HTMLButtonElement>(null);
+  const visitedRows = useRef(new Set<number>());
+  const onScreenIdx = () => ((Math.round(target.current) % N) + N) % N;
+
+  const onRowFocus = (e: React.FocusEvent<HTMLButtonElement>, i: number) => {
+    const list = e.currentTarget.parentElement;
+    const fromOutside = !list?.contains(e.relatedTarget as Node | null);
+    if (fromOutside) {
+      visitedRows.current = new Set();
+      const here = onScreenIdx();
+      if (here !== i) {
+        timelineRefs.current[here]?.focus();
+        return;
+      }
+    }
+    visitedRows.current.add(i);
+    jumpTo(i);
+  };
+
+  const onRowKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>, i: number) => {
+    if (e.key === "Enter") {
+      e.preventDefault(); // or the button's own click would just re-select it
+      const r = heroOpenRef.current?.getBoundingClientRect();
+      if (!r) return;
+      begin({
+        color: projectBg(projects[i]),
+        rect: { x: r.x, y: r.y, width: r.width, height: r.height },
+        slug: projects[i].slug,
+      });
+      return;
+    }
+    if (e.key !== "Tab" || e.altKey || e.ctrlKey || e.metaKey) return;
+    e.preventDefault();
+    const dir = e.shiftKey ? -1 : 1;
+    if (visitedRows.current.size < N) {
+      timelineRefs.current[(i + dir + N) % N]?.focus();
+      return;
+    }
+    // Every project seen: forward wraps back to the top of the page (the
+    // nav), backward steps out to whatever sits just before the list. The
+    // hero and satellites aren't stops: Enter on a name already opens it.
+    const rows = timelineRefs.current.filter(Boolean) as HTMLElement[];
+    const tabbable = [
+      ...document.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input:not([disabled]), select, textarea, [tabindex]:not([tabindex="-1"])'
+      ),
+    ].filter((el) => el.tabIndex >= 0 && el.getClientRects().length > 0);
+    const next =
+      dir > 0 ? tabbable[0] : tabbable[tabbable.indexOf(rows[0]) - 1];
+    (next ?? (e.currentTarget as HTMLElement)).focus();
+  };
+
   return (
     <div
       ref={rootRef}
@@ -1050,6 +1119,12 @@ export default function ParallaxIndex({ background }: Props) {
             onMouseLeave={() => {
               hoveredMenuRef.current = false;
             }}
+            // Rows are placed by transform, so the box must never scroll. A
+            // focused row would otherwise get scrolled "into view" and knock
+            // every row off the centre line.
+            onScroll={(e) => {
+              e.currentTarget.scrollTop = 0;
+            }}
             className="absolute bottom-6 left-6 z-10 w-[min(320px,72vw)] overflow-hidden md:bottom-auto md:left-[44px] md:top-1/2 md:w-[min(260px,34vw)] md:-translate-y-1/2"
             style={{
               height: TIMELINE_HEIGHT,
@@ -1072,15 +1147,11 @@ export default function ParallaxIndex({ background }: Props) {
                 ref={(el) => {
                   timelineRefs.current[i] = el;
                 }}
-                onClick={() => {
-                  // Index is unbounded (wrapping strip). Jump to the nearest
-                  // copy of project `i` relative to where we are, so a click
-                  // always takes the short way round the ring.
-                  const base = Math.round(current.current);
-                  let delta = (((i - base) % N) + N) % N;
-                  if (delta > N / 2) delta -= N;
-                  target.current = base + delta;
-                }}
+                onClick={() => jumpTo(i)}
+                // Keyboard: tabbing onto a name brings that project up, Tab /
+                // Shift+Tab go round every project, Enter opens it.
+                onFocus={(e) => onRowFocus(e, i)}
+                onKeyDown={(e) => onRowKeyDown(e, i)}
                 onMouseEnter={() => {
                   hoveredRow.current = i;
                 }}
@@ -1213,7 +1284,11 @@ export default function ParallaxIndex({ background }: Props) {
                 their own click-to-open (below) so a click on them still opens
                 the project even though they now cover this button. */}
             <button
+              ref={heroOpenRef}
               type="button"
+              // Mouse target only; from the keyboard, Enter on the project's
+              // name opens it, so Tab skips straight past the artwork.
+              tabIndex={-1}
               aria-label={`Open ${active.title}`}
               onClick={(e) => open(e, active)}
               className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 cursor-pointer md:cursor-none ${HERO_BOX}`}

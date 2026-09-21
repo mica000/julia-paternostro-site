@@ -164,7 +164,9 @@ export default function TopNav() {
 
   return (
     <nav
-      className="pointer-events-none fixed inset-x-0 top-0 z-40"
+      // z-41, one above the cursor's HoverPill (z-40): the nav now renders
+      // before the page (for Tab order), so it can't win the tie on DOM order.
+      className="pointer-events-none fixed inset-x-0 top-0 z-[41]"
       style={{
         // Case studies push an explicit foreground into the page-bg context;
         // the index and the secondary routes use Figma's near-white.
