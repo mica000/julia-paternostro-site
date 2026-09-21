@@ -82,13 +82,13 @@ export default function AboutPage() {
       style={{ backgroundColor: "#000000", color: "#ffffff" }}
     >
       <div className="mx-auto w-full max-w-[928px] px-6 pb-24 pt-[120px] md:px-[44px] md:pb-32 md:pt-[180px]">
-        <div className="flex flex-col gap-12 md:flex-row md:items-start md:justify-between md:gap-8">
+        <div className="flex flex-col gap-12 md:flex-row md:items-start md:justify-between md:gap-8 lg:gap-12">
           {/* LEFT — bio (its last block is the location) + contact links. */}
           {/* 392 wide (Figma 458:6351) — the bio block and the link rows are
               both that width in the design, and ArrowLinks fills the column,
               so the rules run the full 392 with the arrow sitting flush at
               the end of each. */}
-          <div className="flex flex-col md:w-[392px] md:shrink-0">
+          <div className="flex min-w-0 flex-col md:w-[392px]">
             <div className={`flex flex-col gap-4 ${body}`}>
               {t("about.body")
                 .split("\n\n")
@@ -110,7 +110,7 @@ export default function AboutPage() {
           {/* RIGHT — portrait (4:5), drifts with the cursor. */}
           <div
             ref={portraitRef}
-            className="relative aspect-[380/475] w-full overflow-hidden will-change-transform md:w-[380px] md:shrink-0"
+            className="relative aspect-[380/475] w-full overflow-hidden will-change-transform md:w-[380px]"
           >
             <Image
               src="/Images/about/me.webp"

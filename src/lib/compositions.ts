@@ -60,7 +60,7 @@ export const sat = (folder: string, name: string) =>
 // around). Falls back to the project's own index/gallery image.
 export const HERO_IMAGES: Record<string, string> = {
   "delirio-tropical": sat("delirio-tropical", "tropical-lettering-background"),
-  "delirio-sao-joao": sat("sao-joao", "delirio-tropical-sao-joao-banner"),
+  "delirio-sao-joao": sat("sao-joao", "sao-joao-banner-bleed"),
   fcv: sat("30-fcv", "festival-collage-eyes-and-stars"),
   vivs: sat("vivs", "rectangle-81"),
   "a-selva": sat("selva", "background"),
@@ -73,6 +73,27 @@ export const HERO_IMAGES: Record<string, string> = {
   // that is video — the source GIF was 8.5MB, so it ships as H.264 and the
   // index renders it in a <video> instead of an <img>.
   "tenda-lab": "/Images/Tenda-Lab/01.mp4",
+};
+
+/**
+ * Heroes whose artwork spills past the rectangle (a transparent PNG export of
+ * the whole Figma group). Instead of cropping to the hero box, the image is
+ * placed so its `rect` lands on the box and the rest overhangs it.
+ * `rect` and `size` are in the export's own units — Figma's, not pixels.
+ */
+export type HeroBleed = {
+  rect: { x: number; y: number; w: number; h: number };
+  size: { w: number; h: number };
+};
+
+export const HERO_BLEED: Record<string, HeroBleed> = {
+  // Figma 245:293 — the banner (1309×736) with the flower overhanging top-left
+  // and the heron bottom-left. The export spans the heron's left edge to the
+  // banner's right, and the flower's top to the heron's feet.
+  "delirio-sao-joao": {
+    rect: { x: 203.61, y: 77.03, w: 1309.06, h: 736.44 },
+    size: { w: 1512.67, h: 949.9 },
+  },
 };
 
 /** Big hero image for a project — its hero override, else index/gallery. */

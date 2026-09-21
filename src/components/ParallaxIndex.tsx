@@ -61,7 +61,9 @@ import {
 import {
   compositionFor,
   heroSrc,
+  HERO_BLEED,
   satelliteImagesFor,
+  type HeroBleed,
 } from "@/lib/compositions";
 import { useTransition } from "@/components/PageTransition";
 import ShowAllIcon, { CHIP_CLASS } from "@/components/ShowAllIcon";
@@ -181,6 +183,28 @@ const SHAKE_THRESHOLD = 260;
 // takes nearly the full width and dominates the top half of the screen.
 const HERO_BOX =
   "aspect-[913/560] max-w-[1140px] w-[86vw] md:w-[min(58vw,88vh)] lg:w-[min(62vw,91vh)]";
+
+// Places a bleed hero (see HERO_BLEED) so its banner `rect` covers the hero
+// box edge to edge in width, centred vertically, with everything else in the
+// export overhanging. Percentages of the box, so it scales with HERO_BOX.
+const HERO_ASPECT = 913 / 560;
+// On a phone the hero is nearly full-width, so a one-sided overhang (São
+// João's heron, left only) would run off the screen. There the whole
+// artwork is centred instead of the banner: shift right by half the
+// difference between the left and right overhangs.
+function bleedShift({ rect, size }: HeroBleed): string {
+  const right = size.w - rect.x - rect.w;
+  return `${((rect.x - right) / 2 / rect.w) * 100}%`;
+}
+function bleedStyle({ rect, size }: HeroBleed): React.CSSProperties {
+  const rectH = (HERO_ASPECT * rect.h) / rect.w; // rect height, box heights
+  return {
+    left: `${(-rect.x / rect.w) * 100}%`,
+    width: `${(size.w / rect.w) * 100}%`,
+    top: `${((1 - rectH) / 2 - (HERO_ASPECT * rect.y) / rect.w) * 100}%`,
+    height: `${((HERO_ASPECT * size.h) / rect.w) * 100}%`,
+  };
+}
 
 /*
   Satellite compositions, asset maps and geometry helpers now live in
@@ -534,10 +558,30 @@ export default function ParallaxIndex({ background }: Props) {
       target.current = Math.round(target.current) + (dy > 0 ? 1 : -1);
     };
 
+    // Keyboard — ↓ next project, ↑ previous, same loop as the wheel. Holding a
+    // key auto-repeats, and the settle floor paces that to one project per
+    // WHEEL_SETTLE_MS instead of a blur. Left alone in Show-all (the arrows
+    // scroll the list there), with a modifier held (browser shortcuts), and
+    // while typing in a field.
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
+      if (showAllRef.current) return;
+      if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+      const t = e.target as HTMLElement | null;
+      if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+      e.preventDefault();
+      const now = performance.now();
+      if (now < wheelSettleUntil.current) return;
+      wheelSettleUntil.current = now + WHEEL_SETTLE_MS;
+      target.current = Math.round(target.current) + (e.key === "ArrowDown" ? 1 : -1);
+    };
+
     el.addEventListener("wheel", onWheel, { passive: false });
     el.addEventListener("touchstart", onTouchStart, { passive: true });
     el.addEventListener("touchmove", onTouchMove, { passive: false });
+    window.addEventListener("keydown", onKeyDown);
     return () => {
+      window.removeEventListener("keydown", onKeyDown);
       el.removeEventListener("wheel", onWheel);
       el.removeEventListener("touchstart", onTouchStart);
       el.removeEventListener("touchmove", onTouchMove);
@@ -921,11 +965,31 @@ export default function ParallaxIndex({ background }: Props) {
                 }}
                 className="absolute inset-0 flex items-center justify-center will-change-transform"
               >
-                <div className={`relative overflow-hidden ${HERO_BOX}`}>
+                <div
+                  className={`relative ${HERO_BLEED[p.slug] ? "max-md:translate-x-[var(--bleed-shift)]" : "overflow-hidden"} ${HERO_BOX}`}
+                  style={
+                    HERO_BLEED[p.slug]
+                      ? ({ "--bleed-shift": bleedShift(HERO_BLEED[p.slug]) } as React.CSSProperties)
+                      : undefined
+                  }
+                >
                   {/* A hero can be an animation. Tenda Lab's is video (the
                       GIF was 8.5MB); everything else is a still or a GIF,
-                      which an <img> handles as-is. */}
-                  {/\.mp4$/i.test(heroSrc(p)) ? (
+                      which an <img> handles as-is. A bleed hero overhangs
+                      the box instead of being cropped to it. */}
+                  {HERO_BLEED[p.slug] ? (
+                    <div className="absolute" style={bleedStyle(HERO_BLEED[p.slug])}>
+                      <Image
+                        src={heroSrc(p)}
+                        alt={p.title}
+                        fill
+                        sizes="86vw"
+                        priority={i === 0}
+                        draggable={false}
+                        className="object-contain"
+                      />
+                    </div>
+                  ) : /\.mp4$/i.test(heroSrc(p)) ? (
                     <video
                       src={heroSrc(p)}
                       autoPlay

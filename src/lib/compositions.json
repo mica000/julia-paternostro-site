@@ -44,44 +44,36 @@
     ],
     "delirio-sao-joao": [
       {
-        "dx": 0.2961,
-        "dy": -0.2389,
-        "w": 0.1812,
-        "ratio": "607 / 401",
-        "depth": 0.57,
-        "src": "/Images/img-satelites/sao-joao/banner-and-tambourine.webp"
+        "dx": -0.164,
+        "dy": 0.3196,
+        "w": 0.1495,
+        "ratio": "395 / 233",
+        "depth": 0.66,
+        "src": "/Images/img-satelites/sao-joao/colorful-boats.webp"
       },
       {
-        "dx": -0.3249,
-        "dy": -0.222,
-        "w": 0.1046,
-        "ratio": "201 / 455",
-        "depth": 0.76,
-        "src": "/Images/img-satelites/sao-joao/casaca-instrument-character.webp"
-      },
-      {
-        "dx": 0.3212,
-        "dy": -0.1125,
-        "w": 0.0818,
+        "dx": 0.3686,
+        "dy": -0.1952,
+        "w": 0.1319,
         "ratio": "211 / 207",
         "depth": 0.75,
         "src": "/Images/img-satelites/sao-joao/zabumba-drum.webp"
       },
       {
-        "dx": 0.3215,
-        "dy": 0.221,
-        "w": 0.1628,
-        "ratio": "387 / 352",
-        "depth": 0.67,
-        "src": "/Images/img-satelites/sao-joao/church-with-palm-trees.webp"
+        "dx": 0.291,
+        "dy": -0.3167,
+        "w": 0.1227,
+        "ratio": "707 / 739",
+        "depth": 0.7,
+        "src": "/Images/img-satelites/sao-joao/flower-accordion.webp"
       },
       {
-        "dx": -0.2885,
-        "dy": 0.2763,
-        "w": 0.2059,
-        "ratio": "395 / 233",
-        "depth": 0.66,
-        "src": "/Images/img-satelites/sao-joao/colorful-boats.webp"
+        "dx": 0.3409,
+        "dy": 0.2407,
+        "w": 0.2026,
+        "ratio": "1167 / 1013",
+        "depth": 0.6,
+        "src": "/Images/img-satelites/sao-joao/crab.webp"
       }
     ],
     "fcv": [
@@ -592,41 +584,33 @@
     ],
     "delirio-sao-joao": [
       {
-        "dx": -0.4008,
-        "dy": -0.3554,
-        "w": 0.3159,
-        "ratio": "607 / 401",
-        "depth": 0.57,
-        "src": "/Images/img-satelites/sao-joao/banner-and-tambourine.webp"
+        "dx": 0.34,
+        "dy": -0.52,
+        "w": 0.2,
+        "ratio": "707 / 739",
+        "depth": 0.7,
+        "src": "/Images/img-satelites/sao-joao/flower-accordion.webp"
       },
       {
-        "dx": 0.3995,
-        "dy": -0.3715,
-        "w": 0.1351,
-        "ratio": "201 / 455",
-        "depth": 0.76,
-        "src": "/Images/img-satelites/sao-joao/casaca-instrument-character.webp"
-      },
-      {
-        "dx": 0.4203,
-        "dy": -0.1424,
+        "dx": 0.4,
+        "dy": -0.2,
         "w": 0.1618,
         "ratio": "211 / 207",
         "depth": 0.75,
         "src": "/Images/img-satelites/sao-joao/zabumba-drum.webp"
       },
       {
-        "dx": 0.3625,
-        "dy": 0.3169,
-        "w": 0.2917,
-        "ratio": "387 / 352",
-        "depth": 0.67,
-        "src": "/Images/img-satelites/sao-joao/church-with-palm-trees.webp"
+        "dx": 0.3,
+        "dy": 0.47,
+        "w": 0.3,
+        "ratio": "1167 / 1013",
+        "depth": 0.6,
+        "src": "/Images/img-satelites/sao-joao/crab.webp"
       },
       {
-        "dx": -0.4224,
-        "dy": 0.3703,
-        "w": 0.2059,
+        "dx": -0.1,
+        "dy": 0.5,
+        "w": 0.24,
         "ratio": "395 / 233",
         "depth": 0.66,
         "src": "/Images/img-satelites/sao-joao/colorful-boats.webp"
