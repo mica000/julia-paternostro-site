@@ -7,7 +7,7 @@
   below the All-projects footer:
 
       Have something              ──────────────────────────
-      in mind?                    Tell me about your project  ↗
+      in mind?                    hello.paternostro@gmail.com ↗
                                   ──────────────────────────
                                   Get to know me              ↗
                                   ──────────────────────────
@@ -27,14 +27,14 @@
 import { useLang } from "@/lib/state";
 import ArrowLinks, { type ArrowLink } from "@/components/ArrowLinks";
 
-const STUDIO_EMAIL = "julia.paternostro@gmail.com";
+const STUDIO_EMAIL = "hello.paternostro@gmail.com";
 const INSTAGRAM = "https://instagram.com/juliapaternostro";
 const LINKEDIN = "https://www.linkedin.com/in/jupaternostro";
 
 export default function CaseStudyCTA() {
   const { t } = useLang();
   const links: ArrowLink[] = [
-    { label: t("cta.tellProject"), href: `mailto:${STUDIO_EMAIL}`, external: true },
+    { label: STUDIO_EMAIL, href: `mailto:${STUDIO_EMAIL}`, copy: STUDIO_EMAIL },
     { label: t("cta.getToKnow"), href: "/about" },
     { label: "Instagram", href: INSTAGRAM, external: true },
     { label: "Linkedin", href: LINKEDIN, external: true },

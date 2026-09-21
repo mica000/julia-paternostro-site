@@ -72,7 +72,6 @@ const dicts = {
     "parallax.goToProject": "Go to project",
     "footer.allProjects": "All projects",
     "cta.headline": "Got a project in mind?\nLet's bring it to life.",
-    "cta.tellProject": "Tell me about your project",
     "cta.getToKnow": "Get to know me",
     "about.title": "About",
     // Paragraphs are split on the blank line (\n\n); single \n is a line break
@@ -93,7 +92,6 @@ const dicts = {
     "parallax.goToProject": "Ir para o projeto",
     "footer.allProjects": "Todos os projetos",
     "cta.headline": "Tem um projeto na cabeça?\nBora tirar ele de lá.",
-    "cta.tellProject": "Me conte sobre seu projeto",
     "cta.getToKnow": "Me conheça",
     "about.title": "Sobre",
     "about.body":

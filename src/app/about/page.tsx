@@ -26,7 +26,7 @@ import { useEffect, useRef } from "react";
 import { useLang } from "@/lib/state";
 import ArrowLinks, { type ArrowLink } from "@/components/ArrowLinks";
 
-const STUDIO_EMAIL = "julia.paternostro@gmail.com";
+const STUDIO_EMAIL = "hello.paternostro@gmail.com";
 const INSTAGRAM = "https://instagram.com/juliapaternostro";
 const LINKEDIN = "https://www.linkedin.com/in/jupaternostro";
 // Bare profile URL — the link Julia shared carried Behance's own
@@ -38,7 +38,7 @@ export default function AboutPage() {
   const { t } = useLang();
 
   const links: ArrowLink[] = [
-    { label: t("cta.tellProject"), href: `mailto:${STUDIO_EMAIL}`, external: true },
+    { label: STUDIO_EMAIL, href: `mailto:${STUDIO_EMAIL}`, copy: STUDIO_EMAIL },
     { label: "Instagram", href: INSTAGRAM, external: true },
     { label: "Linkedin", href: LINKEDIN, external: true },
     { label: "Behance", href: BEHANCE, external: true },
@@ -46,6 +46,17 @@ export default function AboutPage() {
 
   // Body/Regular — SF Regular 13/16 (Figma node 459:6392).
   const body = "text-[13px] font-normal leading-4 tracking-normal";
+
+  // No elastic bounce past the top or bottom, same as the All-projects list.
+  // About scrolls the window itself, so it's set on <html>, and only while
+  // this page is open; the rest of the site keeps the browser's default.
+  useEffect(() => {
+    const root = document.documentElement;
+    root.style.overscrollBehaviorY = "none";
+    return () => {
+      root.style.overscrollBehaviorY = "";
+    };
+  }, []);
 
   // Cursor-drift parallax on the portrait — the same soft ease as the index
   // satellites. Written straight to the DOM via a ref in a rAF loop (no
