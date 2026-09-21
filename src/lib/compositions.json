@@ -44,6 +44,22 @@
     ],
     "delirio-sao-joao": [
       {
+        "dx": -0.3468,
+        "dy": -0.2608,
+        "w": 0.1433,
+        "ratio": "826 / 616",
+        "depth": 0.8,
+        "src": "/Images/img-satelites/sao-joao/flower-eye.webp"
+      },
+      {
+        "dx": -0.3351,
+        "dy": 0.1962,
+        "w": 0.2238,
+        "ratio": "1289 / 1482",
+        "depth": 0.65,
+        "src": "/Images/img-satelites/sao-joao/heron.webp"
+      },
+      {
         "dx": -0.164,
         "dy": 0.3196,
         "w": 0.1495,
@@ -583,6 +599,22 @@
       }
     ],
     "delirio-sao-joao": [
+      {
+        "dx": -0.4,
+        "dy": -0.33,
+        "w": 0.18,
+        "ratio": "826 / 616",
+        "depth": 0.8,
+        "src": "/Images/img-satelites/sao-joao/flower-eye.webp"
+      },
+      {
+        "dx": -0.36,
+        "dy": 0.25,
+        "w": 0.26,
+        "ratio": "1289 / 1482",
+        "depth": 0.65,
+        "src": "/Images/img-satelites/sao-joao/heron.webp"
+      },
       {
         "dx": 0.34,
         "dy": -0.52,

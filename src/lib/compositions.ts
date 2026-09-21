@@ -60,7 +60,7 @@ export const sat = (folder: string, name: string) =>
 // around). Falls back to the project's own index/gallery image.
 export const HERO_IMAGES: Record<string, string> = {
   "delirio-tropical": sat("delirio-tropical", "tropical-lettering-background"),
-  "delirio-sao-joao": sat("sao-joao", "sao-joao-banner-bleed"),
+  "delirio-sao-joao": sat("sao-joao", "sao-joao-banner-solo"),
   fcv: sat("30-fcv", "festival-collage-eyes-and-stars"),
   vivs: sat("vivs", "rectangle-81"),
   "a-selva": sat("selva", "background"),
@@ -87,12 +87,13 @@ export type HeroBleed = {
 };
 
 export const HERO_BLEED: Record<string, HeroBleed> = {
-  // Figma 245:293 — the banner (1309×736) with the flower overhanging top-left
-  // and the heron bottom-left. The export spans the heron's left edge to the
-  // banner's right, and the flower's top to the heron's feet.
+  // Figma 245:293 — the banner alone (1309×736), a touch wider than the
+  // standard hero, so it's fitted whole rather than cropped. The flower and
+  // heron that overlap it are satellites of their own (compositions.json), so
+  // they drift and fade in like every other piece.
   "delirio-sao-joao": {
-    rect: { x: 203.61, y: 77.03, w: 1309.06, h: 736.44 },
-    size: { w: 1512.67, h: 949.9 },
+    rect: { x: 0, y: 0, w: 1309.06, h: 736.44 },
+    size: { w: 1309.06, h: 736.44 },
   },
 };
 
