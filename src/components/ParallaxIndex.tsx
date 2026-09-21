@@ -349,6 +349,17 @@ export default function ParallaxIndex({ background }: Props) {
     return () => window.clearTimeout(timer);
   }, [showAll]);
 
+  // True once the sheet has finished sliding in, false the moment it starts
+  // to leave, so the stage is visible for the whole of both slides.
+  // A timer, not animationend: that event doesn't fire in a hidden tab.
+  const [stageCovered, setStageCovered] = useState(false);
+  if (!showAll && stageCovered) setStageCovered(false);
+  useEffect(() => {
+    if (!showAll) return;
+    const timer = window.setTimeout(() => setStageCovered(true), SHEET_IN_MS);
+    return () => window.clearTimeout(timer);
+  }, [showAll]);
+
   const rootRef = useRef<HTMLDivElement>(null);
   const heroRefs = useRef<Array<HTMLDivElement | null>>([]);
   const timelineRefs = useRef<Array<HTMLButtonElement | null>>([]);
@@ -948,6 +959,12 @@ export default function ParallaxIndex({ background }: Props) {
           on `showAllRef`, so nothing reacts to a pointer it can't see. */}
       {
         <>
+          {/* Hidden once the sheet has fully covered it. The sheet is opaque, but
+              its edge isn't fixed: a phone's toolbar collapsing mid-scroll, or
+              the bounce past either end, uncovers a strip for a moment and the
+              projects showed through it. `contents` adds no box, so the
+              layout underneath is untouched. */}
+          <div className="contents" style={{ visibility: stageCovered ? "hidden" : undefined }}>
           {/* ─── Hero slide layer (behind everything, non-interactive).
                 On mobile the whole layer lifts so the images sit in the TOP
                 HALF of the screen, leaving the bottom for the timeline. The
@@ -1347,6 +1364,7 @@ export default function ParallaxIndex({ background }: Props) {
               </p>
             )}
           </div>
+          </div>
         </>
       }
 
@@ -1357,8 +1375,10 @@ export default function ParallaxIndex({ background }: Props) {
 
             It scrolls itself (`overflow-y-auto`) rather than relying on the
             root, which has to stay put so the stage doesn't move underneath.
-            `overscroll-contain` stops a flick at the end of the list from
-            chaining into the page behind it.
+            `overscroll-none` stops a flick at the end of the list from
+            chaining into the page behind it, and also turns off the elastic
+            bounce, which pulled the list away from its edge and uncovered
+            the stage underneath.
 
             Direction is read straight off `showAll`, so the moment it flips
             the element re-renders with the exit animation and the faster
@@ -1367,7 +1387,7 @@ export default function ParallaxIndex({ background }: Props) {
             snapping back before the unmount. */}
       {sheetMounted && (
         <div
-          className="fixed inset-0 z-20 overflow-y-auto overscroll-contain"
+          className="fixed inset-0 z-20 overflow-y-auto overscroll-none"
           style={{
             backgroundColor: background,
             willChange: "transform, filter",
@@ -1543,7 +1563,6 @@ function ShowAllList({
     </div>
   );
 }
-
 
 /*
   RepelControls — dev-only live tuner for the satellite hover-repel. Three
