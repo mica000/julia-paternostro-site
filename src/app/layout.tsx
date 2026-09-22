@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { ConfigProvider, LanguageProvider, PageBackgroundProvider } from "@/lib/state";
 import TopNav from "@/components/TopNav";
@@ -76,6 +77,9 @@ export default function RootLayout({
             </PageBackgroundProvider>
           </LanguageProvider>
         </ConfigProvider>
+        {/* Vercel Web Analytics — renders nothing visible; only reports
+            page views once deployed on Vercel. */}
+        <Analytics />
       </body>
     </html>
   );
