@@ -1,67 +1,72 @@
-# Torto Studio
+# Julia Paternostro — portfolio
 
-A design-system / brand-guidelines showcase site, inspired by the structure of
-[design.cash.app](https://design.cash.app). It's a **static, image-first
-gallery** organized into Foundations, Expressions, and Resources — built for
-speed and for easily trying layout variations.
+The portfolio of **Julia Paternostro**, a Brazilian visual designer and
+illustrator: visual identities, graphic systems and illustration for brands,
+festivals and cultural projects.
 
-## Tech stack
+**Live:** [julia-paternostro.com](https://julia-paternostro.com)
 
-| Concern    | Choice                        | Why |
-|------------|-------------------------------|-----|
-| Framework  | Next.js 16 (App Router)       | Static-first rendering, Vercel-native |
-| Language   | TypeScript                    | Typed content model |
-| Styling    | Tailwind CSS v4               | Token-driven, matches a design system |
-| Animation  | Motion (Framer Motion)        | GPU-friendly entrance + hover motion |
-| Images     | next/image                    | Auto AVIF/WebP, responsive, lazy-load |
-| Hosting    | Vercel                        | Edge CDN + built-in image optimization |
+Designed and built by [Mica Sugui](https://github.com/mica000), with
+Julia as the client and editor.
 
-There is **no backend and no database** — every page prerenders to static HTML.
+## What's in it
 
-## Getting started
+- **Home:** one project at a time, its artwork floating around a hero image.
+  The pieces drift with the cursor, each at its own depth. Scroll, swipe, the
+  arrow keys or Tab move between projects.
+- **All projects:** a sheet that slides down over the home with every
+  project's crops.
+- **Case studies** (`/work/[slug]`): the project's gallery, then a closing
+  call to action.
+- **About** and **Services**, in English and Portuguese.
+
+## Stack
+
+| | |
+| --- | --- |
+| Framework | Next.js 16 (App Router), React 19 |
+| Language | TypeScript |
+| Styling | Tailwind CSS v4 |
+| Motion | CSS keyframes and a hand-written `requestAnimationFrame` loop; Lenis for smooth scroll |
+| Images | `next/image`, WebP exports converted with `sharp` |
+| Hosting | Vercel |
+
+No backend, no database. Every page is prerendered.
+
+## Where things live
+
+| Path | What |
+| --- | --- |
+| `src/lib/projects.ts` | Every project: copy (EN/PT), galleries, list crops |
+| `src/lib/compositions.json` | Where each floating piece sits on the home, per project, desktop and mobile |
+| `src/lib/state.tsx` | Interface text in both languages, and the About bio |
+| `src/components/ParallaxIndex.tsx` | The home: stage, motion loop, keyboard, All-projects sheet |
+| `src/components/CaseStudy.tsx` | Case study pages |
+| `public/Images/` | All artwork |
+
+## Run it
 
 ```bash
-pnpm dev      # dev server at http://localhost:3000
-pnpm build    # production build (all routes prerender static)
-pnpm lint     # eslint
+pnpm install
+pnpm dev
 ```
 
-## How it's organized
+Open [localhost:3000](http://localhost:3000). Add `?edit=1` to the home URL
+to open the composition editor, which drags the floating pieces into place
+and saves them to `compositions.json`. It only works locally.
 
-```
-src/
-  app/
-    layout.tsx          # fonts, metadata
-    page.tsx            # homepage (server component — static hero + gallery)
-    globals.css         # design tokens (color, motion) — change once, applies everywhere
-  content/
-    products.ts         # ← the single source of truth for the gallery
-  lib/
-    layouts.ts          # ← layout VARIATIONS live here (config, not markup)
-  components/
-    SiteHeader.tsx      # nav (server component, zero JS)
-    Gallery.tsx         # the one interactive island (holds active-variant state)
-    VariantSwitcher.tsx # live layout toggle
-    ProductGrid.tsx     # the only place tiles are drawn
-```
+## Editing content (for Julia)
 
-### Add a piece to the gallery
+1. Make a branch and change the copy in `src/lib/projects.ts` or `src/lib/state.tsx`.
+2. Open a pull request. Vercel builds a preview link for it.
+3. Check the preview, then merge. The site updates on its own.
 
-Add one object to `products` in [`src/content/products.ts`](src/content/products.ts).
-Drop the asset in `public/products/` and set `image: "/products/your-file.avif"`.
-Until an image exists, the `color` field renders a placeholder tile — so you can
-design layouts with zero assets.
+**Images:** export as WebP and give a replaced image a **new file name**.
+Vercel caches images by name, so reusing a name can keep showing the old
+picture.
 
-### Try a layout variation
+## Rights
 
-Add a variant object to `layoutVariants` in [`src/lib/layouts.ts`](src/lib/layouts.ts).
-It instantly appears in the on-page switcher. Variations are pure config
-(columns, gap, radius, whether tiles may span 2 columns) — no duplicated markup.
-
-## Performance notes
-
-- Homepage prerenders static; only the `Gallery` island ships JavaScript.
-- Real images go through `next/image` (see the commented block in `ProductGrid.tsx`)
-  for automatic AVIF/WebP, correct responsive sizes, and off-screen lazy-loading.
-- Entrance animation is transform/opacity only, staggered, and disabled under
-  `prefers-reduced-motion`.
+The artwork in `public/Images/` and the project copy belong to Julia
+Paternostro and her clients, all rights reserved. See [LICENSE](LICENSE) for
+the code.
