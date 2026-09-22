@@ -10,6 +10,7 @@
     "optimize-images": "node scripts/optimize-images.mjs"
   },
   "dependencies": {
+    "@vercel/analytics": "^2.0.1",
     "lenis": "^1.3.25",
     "motion": "^12.42.2",
     "next": "16.2.10",
