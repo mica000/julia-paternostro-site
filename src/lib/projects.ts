@@ -510,7 +510,7 @@ const projectsSource: Project[] = [
     // landscape 1800×1105, wide banner 1800×855, portrait 1342×1682.
     // Files are numbered in the order of Julia's Figma layout (node 460:6907);
     // the `-still` webps are frames of the matching video, used as thumbnails.
-    sections:     sections: [
+    sections: [
       { kind: "hero", src: "/Images/Vivs/vivs-01.mp4", ratio: "1800/1105" },
       {
         kind: "cols",
