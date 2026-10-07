@@ -29,14 +29,14 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://julia-paternostro.com"),
   title: "Julia Paternostro",
   description:
-    "Julia Paternostro - Visual Designer & Illustrator.",
+    "Julia Paternostro - Visual Designer & Illustrator. Visual identities, graphic systems and illustration for brands, festivals and cultural projects.",
   alternates: {
     canonical: "https://julia-paternostro.com",
   },
   openGraph: {
     title: "Julia Paternostro",
     description:
-      "Julia Paternostro - Visual Designer & Illustrator.",
+      "Julia Paternostro - Visual Designer & Illustrator. Visual identities, graphic systems and illustration for brands, festivals and cultural projects.",
     url: "https://julia-paternostro.com",
     siteName: "Julia Paternostro",
     type: "website",
