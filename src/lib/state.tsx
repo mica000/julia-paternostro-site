@@ -77,7 +77,7 @@ const dicts = {
     // Paragraphs are split on the blank line (\n\n); single \n is a line break
     // within a paragraph (the location sign-off). Figma node 459:6392.
     "about.body":
-      "Julia is a Brazilian visual designer & illustrator. She creates visual identities, graphic systems and original illustrations for brands, festivals and cultural projects. Her work combines bold graphics, vibrant colors and playful visual narratives.\n\nAvailable worldwide. 🏳️‍🌈",
+      "Hi! I'm Julia, a Brazilian visual designer & illustrator.\n\nI create visual identities, graphic systems and original illustrations for brands, festivals and cultural projects. My work combines bold graphics, vibrant colors and playful visual narratives.\n\nI'm currently open to full-time roles and freelance projects.",
     "services.title": "Services",
     "services.body":
       "Brand identity, editorial design, packaging, type design, and web design.",
@@ -95,7 +95,7 @@ const dicts = {
     "cta.getToKnow": "Me conheça",
     "about.title": "Sobre",
     "about.body":
-      "Julia é uma designer visual e ilustradora brasileira. Cria identidades visuais, sistemas gráficos e ilustrações autorais para marcas, festivais e projetos culturais. Seu trabalho combina grafismos marcantes, cores vibrantes e narrativas visuais bem-humoradas.\n\nDisponível para projetos no mundo todo. 🏳️‍🌈",
+      "Oi! Sou a Julia, designer visual e ilustradora brasileira, baseada em Vila Velha-ES.\n\nCrio identidades visuais, sistemas gráficos e ilustrações autorais para marcas, festivais e projetos culturais. Meu trabalho combina gráficos marcantes, cores vibrantes e narrativas visuais divertidas.\n\nNo momento, estou aberta a vagas em tempo integral e projetos freelance.",
     "services.title": "Serviços",
     "services.body":
       "Identidade de marca, design editorial, packaging, desenho de tipos e web design.",
