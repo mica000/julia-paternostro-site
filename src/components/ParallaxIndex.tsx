@@ -551,20 +551,25 @@ export default function ParallaxIndex({ background }: Props) {
     // Dragging the finger UP (content moves up, i.e. "scrolling down") goes to
     // the NEXT project, matching native scroll direction.
     let touchY = 0;
+    // Set once a drag has fired its step; cleared when the next one starts.
+    let touchStepped = false;
     const onTouchStart = (e: TouchEvent) => {
       touchY = e.touches[0]?.clientY ?? 0;
+      touchStepped = false;
     };
     const onTouchMove = (e: TouchEvent) => {
       if (showAllRef.current) return; // let the list scroll natively
       e.preventDefault();
+      // One step per drag. The settle floor alone is not enough: a swipe
+      // outlasts it, and the distance travelled meanwhile would fire a second
+      // and third step the moment it expired.
+      if (touchStepped) return;
       const now = performance.now();
-      // A finger stops when it is lifted — there is no inertia to sort out, so
-      // the settle floor is the whole guard here.
       if (now < wheelSettleUntil.current) return;
       const y = e.touches[0]?.clientY ?? touchY;
       const dy = touchY - y;
       if (Math.abs(dy) < TOUCH_STEP_THRESHOLD) return;
-      touchY = y;
+      touchStepped = true;
       wheelSettleUntil.current = now + WHEEL_SETTLE_MS;
       target.current = Math.round(target.current) + (dy > 0 ? 1 : -1);
     };
