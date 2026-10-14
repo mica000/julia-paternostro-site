@@ -14,11 +14,11 @@
       3. REVEAL — only once every poster is gone does the black backdrop fade,
          uncovering the index. The page is never visible before then.
 
-  Throughout 1–2 the ring spins continuously (each poster counter-spins to stay
-  upright). The spin runs concurrently — it adds no time to the sequence.
+  Throughout 1–2 the posters orbit the center continuously, staying upright.
+  The orbit runs concurrently — it adds no time to the sequence.
 
   Everything above is driven by CSS animations (keyframes in globals.css:
-  `posterIn`, `posterOut`, `overlayOut`) so it stays on the GPU. React only
+  `posterOrbit`, `posterIn`, `posterOut`, `overlayOut`) so it stays on the GPU. React only
   mounts the overlay, then unmounts it once the timeline is done.
 
   Once per session:
@@ -208,62 +208,57 @@ export default function Preloader() {
         animation: `overlayOut ${REVEAL_MS}ms var(--ease-out) ${POSTERS_DONE_MS}ms forwards`,
       }}
     >
-      {/* Ring: a zero-size box at center that spins continuously the whole time
-          (independent of the assemble/dissipate timing). */}
-      <div
-        className="relative"
-        style={{ animation: `spin ${SPIN_MS}ms linear infinite` }}
-      >
+      {/* Ring: a zero-size box at center. It does not move; each poster
+          orbits it on its own (see `posterOrbit` in globals.css). */}
+      <div className="relative">
         {POSTERS.map((src, i) => {
           const angle = (360 / POSTERS.length) * i;
-          // Poster 0 is Delírio Tropical — the studio's lead project. It sits at
-          // the top of the ring (angle 0 = 12 o'clock) and gets the highest
+          // Poster 0 is Delírio Tropical — the studio's lead project. It starts
+          // at the top of the ring (angle 0 = 12 o'clock) and gets the highest
           // z-index so the overlapping neighbours never cover it.
           const isLead = i === 0;
           return (
-            // Positioner: place the poster on the ring, upright. Net rotation
-            // zero — it only translates out to the radius.
+            // Positioner: carries the poster round the ring, upright the whole
+            // way. `--a` is its starting angle, `--r` the ring radius.
             <div
               key={src}
               className="absolute left-0 top-0"
-              style={{
-                zIndex: isLead ? 2 : 1,
-                transform: `translate(-50%, -50%) rotate(${angle}deg) translateY(-${RADIUS}vmin) rotate(${-angle}deg)`,
-              }}
+              style={
+                {
+                  zIndex: isLead ? 2 : 1,
+                  "--a": `${angle}deg`,
+                  "--r": `${RADIUS}vmin`,
+                  animation: `posterOrbit ${SPIN_MS}ms linear infinite`,
+                } as React.CSSProperties
+              }
             >
-              {/* Counter-spin: mirrors the ring's continuous turn so the poster
-                  orbits the center yet stays upright the whole time. */}
+              {/* Grow-in wrapper — kept as its own element so the assemble
+                  scale and the dissipate scale (on the img) compose instead of
+                  overriding each other. Staggered by index. */}
               <div
-                style={{ animation: `spin ${SPIN_MS}ms linear infinite reverse` }}
+                style={{
+                  animation: `posterIn ${ASSEMBLE_MS}ms var(--ease-out) ${i * STAGGER_MS}ms both`,
+                }}
               >
-                {/* Grow-in wrapper — kept as its own element so the assemble
-                    scale and the dissipate scale (on the img) compose instead of
-                    overriding each other. Staggered by index. */}
-                <div
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={src}
+                  alt=""
+                  draggable={false}
+                  className="object-cover shadow-2xl"
                   style={{
-                    animation: `posterIn ${ASSEMBLE_MS}ms var(--ease-out) ${i * STAGGER_MS}ms both`,
+                    // display/maxWidth inline: the ring box is 0×0, so the
+                    // browser default `img { max-width: 100% }` would crush the
+                    // poster to zero width before Tailwind's classes land.
+                    display: "block",
+                    maxWidth: "none",
+                    width: "clamp(76px, 13.5vmin, 168px)",
+                    aspectRatio: "233 / 300",
+                    // Shrink away around its own center after the brief hold,
+                    // staggered by index so they pop out one after another.
+                    animation: `posterOut ${DISSIPATE_MS}ms var(--ease-out) ${HOLD_MS + i * STAGGER_MS}ms both`,
                   }}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={src}
-                    alt=""
-                    draggable={false}
-                    className="object-cover shadow-2xl"
-                    style={{
-                      // display/maxWidth inline: the ring box is 0×0, so the
-                      // browser default `img { max-width: 100% }` would crush the
-                      // poster to zero width before Tailwind's classes land.
-                      display: "block",
-                      maxWidth: "none",
-                      width: "clamp(76px, 13.5vmin, 168px)",
-                      aspectRatio: "233 / 300",
-                      // Shrink away around its own center after the brief hold,
-                      // staggered by index so they pop out one after another.
-                      animation: `posterOut ${DISSIPATE_MS}ms var(--ease-out) ${HOLD_MS + i * STAGGER_MS}ms both`,
-                    }}
-                  />
-                </div>
+                />
               </div>
             </div>
           );
