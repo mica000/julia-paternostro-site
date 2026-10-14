@@ -181,22 +181,28 @@ nav a, nav button {
 }
 
 /*
-  Preloader intro — assemble → dissipate → reveal, over a ring that spins the
+  Preloader intro — assemble → dissipate → reveal, over a ring that turns the
   whole time. Drives the first-load poster ring in Preloader.tsx. Everything
   animates `transform`/`opacity` only, so it stays on the GPU. The reduced-
   motion block below collapses all of it (0.01ms), and the component also skips
   the intro for those visitors.
 */
 
-/* Continuous spin. The ring turns forever (forwards); each poster counter-
-   turns (reverse) to cancel it and stay upright while orbiting. This runs
-   concurrently with the assemble/dissipate — it adds no time of its own. */
-@keyframes spin {
+/* Orbit. Each poster travels round the ring on its own, staying upright: the
+   outer rotate swings it round the center, the inner one turns it back by the
+   same amount. Both live in ONE animation on ONE element, so they cannot drift
+   apart. As two animations (ring spinning, poster counter-spinning) they
+   started a frame or two apart on iOS and left every poster tilted. `--a` is
+   the poster's place on the ring, `--r` the ring radius. Runs concurrently
+   with the assemble/dissipate, so it adds no time of its own. */
+@keyframes posterOrbit {
   from {
-    transform: rotate(0deg);
+    transform: translate(-50%, -50%) rotate(var(--a))
+      translateY(calc(-1 * var(--r))) rotate(calc(-1 * var(--a)));
   }
   to {
-    transform: rotate(360deg);
+    transform: translate(-50%, -50%) rotate(calc(var(--a) + 360deg))
+      translateY(calc(-1 * var(--r))) rotate(calc(-1 * var(--a) - 360deg));
   }
 }
 
