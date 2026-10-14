@@ -529,10 +529,10 @@ const projectsSource: Project[] = [
       {
         kind: "cols",
         cols: 2,
-        images: ["/Images/Vivs/vivs-08-v2.webp", "/Images/Vivs/vivs-09-v2.mp4"],
+        images: ["/Images/Vivs/vivs-08-v2.webp", "/Images/Vivs/vivs-09-v3.mp4"],
         ratio: "1342/1682",
       },
-      { kind: "hero", src: "/Images/Vivs/vivs-10-v2.webp", ratio: "1800/1105" },
+      { kind: "hero", src: "/Images/Vivs/vivs-10-v3.webp", ratio: "1800/1105" },
       {
         kind: "cols",
         cols: 2,
